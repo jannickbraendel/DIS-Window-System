@@ -55,29 +55,27 @@ class WindowSystem(GraphicsEventSystem):
         return window
     
     def bringWindowToFront(self, window):
-        tempW = window.parentWindow
-        # propagate tree until top level window
-        while tempW != self.screen:
-            tempW = tempW.parentWindow
-        # tempW is screen now
-
+        """
+        Specified window is brought to front in z-level direction. It is removed from its original parent window and
+        added as a child to the screen
+        :param window: window to be brought to front
+        """
         # remove the parent
         window.removeFromParentWindow()
         # calculate new position
         window.x, window.y = window.convertPositionToScreen(window.x, window.y)
         # add window as top level window
-        tempW.addChildWindow(window)
+        self.screen.addChildWindow(window)
 
 
-
-
-    
-    
     """
     DRAWING
     """
     
     def handlePaint(self):
+        """
+        Repaint the screen by calling the draw function.
+        """
         self.screen.draw(self.graphicsContext)
     
     
@@ -86,15 +84,27 @@ class WindowSystem(GraphicsEventSystem):
     """
     
     def handleMousePressed(self, x, y):
+        """
+        When the left mouse button is pressed, bring selected window to front and repaint the screen.
+        :param x: x value of mouse position when pressed
+        :param y: y value of mouse position when pressed
+        """
+        # save mouse position to check when button is released
         self.tempMouseDown = (x, y)
         child = self.screen.childWindowAtLocation(x, y)
         if child:
-            print("pressed:" + child.identifier)
             self.bringWindowToFront(child)
             self.handlePaint()
         
     def handleMouseReleased(self, x, y):
+        """
+        When the left mouse button is released, check if mouse click occurred and send event to respective child window.
+        :param x: x value of mouse position when released
+        :param y: y value of mouse position when released
+        """
+        # calculate distance between release and pressed position
         deltaX, deltaY = abs(self.tempMouseDown[0] - x), abs(self.tempMouseDown[1] - y)
+        # if distance is less than mouseClickTolerance send mouse-click event to child where click occurred.
         if deltaX <= self.mouseClickTolerance and deltaY <= self.mouseClickTolerance:
             child = self.screen.childWindowAtLocation(x, y)
             if child:
