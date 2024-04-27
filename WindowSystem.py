@@ -3,8 +3,8 @@
 
 """
 Window System - Submission
-by  Student Name 1 (#999999)
-and Student Name 2 (#999999)
+by Felix Umland (#406886)
+and Jannick Brändel (#405391)
 """
 
 import GraphicsEventSystem
@@ -30,9 +30,15 @@ class WindowSystem(GraphicsEventSystem):
         window2.setBackgroundColor(COLOR_BLUE)
         window3 = Window(20, 20, 40, 40, "3")
         window3.setBackgroundColor(COLOR_ORANGE)
-        window2.addChildWindow(window3)
+        window4 = Window(120, 200, 120, 120, "4")
+        window4.setBackgroundColor(COLOR_GRAY)
+        window5 = Window(20, 30, 120, 120, "5")
+        window5.setBackgroundColor(COLOR_WHITE)
         self.screen.addChildWindow(window1)
         self.screen.addChildWindow(window2)
+        self.screen.addChildWindow(window4)
+        window2.addChildWindow(window3)
+        window4.addChildWindow(window5)
 
     
     """
