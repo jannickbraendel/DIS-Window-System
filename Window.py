@@ -128,7 +128,7 @@ class Window:
         ctx.setFillColor(self.backgroundColor)
         # fill the complete window
         ctx.fillRect(0, 0, self.width, self.height)
-        # recursively draw child windows in front-to-back order
+        # recursively draw child windows in ascending z-order
         for child in self.childWindows:
             child.draw(ctx)
 

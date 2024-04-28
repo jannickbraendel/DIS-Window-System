@@ -34,11 +34,14 @@ class WindowSystem(GraphicsEventSystem):
         window4.setBackgroundColor(COLOR_GRAY)
         window5 = Window(20, 30, 120, 120, "5")
         window5.setBackgroundColor(COLOR_WHITE)
+        window6 = Window(40, 40, 120, 120, "6")
+        window6.setBackgroundColor(COLOR_BROWN)
         self.screen.addChildWindow(window1)
         self.screen.addChildWindow(window2)
         self.screen.addChildWindow(window4)
         window2.addChildWindow(window3)
         window4.addChildWindow(window5)
+        window5.addChildWindow(window6)
 
     
     """
@@ -66,6 +69,9 @@ class WindowSystem(GraphicsEventSystem):
         added as a child to the screen
         :param window: window to be brought to front
         """
+        # if screen is clicked don't bring it to front
+        if window == self.screen:
+            return
         # remove the parent
         window.removeFromParentWindow()
 
