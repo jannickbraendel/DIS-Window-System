@@ -66,8 +66,9 @@ class Window:
                 else:
                     # top-most child window (with no children) found and returned
                     return child
+
         # no child window was hit -> return None
-        return None
+        return self
 
     def hitTest(self, x, y):
         """

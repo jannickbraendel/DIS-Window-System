@@ -68,6 +68,13 @@ class WindowSystem(GraphicsEventSystem):
         """
         # remove the parent
         window.removeFromParentWindow()
+
+        # children should also be added to screen
+        for child in window.childWindows:
+            child.removeFromParentWindow()
+            child.x, child.y = child.convertPositionToScreen(child.x, child.y)
+            self.screen.addChildWindow(child)
+
         # calculate new position
         window.x, window.y = window.convertPositionToScreen(window.x, window.y)
         # add window as top level window
