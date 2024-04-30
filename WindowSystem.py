@@ -43,7 +43,7 @@ class WindowSystem(GraphicsEventSystem):
         window4.addChildWindow(window5)
         window5.addChildWindow(window6)
 
-    
+
     """
     WINDOW MANAGEMENT
     """
@@ -113,8 +113,7 @@ class WindowSystem(GraphicsEventSystem):
         child = self.screen.childWindowAtLocation(x, y)
         if child:
             self.bringWindowToFront(child)
-            self.handlePaint()
-        
+
     def handleMouseReleased(self, x, y):
         """
         When the left mouse button is released, check if mouse click occurred and send event to respective child window.

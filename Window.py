@@ -43,6 +43,7 @@ class Window:
         Remove current window from its parent's child windows.
         """
         self.parentWindow.childWindows.remove(self)
+        self.parentWindow = None
 
     def childWindowAtLocation(self, x, y):
         """
@@ -55,11 +56,8 @@ class Window:
         # loop through child windows in reverse as they are sorted by ascending z-level, and we want the topmost one
         for i in reversed(range(len(self.childWindows))):
             child = self.childWindows[i]
-            print("testing: " + child.identifier)
             # transform the position into the child's local coord. system and checks if it is hit
             if child.hitTest(x - child.x, y - child.y):
-                print("hit: " + child.identifier)
-                print("x: " + str(x - child.x) + " y: " + str(y - child.y))
                 if len(child.childWindows) > 0:
                     # child window has children -> function is called recursively
                     return child.childWindowAtLocation(x - child.x, y - child.y)
@@ -82,7 +80,7 @@ class Window:
             return False
         else:
             # x and y are above 0 and if they are less than the width or height respectively, return true
-            return x < self.width and y < self.height
+            return x <= self.width and y <= self.height
 
     def convertPositionToScreen(self, x, y):
         """
