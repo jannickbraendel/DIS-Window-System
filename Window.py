@@ -89,8 +89,8 @@ class Window:
         :param y: y-value of screen position
         :return: x and y value of the converted screen position
         """
-        totalX = x
-        totalY = y
+        totalX = x + self.x
+        totalY = y + self.y
         parent = self.parentWindow
         # loop through the path up to the root (screen) and add each x and y value to the given position (results in
         # position on screen)
@@ -110,8 +110,9 @@ class Window:
         """
         # subtract local origin (converted to screen coordinates) from the given global position (results in local x
         # and y)
-        localX = x - self.convertPositionToScreen(x, y)[0]
-        localY = y - self.convertPositionToScreen(x, y)[1]
+        screenX, screenY = self.convertPositionToScreen(0, 0)
+        localX = x - screenX
+        localY = y - screenY
         return localX, localY
 
     def draw(self, ctx):
@@ -120,7 +121,7 @@ class Window:
         :param ctx: Current graphics context
         """
         # set ctx origin to the global position of the window's origin
-        position = self.convertPositionToScreen(self.x, self.y)
+        position = self.convertPositionToScreen(0, 0)
         ctx.setOrigin(position[0], position[1])
         # ctx should draw with bg color
         ctx.setFillColor(self.backgroundColor)

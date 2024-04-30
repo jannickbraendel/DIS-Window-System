@@ -35,6 +35,7 @@ class WindowSystem(GraphicsEventSystem):
         window5 = Window(20, 30, 120, 120, "5")
         window5.setBackgroundColor(COLOR_WHITE)
         window6 = Window(40, 40, 120, 120, "6")
+        # print(window1.convertPositionFromScreen(30,30))
         window6.setBackgroundColor(COLOR_BROWN)
         self.screen.addChildWindow(window1)
         self.screen.addChildWindow(window2)
@@ -42,6 +43,10 @@ class WindowSystem(GraphicsEventSystem):
         window2.addChildWindow(window3)
         window4.addChildWindow(window5)
         window5.addChildWindow(window6)
+
+        print(window1.convertPositionToScreen(10, 10))  # should be 30, 30
+        print(window2.convertPositionToScreen(10, 10))  # should be 50, 50
+        print(window3.convertPositionToScreen(10, 10))  # should be 70, 70
 
 
     """
@@ -70,21 +75,22 @@ class WindowSystem(GraphicsEventSystem):
         :param window: window to be brought to front
         """
         # if screen is clicked don't bring it to front
-        if window == self.screen:
+        if window.parentWindow is None:
             return
-        # remove the parent
-        window.removeFromParentWindow()
 
-        # children should also be added to screen
-        for child in window.childWindows:
-            child.removeFromParentWindow()
-            child.x, child.y = child.convertPositionToScreen(child.x, child.y)
-            self.screen.addChildWindow(child)
+        # find top level window this window belongs to
+        topLevelWindow = window
+        while topLevelWindow.parentWindow.identifier != "SCREEN_1":
+            topLevelWindow = topLevelWindow.parentWindow
 
         # calculate new position
-        window.x, window.y = window.convertPositionToScreen(window.x, window.y)
+        topLevelWindow.x, topLevelWindow.y = topLevelWindow.convertPositionToScreen(0, 0)
+        # remove the parent
+        topLevelWindow.removeFromParentWindow()
         # add window as top level window
-        self.screen.addChildWindow(window)
+        self.screen.addChildWindow(topLevelWindow)
+
+        print("Window " + topLevelWindow.identifier + " was brought to front")
 
 
     """
