@@ -25,7 +25,7 @@ class Window:
         self.width = width
         self.height = height
         self.identifier = identifier
-        self.backgroundColor = COLOR_LIGHT_BLUE
+        self.backgroundColor = COLOR_GRAY
 
         self.childWindows = []
         self.parentWindow = None
@@ -159,12 +159,13 @@ class Screen(Window):
         Window that includes the whole screen of the window system.
         :param windowSystem: Window system the screen belongs to
         """
-        super().__init__(0, 0, windowSystem.width, windowSystem.height, "SCREEN_1")
+        super().__init__(0, 0, windowSystem.width, windowSystem.height, "SCREEN")
         self.windowSystem = windowSystem
 
     def draw(self, ctx):
         """
-        Apply draw implementation of super-class window.
+        Draw screen using the window manager.
         :param ctx: Current graphics context
         """
+        self.windowSystem.windowManager.drawDesktop(ctx)
         super().draw(ctx)

@@ -21,10 +21,10 @@ class WindowManager:
     
     def decorateWindow(self, window, ctx):
         pass
-    
-    
+
     def drawDesktop(self, ctx):
-        pass
+        # desktop is filled with light blue color
+        self.windowSystem.screen.setBackgroundColor(COLOR_LIGHT_BLUE)
     
     
     def drawTaskbar(self, ctx):

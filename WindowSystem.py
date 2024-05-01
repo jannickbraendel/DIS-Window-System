@@ -9,15 +9,18 @@ and Jannick Brändel (#405391)
 
 import GraphicsEventSystem
 from Window import *
+from WindowManager import WindowManager
+
 
 class WindowSystem(GraphicsEventSystem):
     def start(self):
         """
         Prepare screen and initialize needed attributes (e.g. mouse-click tolerance).
         """
+        # add window manager
+        self.windowManager = WindowManager(self)
         # add screen
         self.screen = Screen(self)
-
         # temporarily save mouse down position to compare with release position
         self.tempMouseDown = (0, 0)
         # amount of pixels the user can move the mouse in between pressing and releasing
