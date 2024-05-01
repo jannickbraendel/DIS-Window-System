@@ -27,16 +27,16 @@ class WindowSystem(GraphicsEventSystem):
         self.mouseClickTolerance = 2
 
         # add a few test windows
-        window1 = Window(20, 20, 80, 80, "1")
-        window1.setBackgroundColor(COLOR_GREEN)
-        window2 = Window(40, 40, 80, 80, "2")
-        window2.setBackgroundColor(COLOR_BLUE)
+        window1 = Window(80, 80, 280, 280, "First Window")
+        window1.setBackgroundColor(COLOR_WHITE)
+        window2 = Window(40, 40, 250, 250, "Second Window")
+        window2.setBackgroundColor(COLOR_WHITE)
         window3 = Window(20, 20, 40, 40, "3")
         window3.setBackgroundColor(COLOR_ORANGE)
-        window4 = Window(120, 200, 120, 120, "4")
-        window4.setBackgroundColor(COLOR_GRAY)
+        window4 = Window(400, 300, 300, 400, "Third Window")
+        window4.setBackgroundColor(COLOR_WHITE)
         window5 = Window(20, 30, 120, 120, "5")
-        window5.setBackgroundColor(COLOR_WHITE)
+        window5.setBackgroundColor(COLOR_GREEN)
         window6 = Window(40, 40, 120, 120, "6")
         window6.setBackgroundColor(COLOR_BROWN)
         window7 = Window(60, 20, 200, 200, "7")
@@ -71,9 +71,8 @@ class WindowSystem(GraphicsEventSystem):
     
     def bringWindowToFront(self, window):
         """
-        Specified window is brought to front in z-level direction. It is removed from its original parent window and
-        added as a child to the screen
-        :param window: window to be brought to front
+        Find top-level window the specified window is a child of and bring it to front.
+        :param window: window which was selected.
         """
         # if screen is clicked don't bring it to front
         if window.parentWindow is None:
@@ -81,7 +80,7 @@ class WindowSystem(GraphicsEventSystem):
 
         # find top level window this window belongs to
         topLevelWindow = window
-        while topLevelWindow.parentWindow.identifier != "SCREEN_1":
+        while topLevelWindow.parentWindow.identifier != "SCREEN":
             topLevelWindow = topLevelWindow.parentWindow
 
         # calculate new position

@@ -164,8 +164,13 @@ class Screen(Window):
 
     def draw(self, ctx):
         """
-        Draw screen using the window manager.
+        Draw screen using the window manager and call draw function on all top level windows.
         :param ctx: Current graphics context
         """
         self.windowSystem.windowManager.drawDesktop(ctx)
-        super().draw(ctx)
+        # call draw function on top-level windows and decorate them using the WM.
+        for child in self.childWindows:
+            child.draw(ctx)
+            self.windowSystem.windowManager.decorateWindow(child, ctx)
+
+
