@@ -38,6 +38,16 @@ class Window:
         self.childWindows.append(window)
         window.parentWindow = self
 
+        # check if child window exceeds parent window in size and adjust accordingly
+        windowRightBorder = window.x + window.width
+        windowLowerBorder = window.y + window.height
+        if windowRightBorder > self.width:
+            widthToRemove = windowRightBorder - self.width
+            window.width -= widthToRemove
+        if windowLowerBorder > self.height:
+            heightToRemove = windowLowerBorder - self.height
+            window.height -= heightToRemove
+
     def removeFromParentWindow(self):
         """
         Remove current window from its parent's child windows.

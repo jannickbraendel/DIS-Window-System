@@ -35,19 +35,17 @@ class WindowSystem(GraphicsEventSystem):
         window5 = Window(20, 30, 120, 120, "5")
         window5.setBackgroundColor(COLOR_WHITE)
         window6 = Window(40, 40, 120, 120, "6")
-        # print(window1.convertPositionFromScreen(30,30))
         window6.setBackgroundColor(COLOR_BROWN)
+        window7 = Window(60, 20, 200, 200, "7")
+        window7.setBackgroundColor(COLOR_PINK)
+        # print(window1.convertPositionFromScreen(30,30))
         self.screen.addChildWindow(window1)
         self.screen.addChildWindow(window2)
         self.screen.addChildWindow(window4)
         window2.addChildWindow(window3)
         window4.addChildWindow(window5)
         window5.addChildWindow(window6)
-
-        print(window1.convertPositionToScreen(10, 10))  # should be 30, 30
-        print(window2.convertPositionToScreen(10, 10))  # should be 50, 50
-        print(window3.convertPositionToScreen(10, 10))  # should be 70, 70
-
+        window5.addChildWindow(window7)
 
     """
     WINDOW MANAGEMENT
