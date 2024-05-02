@@ -17,7 +17,19 @@ class WindowManager:
         self.titleBarHeight = 18
 
     def checkWindowPosition(self, window, x, y):
-        pass
+        # TODO: Check later if function is implemented correctly when handling window-dragging
+        # check if window is top-level window and return otherwise
+        if window.parentWindow.identifier != "SCREEN":
+            pass
+        screen = window.parentWindow
+
+        titleBarVisibleLeft = x + window.width > 0
+        titleBarVisibleRight = x - window.width < screen.width
+
+        titleBarVisibleTop = y + self.titleBarHeight > 0
+        titleBarVisibleBottom = y - self.titleBarHeight < screen.height
+        # returns true if title bar is visible towards all directions
+        return titleBarVisibleLeft and titleBarVisibleRight and titleBarVisibleTop and titleBarVisibleBottom
 
     # TODO: Title bar only appears after clicking for the first time (children are appended after drawing -> see Screen.draw())
     def decorateWindow(self, window, ctx):
