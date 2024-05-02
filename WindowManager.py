@@ -19,14 +19,13 @@ class WindowManager:
     def checkWindowPosition(self, window, x, y):
         pass
 
+    # TODO: Title bar only appears after clicking for the first time (children are appended after drawing -> see Screen.draw())
     def decorateWindow(self, window, ctx):
         # stroke border around window
-        # TODO: check why border is not displayed after clicking around (especially Second Window)
         ctx.setStrokeColor(COLOR_GRAY)
         startX, startY = window.convertPositionToScreen(0, 0)
         ctx.setOrigin(startX, startY)
         ctx.strokeRect(0, 0, window.width, window.height)
-        print("Stroked border for", window.identifier)
         # add title bar
         titleBar = Window(0, 0, window.width, self.titleBarHeight, window.identifier + " - Title Bar")
         # set background color based on if window is selected
@@ -48,15 +47,38 @@ class WindowManager:
         titleWindowX, titleWindowY = titleWindow.convertPositionToScreen(0, 0)
         ctx.setOrigin(titleWindowX, titleWindowY)
         ctx.setStrokeColor(COLOR_WHITE)
-        '''
-        if windowIsFocused:
-            ctx.setFont(Font(family="Helvetica", size=10, weight="bold"))
-        else:
-            ctx.setFont(Font(family="Helvetica", size=10, weight="normal"))
-        '''
         ctx.setFont(Font(family="Helvetica", size=10, weight="bold"))
+        ctx.drawString(window.identifier, 3, 1)
 
-        ctx.drawString(window.identifier, 1, 1)
+        # add buttons windows
+        buttonWidth = 10
+        buttonHeight = self.titleBarHeight - 8
+        distanceBetweenButtons = 5
+
+        closeButton = Window(titleBar.width - buttonWidth - distanceBetweenButtons, 4, buttonWidth, buttonHeight, titleBar.identifier + " - Close Button")
+        maximizeButton = Window(titleBar.width - (2 * buttonWidth + 2 * distanceBetweenButtons), 4, buttonWidth, buttonHeight, titleBar.identifier + " - Maximize Button")
+        minimizeButton = Window(titleBar.width - (3 * buttonWidth + 3 * distanceBetweenButtons), 4, buttonWidth, buttonHeight, titleBar.identifier + " - Minimize Button")
+        # buttons have same background color as titlebar
+        closeButton.setBackgroundColor(titleBar.backgroundColor)
+        maximizeButton.setBackgroundColor(titleBar.backgroundColor)
+        minimizeButton.setBackgroundColor(titleBar.backgroundColor)
+        # append buttons to title bar
+        titleBar.addChildWindow(closeButton)
+        titleBar.addChildWindow(maximizeButton)
+        titleBar.addChildWindow(minimizeButton)
+        # draw minimize button
+        minButtonX, minButtonY = minimizeButton.convertPositionToScreen(0, 0)
+        ctx.setOrigin(minButtonX, minButtonY)
+        ctx.drawLine(0, minimizeButton.height/2, buttonWidth, minimizeButton.height/2)
+        # draw maximize button
+        maxButtonX, maxButtonY = maximizeButton.convertPositionToScreen(0, 0)
+        ctx.setOrigin(maxButtonX, maxButtonY)
+        ctx.strokeRect(0, 0, buttonWidth, buttonHeight)
+        # draw close button
+        closeButtonX, closeButtonY = closeButton.convertPositionToScreen(0, 0)
+        ctx.setOrigin(closeButtonX, closeButtonY)
+        ctx.drawLine(0, 0, buttonWidth, buttonHeight)
+        ctx.drawLine(0, buttonHeight, buttonWidth, 0)
 
     def drawDesktop(self, ctx):
         # desktop is filled with light blue color

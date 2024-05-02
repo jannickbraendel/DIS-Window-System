@@ -53,7 +53,7 @@ class WindowSystem(GraphicsEventSystem):
     """
     WINDOW MANAGEMENT
     """
-        
+
     def createWindowOnScreen(self, x, y, width, height, identifier):
         """
         Create a new window on screen and return it
@@ -68,7 +68,7 @@ class WindowSystem(GraphicsEventSystem):
         # window is displayed on screen
         self.screen.addChildWindow(window)
         return window
-    
+
     def bringWindowToFront(self, window):
         """
         Find top-level window the specified window is a child of and bring it to front.
@@ -92,22 +92,20 @@ class WindowSystem(GraphicsEventSystem):
 
         print("Window " + topLevelWindow.identifier + " was brought to front")
 
-
     """
     DRAWING
     """
-    
+
     def handlePaint(self):
         """
         Repaint the screen by calling the draw function.
         """
         self.screen.draw(self.graphicsContext)
-    
-    
+
     """
     INPUT EVENTS
     """
-    
+
     def handleMousePressed(self, x, y):
         """
         When the left mouse button is pressed, bring selected window to front and repaint the screen.
@@ -136,16 +134,13 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleMouseMoved(self, x, y):
         pass
-        
+
     def handleMouseDragged(self, x, y):
         pass
-        
+
     def handleKeyPressed(self, char):
         pass
-        
-    
-    
-        
-    
+
+
 # Let's start your window system!
-w = WindowSystem(800,600)
+w = WindowSystem(800, 600)

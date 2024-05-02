@@ -130,6 +130,7 @@ class Window:
         Draw current window and all child windows on screen and filling them with the specified background color.
         :param ctx: Current graphics context
         """
+        print("Drawing:", self.identifier)
         # set ctx origin to the global position of the window's origin
         position = self.convertPositionToScreen(0, 0)
         ctx.setOrigin(position[0], position[1])
@@ -169,8 +170,6 @@ class Screen(Window):
         """
         self.windowSystem.windowManager.drawDesktop(ctx)
         # call draw function on top-level windows and decorate them using the WM.
-        for child in self.childWindows:
-            child.draw(ctx)
-            self.windowSystem.windowManager.decorateWindow(child, ctx)
-
-
+        for topLevelWindow in self.childWindows:
+            topLevelWindow.draw(ctx)
+            self.windowSystem.windowManager.decorateWindow(topLevelWindow, ctx)
