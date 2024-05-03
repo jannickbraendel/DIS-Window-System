@@ -23,6 +23,7 @@ class WindowSystem(GraphicsEventSystem):
         self.screen = Screen(self)
         # temporarily save mouse down position to compare with release position or handle mouse dragging
         self.tempMouseDown = (0, 0)
+        self.tempMouseDownWindow = None
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
 
@@ -115,6 +116,7 @@ class WindowSystem(GraphicsEventSystem):
         child = self.screen.childWindowAtLocation(x, y)
         if child:
             self.bringWindowToFront(child)
+            self.tempMouseDownWindow = child
 
     def handleMouseReleased(self, x, y):
         """
@@ -123,6 +125,7 @@ class WindowSystem(GraphicsEventSystem):
         :param x: x value of mouse position when released
         :param y: y value of mouse position when released
         """
+        self.tempMouseDownWindow = None
         # calculate distance between release and pressed position
         deltaX, deltaY = abs(self.tempMouseDown[0] - x), abs(self.tempMouseDown[1] - y)
         # if distance is less than mouseClickTolerance send mouse-click event to child where click occurred.
@@ -141,14 +144,14 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleMouseDragged(self, x, y):
         clickedX, clickedY = self.tempMouseDown
-        draggedWindow = self.screen.childWindowAtLocation(clickedX, clickedY)
+        deltaX, deltaY = x - clickedX, y - clickedY
 
-        if "- Title Bar" in draggedWindow.identifier and "Button" not in draggedWindow.identifier:
+        if "- Title Bar" in self.tempMouseDownWindow.identifier and "Button" not in self.tempMouseDownWindow.identifier:
             # title bar is dragged but not title bar buttons
             # print(clickedX, clickedY, x, y)
             print(x - clickedX, y - clickedY)
             # TODO: Dragging not working!
-            self.windowManager.handleTitleBarDragged(draggedWindow, x - clickedX, y - clickedY)
+            self.windowManager.handleTitleBarDragged(self.tempMouseDownWindow, clickedX + deltaX, clickedY + deltaY)
 
     def handleKeyPressed(self, char):
         pass

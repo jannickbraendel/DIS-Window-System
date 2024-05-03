@@ -101,7 +101,7 @@ class WindowManager:
     def drawTaskbar(self, ctx):
         pass
 
-    def handleTitleBarDragged(self, window, deltaX, deltaY):
+    def handleTitleBarDragged(self, window, x, y):
         """
 
         :param window: low-level window which is dragged
@@ -110,9 +110,10 @@ class WindowManager:
         """
         # find top level window this window belongs to
         topLevelWindow = window.getTopLevelWindow()
-        if self.checkWindowPosition(topLevelWindow, topLevelWindow.x + deltaX, topLevelWindow.y + deltaY):
-            topLevelWindow.x += deltaX
-            topLevelWindow.y += deltaY
+        if self.checkWindowPosition(topLevelWindow, x, y):
+            # offsetX, offsetY = clickedX - topLevelWindow.x, clickedY - topLevelWindow.y
+            topLevelWindow.x = x
+            topLevelWindow.y = y
         else:
             print("out of screen bounds")
 
