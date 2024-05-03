@@ -21,7 +21,7 @@ class WindowSystem(GraphicsEventSystem):
         self.windowManager = WindowManager(self)
         # add screen
         self.screen = Screen(self)
-        # temporarily save mouse down position to compare with release position
+        # temporarily save mouse down position to compare with release position or handle mouse dragging
         self.tempMouseDown = (0, 0)
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
@@ -79,9 +79,7 @@ class WindowSystem(GraphicsEventSystem):
             return
 
         # find top level window this window belongs to
-        topLevelWindow = window
-        while topLevelWindow.parentWindow.identifier != "SCREEN":
-            topLevelWindow = topLevelWindow.parentWindow
+        topLevelWindow = window.getTopLevelWindow()
 
         # calculate new position
         topLevelWindow.x, topLevelWindow.y = topLevelWindow.convertPositionToScreen(0, 0)
@@ -120,7 +118,8 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleMouseReleased(self, x, y):
         """
-        When the left mouse button is released, check if mouse click occurred and send event to respective child window.
+        When the left mouse button is released, check if mouse click occurred and send event to respective child
+        window OR window manager if title bar was clicked.
         :param x: x value of mouse position when released
         :param y: y value of mouse position when released
         """
@@ -128,15 +127,28 @@ class WindowSystem(GraphicsEventSystem):
         deltaX, deltaY = abs(self.tempMouseDown[0] - x), abs(self.tempMouseDown[1] - y)
         # if distance is less than mouseClickTolerance send mouse-click event to child where click occurred.
         if deltaX <= self.mouseClickTolerance and deltaY <= self.mouseClickTolerance:
-            child = self.screen.childWindowAtLocation(x, y)
-            if child:
-                child.handleMouseClicked(x, y)
+            clickedWindow = self.screen.childWindowAtLocation(x, y)
+            if clickedWindow:
+                if "- Title Bar" in clickedWindow.identifier:
+                    # title bar was clicked
+                    self.windowManager.handleTitleBarClicked(clickedWindow)
+                else:
+                    clickedWindow.handleMouseClicked(x, y)
 
     def handleMouseMoved(self, x, y):
         pass
+        # TODO (optional): change background color of buttons when mouse is moved there
 
     def handleMouseDragged(self, x, y):
-        pass
+        clickedX, clickedY = self.tempMouseDown
+        draggedWindow = self.screen.childWindowAtLocation(clickedX, clickedY)
+
+        if "- Title Bar" in draggedWindow.identifier and "Button" not in draggedWindow.identifier:
+            # title bar is dragged but not title bar buttons
+            # print(clickedX, clickedY, x, y)
+            print(x - clickedX, y - clickedY)
+            # TODO: Dragging not working!
+            self.windowManager.handleTitleBarDragged(draggedWindow, x - clickedX, y - clickedY)
 
     def handleKeyPressed(self, char):
         pass

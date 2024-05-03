@@ -23,11 +23,12 @@ class WindowManager:
             pass
         screen = window.parentWindow
 
-        titleBarVisibleLeft = x + window.width > 0
-        titleBarVisibleRight = x - window.width < screen.width
+        minimumTitleBarVisibility = 6
+        titleBarVisibleLeft = x + window.width > 0 + minimumTitleBarVisibility
+        titleBarVisibleRight = x - window.width < screen.width - minimumTitleBarVisibility
 
-        titleBarVisibleTop = y + self.titleBarHeight > 0
-        titleBarVisibleBottom = y - self.titleBarHeight < screen.height
+        titleBarVisibleTop = y + self.titleBarHeight > 0 + minimumTitleBarVisibility
+        titleBarVisibleBottom = y - self.titleBarHeight < screen.height - minimumTitleBarVisibility
         # returns true if title bar is visible towards all directions
         return titleBarVisibleLeft and titleBarVisibleRight and titleBarVisibleTop and titleBarVisibleBottom
 
@@ -42,7 +43,7 @@ class WindowManager:
         titleBar = Window(0, 0, window.width, self.titleBarHeight, window.identifier + " - Title Bar")
         # set background color based on if window is selected
         topLevelWindows = self.windowSystem.screen.childWindows
-        windowIsFocused = topLevelWindows[len(topLevelWindows) - 1] == window
+        windowIsFocused = topLevelWindows[len(topLevelWindows) - 1].identifier == window.identifier
         if windowIsFocused:
             # window is selected
             titleBar.setBackgroundColor(COLOR_DARK_GREEN)
@@ -99,3 +100,43 @@ class WindowManager:
 
     def drawTaskbar(self, ctx):
         pass
+
+    def handleTitleBarDragged(self, window, deltaX, deltaY):
+        """
+
+        :param window: low-level window which is dragged
+        :param x:
+        :param y:
+        """
+        # find top level window this window belongs to
+        topLevelWindow = window.getTopLevelWindow()
+        if self.checkWindowPosition(topLevelWindow, topLevelWindow.x + deltaX, topLevelWindow.y + deltaY):
+            topLevelWindow.x += deltaX
+            topLevelWindow.y += deltaY
+        else:
+            print("out of screen bounds")
+
+    def handleTitleBarClicked(self, window):
+        """
+        Checks which title bar button was pressed and calls respective helper function to execute command.
+        :param window: low-level window, which has been clicked on (part of title bar)
+        """
+        # find top level window this window belongs to
+        topLevelWindow = window.getTopLevelWindow()
+
+        # check which part of title bar was pressed exactly
+        if "Title Bar - Close Button" in window.identifier:
+            self.closeWindow(topLevelWindow)
+        elif "Title Bar - Minimize Button" in window.identifier:
+            self.minimizeWindow(topLevelWindow)
+
+    @staticmethod
+    def closeWindow(window):
+        print("Pressed close-button of window", window.identifier)
+        window.removeFromParentWindow()
+
+    @staticmethod
+    def minimizeWindow(window):
+        print("Pressed minimize-button of window", window.identifier)
+        window.isHidden = True
+

@@ -29,6 +29,8 @@ class Window:
 
         self.childWindows = []
         self.parentWindow = None
+        # used to minimize top-level windows
+        self.isHidden = False
 
     def addChildWindow(self, window):
         """
@@ -130,7 +132,7 @@ class Window:
         Draw current window and all child windows on screen and filling them with the specified background color.
         :param ctx: Current graphics context
         """
-        print("Drawing:", self.identifier)
+        # print("Drawing:", self.identifier)
         # set ctx origin to the global position of the window's origin
         position = self.convertPositionToScreen(0, 0)
         ctx.setOrigin(position[0], position[1])
@@ -153,6 +155,13 @@ class Window:
     def setBackgroundColor(self, color):
         self.backgroundColor = color
 
+    def getTopLevelWindow(self):
+        topLevelWindow = self
+        while topLevelWindow.parentWindow.identifier != "SCREEN":
+            topLevelWindow = topLevelWindow.parentWindow
+
+        return topLevelWindow
+
 
 class Screen(Window):
     def __init__(self, windowSystem):
@@ -171,5 +180,6 @@ class Screen(Window):
         self.windowSystem.windowManager.drawDesktop(ctx)
         # call draw function on top-level windows and decorate them using the WM.
         for topLevelWindow in self.childWindows:
-            topLevelWindow.draw(ctx)
-            self.windowSystem.windowManager.decorateWindow(topLevelWindow, ctx)
+            if not topLevelWindow.isHidden:
+                topLevelWindow.draw(ctx)
+                self.windowSystem.windowManager.decorateWindow(topLevelWindow, ctx)
