@@ -23,7 +23,10 @@ class WindowSystem(GraphicsEventSystem):
         self.screen = Screen(self)
         # temporarily save mouse down position to compare with release position or handle mouse dragging
         self.tempMouseDown = (0, 0)
+        # temporarily save the window that the mouse down event happened on, used for dragging
         self.tempMouseDownWindow = None
+        # temporarily save the offset with which a window's title bar was clicked, used for draggingß
+        self.tempMouseDragOffset = (0, 0)
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
 
@@ -116,7 +119,12 @@ class WindowSystem(GraphicsEventSystem):
         child = self.screen.childWindowAtLocation(x, y)
         if child:
             self.bringWindowToFront(child)
+            # save which window was pressed for dragging
             self.tempMouseDownWindow = child
+            # get the top level window and calculate the offset between the window origin and
+            # where the mouse clicked the title bar (only used for dragging)
+            topLevelWindow = child.getTopLevelWindow()
+            self.tempMouseDragOffset = x - topLevelWindow.x, y - topLevelWindow.y
 
     def handleMouseReleased(self, x, y):
         """
@@ -144,14 +152,19 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleMouseDragged(self, x, y):
         clickedX, clickedY = self.tempMouseDown
+        # calculate the delta between the originally clicked position and the current drag position
         deltaX, deltaY = x - clickedX, y - clickedY
 
         if "- Title Bar" in self.tempMouseDownWindow.identifier and "Button" not in self.tempMouseDownWindow.identifier:
             # title bar is dragged but not title bar buttons
-            # print(clickedX, clickedY, x, y)
-            print(x - clickedX, y - clickedY)
-            # TODO: Dragging not working!
-            self.windowManager.handleTitleBarDragged(self.tempMouseDownWindow, clickedX + deltaX, clickedY + deltaY)
+            # reposition the window with the absolute position and mouse offset
+            self.windowManager.handleTitleBarDragged(
+                self.tempMouseDownWindow,
+                clickedX + deltaX,
+                clickedY + deltaY,
+                self.tempMouseDragOffset[0],
+                self.tempMouseDragOffset[1]
+            )
 
     def handleKeyPressed(self, char):
         pass
