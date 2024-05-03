@@ -32,7 +32,8 @@ class WindowManager:
         # returns true if title bar is visible towards all directions
         return titleBarVisibleLeft and titleBarVisibleRight and titleBarVisibleTop and titleBarVisibleBottom
 
-    # TODO: Title bar only appears after clicking for the first time (children are appended after drawing -> see Screen.draw())
+    # TODO: Title bar only appears after clicking for the first time (children are appended after drawing -> see
+    #  Screen.draw())
     def decorateWindow(self, window, ctx):
         # stroke border around window
         ctx.setStrokeColor(COLOR_GRAY)
