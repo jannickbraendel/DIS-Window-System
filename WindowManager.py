@@ -146,16 +146,20 @@ class WindowManager:
     def handleTaskBarClicked(self, x):
         topLevelWindows = self.windowSystem.screen.childWindows
         topLevelWindowsSorted = sorted(topLevelWindows, key=lambda win: win.identifier)
-        if x <= self.taskBarHeight:
+        xCounter = self.taskBarHeight + 1
+        iconIndex = 0
+        for i in range(len(topLevelWindows) + 1):
+            if xCounter < x:
+                xCounter += self.taskBarHeight + 1
+                iconIndex += 1
+
+        if iconIndex == 0:
             quit()
         else:
-            # 1. 0 - 30 , 31 - 61, 62 - 92, 93 - 133
-            for i in range(len(topLevelWindows)):
-                # x coordinate is subtracted by i+1 to include 1 px distance between each icon button
-                iconIndex = (x-(i+1)) / self.taskBarHeight
-                print(iconIndex)
-
-
+            window = topLevelWindowsSorted[iconIndex-1]
+            window.isHidden = False
+            self.windowSystem.bringWindowToFront(window)
+            self.windowSystem.requestRepaint()
 
 
     def handleTitleBarDragged(self, window, deltaX, deltaY):
