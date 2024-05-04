@@ -118,6 +118,8 @@ class WindowSystem(GraphicsEventSystem):
         self.tempMouseDown = (x, y)
         child = self.screen.childWindowAtLocation(x, y)
         if child:
+            if child.identifier == "SCREEN":
+                return
             self.bringWindowToFront(child)
             # save which window was pressed for dragging
             self.tempMouseDownWindow = child
