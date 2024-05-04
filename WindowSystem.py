@@ -37,22 +37,52 @@ class WindowSystem(GraphicsEventSystem):
         window2.setBackgroundColor(COLOR_WHITE)
         window3 = Window(20, 20, 40, 40, "3")
         window3.setBackgroundColor(COLOR_ORANGE)
-        window4 = Window(400, 300, 300, 400, "Third Window")
-        window4.setBackgroundColor(COLOR_WHITE)
-        window5 = Window(20, 30, 120, 120, "5")
-        window5.setBackgroundColor(COLOR_GREEN)
-        window6 = Window(40, 40, 120, 120, "6")
-        window6.setBackgroundColor(COLOR_BROWN)
-        window7 = Window(60, 20, 200, 200, "7")
-        window7.setBackgroundColor(COLOR_PINK)
+        # test resizing
+        resizing = Window(400, 120, 300, 300, "Resizing Test")
+        resizing.setBackgroundColor(COLOR_WHITE)
+        top_left = Window(15, 25, 70, 40, "top-left")
+        top_left.setBackgroundColor(COLOR_GREEN)
+        top = Window(115, 25, 70, 40, "top")
+        top.setBackgroundColor(COLOR_ORANGE)
+        top_right = Window(215, 25, 70, 40, "top-right")
+        top_right.setBackgroundColor(COLOR_GREEN)
+        right = Window(215, 135, 70, 40, "right")
+        right.setBackgroundColor(COLOR_PURPLE)
+        bottom_right = Window(215, 245, 70, 40, "bottom-right")
+        bottom_right.setBackgroundColor(COLOR_GREEN)
+        bottom = Window(115, 245, 70, 40, "bottom")
+        bottom.setBackgroundColor(COLOR_ORANGE)
+        bottom_left = Window(15, 245, 70, 40, "bottom-left")
+        bottom_left.setBackgroundColor(COLOR_GREEN)
+        left = Window(15, 135, 70, 40, "left")
+        left.setBackgroundColor(COLOR_PURPLE)
+        allAnchors = Window(115, 135, 70, 40, "all")
+        allAnchors.setBackgroundColor(COLOR_RED)
         # print(window1.convertPositionFromScreen(30,30))
         self.screen.addChildWindow(window1)
         self.screen.addChildWindow(window2)
-        self.screen.addChildWindow(window4)
+        self.screen.addChildWindow(resizing)
         window2.addChildWindow(window3)
-        window4.addChildWindow(window5)
-        window5.addChildWindow(window6)
-        window5.addChildWindow(window7)
+
+        resizing.addChildWindow(top_left)
+        resizing.addChildWindow(top)
+        resizing.addChildWindow(top_right)
+        resizing.addChildWindow(right)
+        resizing.addChildWindow(bottom_right)
+        resizing.addChildWindow(bottom)
+        resizing.addChildWindow(bottom_left)
+        resizing.addChildWindow(left)
+        resizing.addChildWindow(allAnchors)
+        # set layout anchors
+        top.layoutAnchors = LayoutAnchor.top
+        top_right.layoutAnchors = LayoutAnchor.top | LayoutAnchor.right
+        right.layoutAnchors = LayoutAnchor.right
+        bottom_right.LayoutAnchors = LayoutAnchor.bottom | LayoutAnchor.right
+        bottom.LayoutAnchors = LayoutAnchor.bottom
+        bottom_left.LayoutAnchors = LayoutAnchor.bottom | LayoutAnchor.left
+        left.LayoutAnchors = LayoutAnchor.left
+        allAnchors.LayoutAnchors = LayoutAnchor.top | LayoutAnchor.bottom | LayoutAnchor.left | LayoutAnchor.right
+
 
     """
     WINDOW MANAGEMENT

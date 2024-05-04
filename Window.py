@@ -8,6 +8,11 @@ and Jannick Brändel (#405391)
 """
 
 from GraphicsEventSystem import *
+from collections import namedtuple
+
+# initialize bit mask for resizing/anchoring
+AllAnchors = namedtuple('AllAnchors', "top right bottom left")
+LayoutAnchor = AllAnchors(1 << 1, 1 << 2, 1 << 3, 1 << 4)
 
 
 class Window:
@@ -31,6 +36,8 @@ class Window:
         self.parentWindow = None
         # used to minimize top-level windows
         self.isHidden = False
+        # window is anchored to top-left by default
+        self.layoutAnchors = LayoutAnchor.top | LayoutAnchor.left
 
     def addChildWindow(self, window):
         """
@@ -206,3 +213,12 @@ class Screen(Window):
                 self.windowSystem.windowManager.decorateWindow(topLevelWindow, ctx)
         # task bar is drawn in the end to be in the foreground compared to other windows
         self.windowSystem.windowManager.drawTaskbar(ctx)
+
+    def resize(self, x, y, width, height):
+        # store current window anchors to use in the following
+        topAnchor = self.layoutAnchors & LayoutAnchor.top
+        rightAnchor = self.layoutAnchors & LayoutAnchor.right
+        bottomAnchor = self.layoutAnchors & LayoutAnchor.bottom
+        leftAnchor = self.layoutAnchors & LayoutAnchor.left
+
+
