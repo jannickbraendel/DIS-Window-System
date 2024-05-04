@@ -15,6 +15,7 @@ class WindowManager:
     def __init__(self, windowSystem):
         self.windowSystem = windowSystem
         self.titleBarHeight = 18
+        self.titleBarButtonWidth = 10
         self.taskBarHeight = 35
 
     def checkWindowPosition(self, window, x, y):
@@ -25,11 +26,11 @@ class WindowManager:
         screen = window.parentWindow
 
         minimumTitleBarVisibility = 6
-        titleBarVisibleLeft = x + window.width > 0 + minimumTitleBarVisibility
-        titleBarVisibleRight = x - window.width < screen.width - minimumTitleBarVisibility
+        titleBarVisibleLeft = x + window.width > 0 + minimumTitleBarVisibility + (3 * self.titleBarButtonWidth)
+        titleBarVisibleRight = x < screen.width - minimumTitleBarVisibility
 
-        titleBarVisibleTop = y + self.titleBarHeight > 0 + minimumTitleBarVisibility
-        titleBarVisibleBottom = y - self.titleBarHeight < screen.height - minimumTitleBarVisibility
+        titleBarVisibleTop = y > 0
+        titleBarVisibleBottom = y < screen.height - minimumTitleBarVisibility
         # returns true if title bar is visible towards all directions
         return titleBarVisibleLeft and titleBarVisibleRight and titleBarVisibleTop and titleBarVisibleBottom
 
@@ -66,7 +67,7 @@ class WindowManager:
         ctx.drawString(window.identifier, 3, 1)
 
         # add buttons windows
-        buttonWidth = 10
+        buttonWidth = self.titleBarButtonWidth
         buttonHeight = self.titleBarHeight - 8
         distanceBetweenButtons = 5
 
@@ -165,7 +166,7 @@ class WindowManager:
             self.windowSystem.requestRepaint()
 
 
-    def handleTitleBarDragged(self, window, deltaX, deltaY):
+    def handleTitleBarDragged(self, window, x, y, offsetX, offsetY):
         """
 
         :param window: low-level window which is dragged
@@ -174,11 +175,11 @@ class WindowManager:
         """
         # find top level window this window belongs to
         topLevelWindow = window.getTopLevelWindow()
-        if self.checkWindowPosition(topLevelWindow, topLevelWindow.x + deltaX, topLevelWindow.y + deltaY):
-            topLevelWindow.x += deltaX
-            topLevelWindow.y += deltaY
-        else:
-            print("out of screen bounds")
+        if self.checkWindowPosition(topLevelWindow, x - offsetX, y - offsetY):
+            # reposition the window using the absolute position and subtracting the mouse offset
+            # (offset is important, so you can click anywhere on the title bar to drag)
+            topLevelWindow.x = x - offsetX
+            topLevelWindow.y = y - offsetY
 
     def handleTitleBarClicked(self, window):
         """
