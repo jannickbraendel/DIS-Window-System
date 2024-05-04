@@ -194,13 +194,13 @@ class WindowManager:
         elif "Title Bar - Minimize Button" in window.identifier:
             self.minimizeWindow(topLevelWindow)
 
-    @staticmethod
-    def closeWindow(window):
+    def closeWindow(self, window):
         print("Pressed close-button of window", window.identifier)
         window.removeFromParentWindow()
+        self.windowSystem.requestRepaint()
 
-    @staticmethod
-    def minimizeWindow(window):
+    def minimizeWindow(self, window):
         print("Pressed minimize-button of window", window.identifier)
         window.isHidden = True
+        self.windowSystem.requestRepaint()
 
