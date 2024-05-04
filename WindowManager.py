@@ -146,6 +146,7 @@ class WindowManager:
     def handleTaskBarClicked(self, x):
         topLevelWindows = self.windowSystem.screen.childWindows
         topLevelWindowsSorted = sorted(topLevelWindows, key=lambda win: win.identifier)
+        # counter goes through taskbar icons and stops when it reaches the x parameter, so we know which icon was clicked
         xCounter = self.taskBarHeight + 1
         iconIndex = 0
         for i in range(len(topLevelWindows) + 1):
@@ -154,8 +155,10 @@ class WindowManager:
                 iconIndex += 1
 
         if iconIndex == 0:
+            # quit button was clicked
             quit()
         else:
+            # selected window is brought to front or reopened if minimized before
             window = topLevelWindowsSorted[iconIndex-1]
             window.isHidden = False
             self.windowSystem.bringWindowToFront(window)
