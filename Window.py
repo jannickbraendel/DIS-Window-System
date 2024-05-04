@@ -195,7 +195,7 @@ class Screen(Window):
 
     def draw(self, ctx):
         """
-        Draw screen using the window manager and call draw function on all top level windows.
+        Draw screen and task bar using the window manager and call draw function on all top level windows.
         :param ctx: Current graphics context
         """
         self.windowSystem.windowManager.drawDesktop(ctx)
@@ -204,3 +204,5 @@ class Screen(Window):
             if not topLevelWindow.isHidden:
                 topLevelWindow.draw(ctx)
                 self.windowSystem.windowManager.decorateWindow(topLevelWindow, ctx)
+        # task bar is drawn in the end to be in the foreground compared to other windows
+        self.windowSystem.windowManager.drawTaskbar(ctx)

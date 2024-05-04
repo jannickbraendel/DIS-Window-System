@@ -15,6 +15,7 @@ class WindowManager:
     def __init__(self, windowSystem):
         self.windowSystem = windowSystem
         self.titleBarHeight = 18
+        self.taskBarHeight = 35
 
     def checkWindowPosition(self, window, x, y):
         # TODO: Check later if function is implemented correctly when handling window-dragging
@@ -44,8 +45,8 @@ class WindowManager:
         titleBar = Window(0, 0, window.width, self.titleBarHeight, window.identifier + " - Title Bar")
         # set background color based on if window is selected
         topLevelWindows = self.windowSystem.screen.childWindows
-        windowIsFocused = topLevelWindows[len(topLevelWindows) - 1].identifier == window.identifier
-        if windowIsFocused:
+        windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == window.identifier
+        if windowIsSelected:
             # window is selected
             titleBar.setBackgroundColor(COLOR_DARK_GREEN)
         else:
@@ -100,7 +101,62 @@ class WindowManager:
         ctx.fillRect(0, 0, self.windowSystem.width, self.windowSystem.height)
 
     def drawTaskbar(self, ctx):
-        pass
+        # set origin to top-left corner of task bar
+        ctx.setOrigin(0, self.windowSystem.height - self.taskBarHeight)
+        # draw task bar
+        ctx.setFillColor(COLOR_DARK_BLUE)
+        ctx.setStrokeColor(COLOR_GRAY)
+        ctx.fillRect(0, 0, self.windowSystem.width, self.taskBarHeight)
+        ctx.strokeRect(0, 0, self.windowSystem.width, self.taskBarHeight)
+
+        # draw quit button
+        ctx.setFillColor(COLOR_RED)
+        ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
+        ctx.setStrokeColor(COLOR_WHITE)
+        ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
+        ctx.drawString("X", self.taskBarHeight * 0.23, self.taskBarHeight * 0.1)
+
+        # draw window icons
+        curX, curY = (self.taskBarHeight + 1, self.windowSystem.height - self.taskBarHeight)
+        topLevelWindows = self.windowSystem.screen.childWindows
+        # sort windows alphabetically to have fixed order of icons
+        topLevelWindowsSorted = sorted(topLevelWindows, key=lambda x: x.identifier)
+        # add icon for each top level window
+        for topLevelWindow in topLevelWindowsSorted:
+            ctx.setOrigin(curX, curY)
+            ctx.setStrokeColor(COLOR_BLACK)
+            ctx.strokeRect(0, 0, self.taskBarHeight, self.taskBarHeight)
+            windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == topLevelWindow.identifier
+            if windowIsSelected:
+                # window is selected
+                ctx.setFillColor(COLOR_DARK_GREEN)
+                ctx.setStrokeColor(COLOR_WHITE)
+            else:
+                # window is in the background
+                ctx.setFillColor(COLOR_LIGHT_GREEN)
+                ctx.setStrokeColor(COLOR_WHITE)
+
+            ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
+            windowIcon = topLevelWindow.identifier[0]
+            ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
+            ctx.drawString(windowIcon, self.taskBarHeight * 0.23, self.taskBarHeight * 0.1)
+
+            curX += self.taskBarHeight + 1
+
+    def handleTaskBarClicked(self, x):
+        topLevelWindows = self.windowSystem.screen.childWindows
+        topLevelWindowsSorted = sorted(topLevelWindows, key=lambda win: win.identifier)
+        if x <= self.taskBarHeight:
+            quit()
+        else:
+            # 1. 0 - 30 , 31 - 61, 62 - 92, 93 - 133
+            for i in range(len(topLevelWindows)):
+                # x coordinate is subtracted by i+1 to include 1 px distance between each icon button
+                iconIndex = (x-(i+1)) / self.taskBarHeight
+                print(iconIndex)
+
+
+
 
     def handleTitleBarDragged(self, window, deltaX, deltaY):
         """
