@@ -44,6 +44,7 @@ class WindowManager:
         ctx.strokeRect(0, 0, window.width, window.height)
         # add title bar
         titleBar = Window(0, 0, window.width, self.titleBarHeight, window.identifier + " - Title Bar")
+        print("TitleBar Width: " + str(titleBar.width))
         # set background color based on if window is selected
         topLevelWindows = self.windowSystem.screen.childWindows
         windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == window.identifier
@@ -180,6 +181,12 @@ class WindowManager:
             # (offset is important, so you can click anywhere on the title bar to drag)
             topLevelWindow.x = x - offsetX
             topLevelWindow.y = y - offsetY
+
+    def handleResizeDragged(self, window, x, y, width, height):
+        #if self.checkWindowPosition(window, x):
+        resizeCornerTolerance = 10
+        topLevelWindow = window.getTopLevelWindow()
+        topLevelWindow.resize(window.x, window.y, width, height)
 
     def handleTitleBarClicked(self, window):
         """

@@ -27,6 +27,10 @@ class WindowSystem(GraphicsEventSystem):
         self.tempMouseDownWindow = None
         # temporarily save the offset with which a window's title bar was clicked, used for draggingß
         self.tempMouseDragOffset = (0, 0)
+        # temporarily save the dimensions of the window on mouse down
+        self.tempMouseDownDimensions = (0, 0)
+        # set a boolean, when this is true the bottom right corner was pressed for resizing
+        self.tempMouseDownResizing = False
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
 
@@ -73,6 +77,7 @@ class WindowSystem(GraphicsEventSystem):
         resizing.addChildWindow(bottom_left)
         resizing.addChildWindow(left)
         resizing.addChildWindow(allAnchors)
+
         # set layout anchors
         top.layoutAnchors = LayoutAnchor.top
         top_right.layoutAnchors = LayoutAnchor.top | LayoutAnchor.right
@@ -158,6 +163,11 @@ class WindowSystem(GraphicsEventSystem):
             # where the mouse clicked the title bar (only used for dragging)
             topLevelWindow = child.getTopLevelWindow()
             self.tempMouseDragOffset = x - topLevelWindow.x, y - topLevelWindow.y
+            self.tempMouseDownDimensions = topLevelWindow.width, topLevelWindow.height
+            resizeCornerTolerance = 10
+            if x > topLevelWindow.x + topLevelWindow.width - resizeCornerTolerance and y > topLevelWindow.y + topLevelWindow.height - resizeCornerTolerance:
+                self.tempMouseDownResizing = True
+
 
     def handleMouseReleased(self, x, y):
         """
@@ -167,6 +177,7 @@ class WindowSystem(GraphicsEventSystem):
         :param y: y value of mouse position when released
         """
         self.tempMouseDownWindow = None
+        self.tempMouseDownResizing = False
         # calculate distance between release and pressed position
         deltaX, deltaY = abs(self.tempMouseDown[0] - x), abs(self.tempMouseDown[1] - y)
         # if distance is less than mouseClickTolerance send mouse-click event to child where click occurred.
@@ -189,10 +200,21 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleMouseDragged(self, x, y):
         clickedX, clickedY = self.tempMouseDown
+        window = self.tempMouseDownWindow
+
         # calculate the delta between the originally clicked position and the current drag position
         deltaX, deltaY = x - clickedX, y - clickedY
 
-        if "- Title Bar" in self.tempMouseDownWindow.identifier and "Button" not in self.tempMouseDownWindow.identifier:
+        if self.tempMouseDownResizing:
+            self.windowManager.handleResizeDragged(
+                window,
+                clickedX,
+                clickedY,
+                self.tempMouseDownDimensions[0] + deltaX,
+                self.tempMouseDownDimensions[1] + deltaY
+            )
+
+        if "- Title Bar" in window.identifier and "Button" not in window.identifier:
             # title bar is dragged but not title bar buttons
             # reposition the window with the absolute position and mouse offset
             self.windowManager.handleTitleBarDragged(

@@ -190,6 +190,22 @@ class Window:
 
         return topLevelWindow
 
+    def resize(self, x, y, width, height):
+        # store current window anchors to use in the following
+        topAnchor = self.layoutAnchors & LayoutAnchor.top
+        rightAnchor = self.layoutAnchors & LayoutAnchor.right
+        bottomAnchor = self.layoutAnchors & LayoutAnchor.bottom
+        leftAnchor = self.layoutAnchors & LayoutAnchor.left
+
+        # arbitrary size values
+        if width < 20 or height < 20:
+            return
+
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
 
 class Screen(Window):
     def __init__(self, windowSystem):
@@ -213,12 +229,3 @@ class Screen(Window):
                 self.windowSystem.windowManager.decorateWindow(topLevelWindow, ctx)
         # task bar is drawn in the end to be in the foreground compared to other windows
         self.windowSystem.windowManager.drawTaskbar(ctx)
-
-    def resize(self, x, y, width, height):
-        # store current window anchors to use in the following
-        topAnchor = self.layoutAnchors & LayoutAnchor.top
-        rightAnchor = self.layoutAnchors & LayoutAnchor.right
-        bottomAnchor = self.layoutAnchors & LayoutAnchor.bottom
-        leftAnchor = self.layoutAnchors & LayoutAnchor.left
-
-
