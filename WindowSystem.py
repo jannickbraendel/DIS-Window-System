@@ -103,6 +103,7 @@ class WindowSystem(GraphicsEventSystem):
         Repaint the screen by calling the draw function.
         """
         self.screen.draw(self.graphicsContext)
+        self.windowManager.drawTaskbar(self.graphicsContext)
 
     """
     INPUT EVENTS
@@ -140,13 +141,17 @@ class WindowSystem(GraphicsEventSystem):
         deltaX, deltaY = abs(self.tempMouseDown[0] - x), abs(self.tempMouseDown[1] - y)
         # if distance is less than mouseClickTolerance send mouse-click event to child where click occurred.
         if deltaX <= self.mouseClickTolerance and deltaY <= self.mouseClickTolerance:
-            clickedWindow = self.screen.childWindowAtLocation(x, y)
-            if clickedWindow:
-                if "- Title Bar" in clickedWindow.identifier:
-                    # title bar was clicked
-                    self.windowManager.handleTitleBarClicked(clickedWindow)
-                else:
-                    clickedWindow.handleMouseClicked(x, y)
+            if y >= self.height - self.windowManager.taskBarHeight:
+                # task bar was clicked
+                self.windowManager.handleTaskBarClicked(x)
+            else:
+                clickedWindow = self.screen.childWindowAtLocation(x, y)
+                if clickedWindow:
+                    if "- Title Bar" in clickedWindow.identifier:
+                        # title bar was clicked
+                        self.windowManager.handleTitleBarClicked(clickedWindow)
+                    else:
+                        clickedWindow.handleMouseClicked(x, y)
 
     def handleMouseMoved(self, x, y):
         pass

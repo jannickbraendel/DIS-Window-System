@@ -16,6 +16,7 @@ class WindowManager:
         self.windowSystem = windowSystem
         self.titleBarHeight = 18
         self.titleBarButtonWidth = 10
+        self.taskBarHeight = 35
 
     def checkWindowPosition(self, window, x, y):
         # TODO: Check later if function is implemented correctly when handling window-dragging
@@ -33,7 +34,8 @@ class WindowManager:
         # returns true if title bar is visible towards all directions
         return titleBarVisibleLeft and titleBarVisibleRight and titleBarVisibleTop and titleBarVisibleBottom
 
-    # TODO: Title bar only appears after clicking for the first time (children are appended after drawing -> see Screen.draw())
+    # TODO: Title bar only appears after clicking for the first time (children are appended after drawing -> see
+    #  Screen.draw())
     def decorateWindow(self, window, ctx):
         # stroke border around window
         ctx.setStrokeColor(COLOR_GRAY)
@@ -44,8 +46,8 @@ class WindowManager:
         titleBar = Window(0, 0, window.width, self.titleBarHeight, window.identifier + " - Title Bar")
         # set background color based on if window is selected
         topLevelWindows = self.windowSystem.screen.childWindows
-        windowIsFocused = topLevelWindows[len(topLevelWindows) - 1].identifier == window.identifier
-        if windowIsFocused:
+        windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == window.identifier
+        if windowIsSelected:
             # window is selected
             titleBar.setBackgroundColor(COLOR_DARK_GREEN)
         else:
@@ -100,7 +102,69 @@ class WindowManager:
         ctx.fillRect(0, 0, self.windowSystem.width, self.windowSystem.height)
 
     def drawTaskbar(self, ctx):
-        pass
+        # set origin to top-left corner of task bar
+        ctx.setOrigin(0, self.windowSystem.height - self.taskBarHeight)
+        # draw task bar
+        ctx.setFillColor(COLOR_DARK_BLUE)
+        ctx.setStrokeColor(COLOR_GRAY)
+        ctx.fillRect(0, 0, self.windowSystem.width, self.taskBarHeight)
+        ctx.strokeRect(0, 0, self.windowSystem.width, self.taskBarHeight)
+
+        # draw quit button
+        ctx.setFillColor(COLOR_RED)
+        ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
+        ctx.setStrokeColor(COLOR_WHITE)
+        ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
+        ctx.drawString("X", self.taskBarHeight * 0.23, self.taskBarHeight * 0.1)
+
+        # draw window icons
+        curX, curY = (self.taskBarHeight + 1, self.windowSystem.height - self.taskBarHeight)
+        topLevelWindows = self.windowSystem.screen.childWindows
+        # sort windows alphabetically to have fixed order of icons
+        topLevelWindowsSorted = sorted(topLevelWindows, key=lambda x: x.identifier)
+        # add icon for each top level window
+        for topLevelWindow in topLevelWindowsSorted:
+            ctx.setOrigin(curX, curY)
+            ctx.setStrokeColor(COLOR_BLACK)
+            ctx.strokeRect(0, 0, self.taskBarHeight, self.taskBarHeight)
+            windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == topLevelWindow.identifier
+            if windowIsSelected:
+                # window is selected
+                ctx.setFillColor(COLOR_DARK_GREEN)
+                ctx.setStrokeColor(COLOR_WHITE)
+            else:
+                # window is in the background
+                ctx.setFillColor(COLOR_LIGHT_GREEN)
+                ctx.setStrokeColor(COLOR_WHITE)
+
+            ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
+            windowIcon = topLevelWindow.identifier[0]
+            ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
+            ctx.drawString(windowIcon, self.taskBarHeight * 0.23, self.taskBarHeight * 0.1)
+
+            curX += self.taskBarHeight + 1
+
+    def handleTaskBarClicked(self, x):
+        topLevelWindows = self.windowSystem.screen.childWindows
+        topLevelWindowsSorted = sorted(topLevelWindows, key=lambda win: win.identifier)
+        # counter goes through taskbar icons and stops when it reaches the x parameter, so we know which icon was clicked
+        xCounter = self.taskBarHeight + 1
+        iconIndex = 0
+        for i in range(len(topLevelWindows) + 1):
+            if xCounter < x:
+                xCounter += self.taskBarHeight + 1
+                iconIndex += 1
+
+        if iconIndex == 0:
+            # quit button was clicked
+            quit()
+        else:
+            # selected window is brought to front or reopened if minimized before
+            window = topLevelWindowsSorted[iconIndex-1]
+            window.isHidden = False
+            self.windowSystem.bringWindowToFront(window)
+            self.windowSystem.requestRepaint()
+
 
     def handleTitleBarDragged(self, window, x, y, offsetX, offsetY):
         """
@@ -131,13 +195,13 @@ class WindowManager:
         elif "Title Bar - Minimize Button" in window.identifier:
             self.minimizeWindow(topLevelWindow)
 
-    @staticmethod
-    def closeWindow(window):
+    def closeWindow(self, window):
         print("Pressed close-button of window", window.identifier)
         window.removeFromParentWindow()
+        self.windowSystem.requestRepaint()
 
-    @staticmethod
-    def minimizeWindow(window):
+    def minimizeWindow(self, window):
         print("Pressed minimize-button of window", window.identifier)
         window.isHidden = True
+        self.windowSystem.requestRepaint()
 

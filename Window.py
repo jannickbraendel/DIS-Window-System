@@ -40,7 +40,24 @@ class Window:
         self.childWindows.append(window)
         window.parentWindow = self
 
+        if self.identifier == "SCREEN":
+            screen = self
+        else:
+            screen = self.getTopLevelWindow().parentWindow
+
         # check if child window exceeds parent window in size and adjust accordingly
+        if window.x < 0:
+            window.x = 0
+
+        titleBarHeight = screen.windowSystem.windowManager.titleBarHeight
+        if window.parentWindow.parentWindow == screen and "- Title Bar" not in window.identifier:
+            # child windows of top-level windows (that are not the title bar itself) should not cover the title bar
+            if window.y < titleBarHeight:
+                window.y = titleBarHeight
+        else:
+            if window.y < 0:
+                window.y = 0
+
         windowRightBorder = window.x + window.width
         windowLowerBorder = window.y + window.height
         if windowRightBorder > self.width:
@@ -156,6 +173,10 @@ class Window:
         self.backgroundColor = color
 
     def getTopLevelWindow(self):
+        if self.parentWindow.identifier == "SCREEN":
+            # self is already top-level window
+            return self
+
         topLevelWindow = self
         while topLevelWindow.parentWindow.identifier != "SCREEN":
             topLevelWindow = topLevelWindow.parentWindow
@@ -174,7 +195,7 @@ class Screen(Window):
 
     def draw(self, ctx):
         """
-        Draw screen using the window manager and call draw function on all top level windows.
+        Draw screen and task bar using the window manager and call draw function on all top level windows.
         :param ctx: Current graphics context
         """
         self.windowSystem.windowManager.drawDesktop(ctx)
@@ -183,3 +204,5 @@ class Screen(Window):
             if not topLevelWindow.isHidden:
                 topLevelWindow.draw(ctx)
                 self.windowSystem.windowManager.decorateWindow(topLevelWindow, ctx)
+        # task bar is drawn in the end to be in the foreground compared to other windows
+        self.windowSystem.windowManager.drawTaskbar(ctx)
