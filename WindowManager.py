@@ -203,5 +203,7 @@ class WindowManager:
     def minimizeWindow(self, window):
         print("Pressed minimize-button of window", window.identifier)
         window.isHidden = True
+        window.parentWindow.childWindows.remove(window)
+        window.parentWindow.childWindows.insert(0, window)
         self.windowSystem.requestRepaint()
 
