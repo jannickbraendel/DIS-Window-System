@@ -227,9 +227,6 @@ class WindowManager:
         bottomAnchor = window.layoutAnchors & LayoutAnchor.bottom
         leftAnchor = window.layoutAnchors & LayoutAnchor.left
 
-        windowOrigin = window.convertPositionToScreen(0, 0)
-        parentOrigin = window.parentWindow.convertPositionToScreen(0, 0)
-
         newX, newY, newWidth, newHeight = window.x, window.y, window.width, window.height
 
         # go through anchor combinations and change coordinates and width/height accordingly
