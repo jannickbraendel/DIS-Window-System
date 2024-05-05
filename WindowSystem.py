@@ -119,8 +119,6 @@ class WindowSystem(GraphicsEventSystem):
         # add window as top level window
         self.screen.addChildWindow(topLevelWindow)
 
-        print("Window " + topLevelWindow.identifier + " was brought to front")
-
     """
     DRAWING
     """

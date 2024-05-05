@@ -20,7 +20,6 @@ class WindowManager:
         self.resizeCornerTolerance = 10
 
     def checkWindowPosition(self, window, x, y):
-        # TODO: Check later if function is implemented correctly when handling window-dragging
         # check if window is top-level window and return otherwise
         if window.parentWindow.identifier != "SCREEN":
             pass
@@ -37,7 +36,6 @@ class WindowManager:
 
     # creates windows for window decorations (title bar, buttons)
     def decorateWindow(self, window, ctx):
-
         # add title bar
         titleBar = Window(0, 0, window.width, self.titleBarHeight, window.identifier + " - Title Bar")
         # set background color based on if window is selected
@@ -102,8 +100,8 @@ class WindowManager:
                 titleWindow = child
         # draw title string
         if None in (titleWindow, minimizeButton, maximizeButton, closeButton):
-            print("not all windows found")
             return
+
         titleWindowX, titleWindowY = titleWindow.convertPositionToScreen(0, 0)
         ctx.setOrigin(titleWindowX, titleWindowY)
         ctx.setStrokeColor(COLOR_WHITE)
@@ -294,12 +292,10 @@ class WindowManager:
             self.minimizeWindow(topLevelWindow)
 
     def closeWindow(self, window):
-        print("Pressed close-button of window", window.identifier)
         window.removeFromParentWindow()
         self.windowSystem.requestRepaint()
 
     def minimizeWindow(self, window):
-        print("Pressed minimize-button of window", window.identifier)
         window.isHidden = True
         window.parentWindow.childWindows.remove(window)
         window.parentWindow.childWindows.insert(0, window)
