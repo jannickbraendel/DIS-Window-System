@@ -12,11 +12,11 @@ from collections import namedtuple
 
 # initialize bit mask for resizing/anchoring
 AllAnchors = namedtuple('AllAnchors', "top right bottom left")
-LayoutAnchor = AllAnchors(1 << 1, 1 << 2, 1 << 3, 1 << 4)
+LayoutAnchor = AllAnchors(1 << 0, 1 << 1, 1 << 2, 1 << 3)
 
 
 class Window:
-    def __init__(self, originX, originY, width, height, identifier):
+    def __init__(self, originX, originY, width, height, identifier, layoutAnchors=LayoutAnchor.top | LayoutAnchor.left):
         """
         Constructor for a new window setting the relevant attributes and the default background color to BLUE
         :param originX: X coordinate of the top left corner of the window (coordinate system of parent window)
@@ -24,6 +24,7 @@ class Window:
         :param width: Width of the window
         :param height: Height of the window
         :param identifier: window ID
+        :param layoutAnchors: anchors to parent window in all directions (default: top-left)
         """
         self.x = originX
         self.y = originY
@@ -37,7 +38,7 @@ class Window:
         # used to minimize top-level windows
         self.isHidden = False
         # window is anchored to top-left by default
-        self.layoutAnchors = LayoutAnchor.top | LayoutAnchor.left
+        self.layoutAnchors = layoutAnchors
 
     def addChildWindow(self, window):
         """
@@ -199,7 +200,6 @@ class Window:
         self.y = y
         self.width = width
         self.height = height
-
 
 
 class Screen(Window):

@@ -49,21 +49,21 @@ class WindowSystem(GraphicsEventSystem):
         resizing.setBackgroundColor(COLOR_WHITE)
         top_left = Window(15, 25, 70, 40, "top-left")
         top_left.setBackgroundColor(COLOR_GREEN)
-        top = Window(115, 25, 70, 40, "top")
+        top = Window(115, 25, 70, 40, "top", LayoutAnchor.top)
         top.setBackgroundColor(COLOR_ORANGE)
-        top_right = Window(215, 25, 70, 40, "top-right")
+        top_right = Window(215, 25, 70, 40, "top-right", LayoutAnchor.top | LayoutAnchor.right)
         top_right.setBackgroundColor(COLOR_GREEN)
-        right = Window(215, 135, 70, 40, "right")
+        right = Window(215, 135, 70, 40, "right", LayoutAnchor.right)
         right.setBackgroundColor(COLOR_PURPLE)
-        bottom_right = Window(215, 245, 70, 40, "bottom-right")
+        bottom_right = Window(215, 245, 70, 40, "bottom-right", LayoutAnchor.bottom | LayoutAnchor.right)
         bottom_right.setBackgroundColor(COLOR_GREEN)
-        bottom = Window(115, 245, 70, 40, "bottom")
+        bottom = Window(115, 245, 70, 40, "bottom", LayoutAnchor.bottom)
         bottom.setBackgroundColor(COLOR_ORANGE)
-        bottom_left = Window(15, 245, 70, 40, "bottom-left")
+        bottom_left = Window(15, 245, 70, 40, "bottom-left", LayoutAnchor.bottom | LayoutAnchor.left)
         bottom_left.setBackgroundColor(COLOR_GREEN)
-        left = Window(15, 135, 70, 40, "left")
+        left = Window(15, 135, 70, 40, "left", LayoutAnchor.left)
         left.setBackgroundColor(COLOR_PURPLE)
-        allAnchors = Window(115, 135, 70, 40, "all")
+        allAnchors = Window(115, 135, 70, 40, "all", LayoutAnchor.top | LayoutAnchor.bottom | LayoutAnchor.left | LayoutAnchor.right)
         allAnchors.setBackgroundColor(COLOR_RED)
         # print(window1.convertPositionFromScreen(30,30))
         self.screen.addChildWindow(window1)
@@ -81,16 +81,19 @@ class WindowSystem(GraphicsEventSystem):
         resizing.addChildWindow(left)
         resizing.addChildWindow(allAnchors)
 
+
+        '''
         # set layout anchors
-        top.layoutAnchors = LayoutAnchor.top
+        top.layoutAnchors.(LayoutAnchor.top)
         top_right.layoutAnchors = LayoutAnchor.top | LayoutAnchor.right
         right.layoutAnchors = LayoutAnchor.right
         bottom_right.LayoutAnchors = LayoutAnchor.bottom | LayoutAnchor.right
+        print(bin(bottom_right.layoutAnchors))
         bottom.LayoutAnchors = LayoutAnchor.bottom
         bottom_left.LayoutAnchors = LayoutAnchor.bottom | LayoutAnchor.left
         left.LayoutAnchors = LayoutAnchor.left
         allAnchors.LayoutAnchors = LayoutAnchor.top | LayoutAnchor.bottom | LayoutAnchor.left | LayoutAnchor.right
-
+        '''
 
     """
     WINDOW MANAGEMENT

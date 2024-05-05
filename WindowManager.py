@@ -57,11 +57,8 @@ class WindowManager:
             titleBar.setBackgroundColor(COLOR_LIGHT_GREEN)
         # append title bar to window
         window.addChildWindow(titleBar)
-        for i in range(len(window.childWindows)):
-            print(i, ": ", window.childWindows[i].identifier)
         # remove old title bar if already existing
         if len(window.childWindows) > 1 and "- Title Bar" in window.childWindows[len(window.childWindows) - 2].identifier:
-            print("remove old title bar")
             window.childWindows[len(window.childWindows) - 2].removeFromParentWindow()
 
         # add title to title Bar
@@ -173,7 +170,6 @@ class WindowManager:
             self.windowSystem.bringWindowToFront(window)
             self.windowSystem.requestRepaint()
 
-
     def handleTitleBarDragged(self, window, x, y, offsetX, offsetY):
         """
 
@@ -192,23 +188,76 @@ class WindowManager:
 
     def handleResizeDragged(self, window, width, height):
         topLevelWindow = window.getTopLevelWindow()
-        # factor < 1: width/height got smaller, factor > 1: width/height got greater (used for child windows)
-        factorWidth = width / topLevelWindow.width
-        factorHeight = height / topLevelWindow.height
+        deltaWidth = width - topLevelWindow.width
+        deltaHeight = height - topLevelWindow.height
         topLevelWindow.resize(window.x, window.y, width, height)
 
         for child in topLevelWindow.childWindows:
-            self.resizeAnchoredWindow(child, factorWidth, factorHeight)
+            self.resizeAnchoredWindow(child, deltaWidth, deltaHeight)
 
-    def resizeAnchoredWindow(self, window, factorWidth, factorHeight):
+    def resizeAnchoredWindow(self, window, deltaWidth, deltaHeight):
         # store current window anchors to use in the following
         topAnchor = window.layoutAnchors & LayoutAnchor.top
         rightAnchor = window.layoutAnchors & LayoutAnchor.right
         bottomAnchor = window.layoutAnchors & LayoutAnchor.bottom
         leftAnchor = window.layoutAnchors & LayoutAnchor.left
 
+        windowOrigin = window.convertPositionToScreen(0, 0)
+        parentOrigin = window.parentWindow.convertPositionToScreen(0, 0)
+
+        newX, newY, newWidth, newHeight = window.x, window.y, window.width, window.height
+
+        # go through anchor combinations and change coordinates and width/height accordingly
+        if topAnchor and rightAnchor and bottomAnchor and leftAnchor:
+            newWidth += deltaWidth
+            newHeight += deltaHeight
+
+        elif topAnchor and rightAnchor:
+            # window is only moved on x-axis by the width delta of the parent
+            if newX + deltaWidth >= 0:
+                newX += deltaWidth
+
+        elif topAnchor and leftAnchor:
+            pass
+
+        elif bottomAnchor and rightAnchor:
+            # window is moved on x- and y-axis by the width/height delta of the parent
+            if newX + deltaWidth >= 0:
+                newX += deltaWidth
+            if newY + deltaHeight >= 0:
+                newY += deltaHeight
+
+        elif bottomAnchor and leftAnchor:
+            if newY + deltaHeight >= 0:
+                newY += deltaHeight
+
+        elif topAnchor:
+            # window keeps distance to left and right and does not change height
+            newX += deltaWidth / 2
+
+        elif bottomAnchor:
+            # window keeps distance to left and moves on y-axis by height delta of parent
+            newX += deltaWidth / 2
+            if newY + deltaHeight >= 0:
+                newY += deltaHeight
+
+        elif rightAnchor:
+            # window keeps distance to top and bottom and moves on x-axis by width delta of parent
+            newY += deltaHeight / 2
+            if newX + deltaWidth >= 0:
+                newX += deltaWidth
+
+        elif leftAnchor:
+            # window keeps distance to top and bottom
+            newY += deltaHeight / 2
+
+        window.resize(newX, newY, newWidth, newHeight)
+
+        '''
+        # resize child windows
         for child in window.childWindows:
             self.resizeAnchoredWindow(child, factorWidth, factorHeight)
+        '''
 
     def handleTitleBarClicked(self, window):
         """
