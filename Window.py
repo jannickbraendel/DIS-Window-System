@@ -180,9 +180,9 @@ class Window:
         self.backgroundColor = color
 
     def getTopLevelWindow(self):
-        if self.parentWindow.identifier == "SCREEN":
-            # self is already top-level window
-            return self
+
+        if self.identifier == "SCREEN":
+            return None
 
         topLevelWindow = self
         while topLevelWindow.parentWindow.identifier != "SCREEN":
@@ -191,12 +191,6 @@ class Window:
         return topLevelWindow
 
     def resize(self, x, y, width, height):
-        # store current window anchors to use in the following
-        topAnchor = self.layoutAnchors & LayoutAnchor.top
-        rightAnchor = self.layoutAnchors & LayoutAnchor.right
-        bottomAnchor = self.layoutAnchors & LayoutAnchor.bottom
-        leftAnchor = self.layoutAnchors & LayoutAnchor.left
-
         # arbitrary size values
         if width < 20 or height < 20:
             return
@@ -205,6 +199,7 @@ class Window:
         self.y = y
         self.width = width
         self.height = height
+
 
 
 class Screen(Window):

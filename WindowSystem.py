@@ -25,7 +25,10 @@ class WindowSystem(GraphicsEventSystem):
         self.tempMouseDown = (0, 0)
         # temporarily save the window that the mouse down event happened on, used for dragging
         self.tempMouseDownWindow = None
-        # temporarily save the offset with which a window's title bar was clicked, used for draggingß
+        # temporarily save the TOP-LEVEL window that the mouse down event happened on, used for dragging (especially
+        # getting new title bar)
+        self.tempMouseDownTLWindow = None
+        # temporarily save the offset with which a window's title bar was clicked, used for dragging
         self.tempMouseDragOffset = (0, 0)
         # temporarily save the dimensions of the window on mouse down
         self.tempMouseDownDimensions = (0, 0)
@@ -162,10 +165,12 @@ class WindowSystem(GraphicsEventSystem):
             # get the top level window and calculate the offset between the window origin and
             # where the mouse clicked the title bar (only used for dragging)
             topLevelWindow = child.getTopLevelWindow()
+            # save top level window for dragging (to get updated child windows (e.g. title bar))
+            self.tempMouseDownTLWindow = topLevelWindow
             self.tempMouseDragOffset = x - topLevelWindow.x, y - topLevelWindow.y
             self.tempMouseDownDimensions = topLevelWindow.width, topLevelWindow.height
-            resizeCornerTolerance = 10
-            if x > topLevelWindow.x + topLevelWindow.width - resizeCornerTolerance and y > topLevelWindow.y + topLevelWindow.height - resizeCornerTolerance:
+
+            if x > topLevelWindow.x + topLevelWindow.width - self.windowManager.resizeCornerTolerance and y > topLevelWindow.y + topLevelWindow.height - self.windowManager.resizeCornerTolerance:
                 self.tempMouseDownResizing = True
 
 
@@ -177,6 +182,7 @@ class WindowSystem(GraphicsEventSystem):
         :param y: y value of mouse position when released
         """
         self.tempMouseDownWindow = None
+        self.tempMouseDownTLWindow = None
         self.tempMouseDownResizing = False
         # calculate distance between release and pressed position
         deltaX, deltaY = abs(self.tempMouseDown[0] - x), abs(self.tempMouseDown[1] - y)
@@ -200,16 +206,15 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleMouseDragged(self, x, y):
         clickedX, clickedY = self.tempMouseDown
+        if self.tempMouseDownWindow is None:
+            return
         window = self.tempMouseDownWindow
-
         # calculate the delta between the originally clicked position and the current drag position
         deltaX, deltaY = x - clickedX, y - clickedY
 
         if self.tempMouseDownResizing:
             self.windowManager.handleResizeDragged(
                 window,
-                clickedX,
-                clickedY,
                 self.tempMouseDownDimensions[0] + deltaX,
                 self.tempMouseDownDimensions[1] + deltaY
             )
@@ -218,7 +223,7 @@ class WindowSystem(GraphicsEventSystem):
             # title bar is dragged but not title bar buttons
             # reposition the window with the absolute position and mouse offset
             self.windowManager.handleTitleBarDragged(
-                self.tempMouseDownWindow,
+                self.tempMouseDownTLWindow,
                 clickedX + deltaX,
                 clickedY + deltaY,
                 self.tempMouseDragOffset[0],

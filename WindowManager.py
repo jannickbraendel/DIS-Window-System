@@ -17,6 +17,7 @@ class WindowManager:
         self.titleBarHeight = 18
         self.titleBarButtonWidth = 10
         self.taskBarHeight = 35
+        self.resizeCornerTolerance = 10
 
     def checkWindowPosition(self, window, x, y):
         # TODO: Check later if function is implemented correctly when handling window-dragging
@@ -42,9 +43,9 @@ class WindowManager:
         startX, startY = window.convertPositionToScreen(0, 0)
         ctx.setOrigin(startX, startY)
         ctx.strokeRect(0, 0, window.width, window.height)
+
         # add title bar
         titleBar = Window(0, 0, window.width, self.titleBarHeight, window.identifier + " - Title Bar")
-        print("TitleBar Width: " + str(titleBar.width))
         # set background color based on if window is selected
         topLevelWindows = self.windowSystem.screen.childWindows
         windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == window.identifier
@@ -56,6 +57,12 @@ class WindowManager:
             titleBar.setBackgroundColor(COLOR_LIGHT_GREEN)
         # append title bar to window
         window.addChildWindow(titleBar)
+        for i in range(len(window.childWindows)):
+            print(i, ": ", window.childWindows[i].identifier)
+        # remove old title bar if already existing
+        if len(window.childWindows) > 1 and "- Title Bar" in window.childWindows[len(window.childWindows) - 2].identifier:
+            print("remove old title bar")
+            window.childWindows[len(window.childWindows) - 2].removeFromParentWindow()
 
         # add title to title Bar
         titleWindow = Window(0, 0, titleBar.width/2, titleBar.height, titleBar.identifier + " - Title")
@@ -175,18 +182,33 @@ class WindowManager:
         :param y:
         """
         # find top level window this window belongs to
-        topLevelWindow = window.getTopLevelWindow()
+        if window.getTopLevelWindow() is not None:
+            topLevelWindow = window.getTopLevelWindow()
         if self.checkWindowPosition(topLevelWindow, x - offsetX, y - offsetY):
             # reposition the window using the absolute position and subtracting the mouse offset
             # (offset is important, so you can click anywhere on the title bar to drag)
             topLevelWindow.x = x - offsetX
             topLevelWindow.y = y - offsetY
 
-    def handleResizeDragged(self, window, x, y, width, height):
-        #if self.checkWindowPosition(window, x):
-        resizeCornerTolerance = 10
+    def handleResizeDragged(self, window, width, height):
         topLevelWindow = window.getTopLevelWindow()
+        # factor < 1: width/height got smaller, factor > 1: width/height got greater (used for child windows)
+        factorWidth = width / topLevelWindow.width
+        factorHeight = height / topLevelWindow.height
         topLevelWindow.resize(window.x, window.y, width, height)
+
+        for child in topLevelWindow.childWindows:
+            self.resizeAnchoredWindow(child, factorWidth, factorHeight)
+
+    def resizeAnchoredWindow(self, window, factorWidth, factorHeight):
+        # store current window anchors to use in the following
+        topAnchor = window.layoutAnchors & LayoutAnchor.top
+        rightAnchor = window.layoutAnchors & LayoutAnchor.right
+        bottomAnchor = window.layoutAnchors & LayoutAnchor.bottom
+        leftAnchor = window.layoutAnchors & LayoutAnchor.left
+
+        for child in window.childWindows:
+            self.resizeAnchoredWindow(child, factorWidth, factorHeight)
 
     def handleTitleBarClicked(self, window):
         """
