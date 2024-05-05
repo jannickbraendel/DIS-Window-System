@@ -220,7 +220,8 @@ class Screen(Window):
         # call draw function on top-level windows and decorate them using the WM.
         for topLevelWindow in self.childWindows:
             if not topLevelWindow.isHidden:
-                topLevelWindow.draw(ctx)
                 self.windowSystem.windowManager.decorateWindow(topLevelWindow, ctx)
+                topLevelWindow.draw(ctx)
+                self.windowSystem.windowManager.drawWindowDecorations(topLevelWindow, ctx)
         # task bar is drawn in the end to be in the foreground compared to other windows
         self.windowSystem.windowManager.drawTaskbar(ctx)
