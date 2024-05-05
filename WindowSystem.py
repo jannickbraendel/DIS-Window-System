@@ -81,20 +81,6 @@ class WindowSystem(GraphicsEventSystem):
         resizing.addChildWindow(left)
         resizing.addChildWindow(allAnchors)
 
-
-        '''
-        # set layout anchors
-        top.layoutAnchors.(LayoutAnchor.top)
-        top_right.layoutAnchors = LayoutAnchor.top | LayoutAnchor.right
-        right.layoutAnchors = LayoutAnchor.right
-        bottom_right.LayoutAnchors = LayoutAnchor.bottom | LayoutAnchor.right
-        print(bin(bottom_right.layoutAnchors))
-        bottom.LayoutAnchors = LayoutAnchor.bottom
-        bottom_left.LayoutAnchors = LayoutAnchor.bottom | LayoutAnchor.left
-        left.LayoutAnchors = LayoutAnchor.left
-        allAnchors.LayoutAnchors = LayoutAnchor.top | LayoutAnchor.bottom | LayoutAnchor.left | LayoutAnchor.right
-        '''
-
     """
     WINDOW MANAGEMENT
     """
