@@ -20,6 +20,7 @@ class WindowManager:
         self.resizeCornerTolerance = 10
 
     def checkWindowPosition(self, window, x, y):
+        # TODO: Function does not yet work correctly
         # check if window is top-level window and return otherwise
         if window.parentWindow.identifier != "SCREEN":
             pass
@@ -130,6 +131,7 @@ class WindowManager:
         ctx.fillRect(0, 0, self.windowSystem.width, self.windowSystem.height)
 
     def drawTaskbar(self, ctx):
+        # TODO: Border around icon buttons only when the window is selected not everywhere
         # set origin to top-left corner of task bar
         ctx.setOrigin(0, self.windowSystem.height - self.taskBarHeight)
         # draw task bar
@@ -210,6 +212,7 @@ class WindowManager:
             topLevelWindow.y = y - offsetY
 
     def handleResizeDragged(self, window, width, height):
+        # TODO: Change structure and implement layout engine in Window's resize function instead
         topLevelWindow = window.getTopLevelWindow()
         deltaWidth = width - topLevelWindow.width
         deltaHeight = height - topLevelWindow.height
