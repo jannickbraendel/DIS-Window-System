@@ -66,14 +66,15 @@ class Window:
             if window.y < 0:
                 window.y = 0
 
-        windowRightBorder = window.x + window.width
-        windowLowerBorder = window.y + window.height
-        if windowRightBorder > self.width:
-            widthToRemove = windowRightBorder - self.width
-            window.width -= widthToRemove
-        if windowLowerBorder > self.height:
-            heightToRemove = windowLowerBorder - self.height
-            window.height -= heightToRemove
+        if window.parentWindow.identifier != "SCREEN":
+            windowRightBorder = window.x + window.width
+            windowLowerBorder = window.y + window.height
+            if windowRightBorder > self.width:
+                widthToRemove = windowRightBorder - self.width
+                window.width -= widthToRemove
+            if windowLowerBorder > self.height:
+                heightToRemove = windowLowerBorder - self.height
+                window.height -= heightToRemove
 
     def removeFromParentWindow(self):
         """
@@ -168,6 +169,7 @@ class Window:
         ctx.setFillColor(self.backgroundColor)
         # fill the complete window
         ctx.fillRect(0, 0, self.width, self.height)
+
         # recursively draw child windows in ascending z-order
         for child in self.childWindows:
             child.draw(ctx)
