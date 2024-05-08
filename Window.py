@@ -157,6 +157,10 @@ class Window:
         Draw current window and all child windows on screen and filling them with the specified background color.
         :param ctx: Current graphics context
         """
+        # do not draw if hidden currently:
+        if self.isHidden:
+            return
+
         # set ctx origin to the global position of the window's origin
         position = self.convertPositionToScreen(0, 0)
         ctx.setOrigin(position[0], position[1])
@@ -191,7 +195,7 @@ class Window:
         return topLevelWindow
 
     def resize(self, x, y, width, height):
-        # arbitrary size values
+        # minimum size:
         if width < 20 or height < 20:
             return
 

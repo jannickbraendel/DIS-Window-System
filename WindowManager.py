@@ -212,7 +212,6 @@ class WindowManager:
             topLevelWindow.y = y - offsetY
 
     def handleResizeDragged(self, window, width, height):
-        # TODO: Change structure and implement layout engine in Window's resize function instead
         topLevelWindow = window.getTopLevelWindow()
         deltaWidth = width - topLevelWindow.width
         deltaHeight = height - topLevelWindow.height
@@ -222,58 +221,62 @@ class WindowManager:
             self.resizeAnchoredWindow(child, deltaWidth, deltaHeight)
 
     def resizeAnchoredWindow(self, window, deltaWidth, deltaHeight):
+        """
+        Resizes windows with anchors to any side (e.g. child windows of top-level windows)
+        :param window: Current window to be resized
+        :param deltaWidth: Change in width of parent window
+        :param deltaHeight: Change in height of parent window
+        """
         # store current window anchors to use in the following
         topAnchor = window.layoutAnchors & LayoutAnchor.top
         rightAnchor = window.layoutAnchors & LayoutAnchor.right
         bottomAnchor = window.layoutAnchors & LayoutAnchor.bottom
         leftAnchor = window.layoutAnchors & LayoutAnchor.left
 
+        newParentWidth = window.parentWindow.width + deltaWidth
+        newParentHeight = window.parentWindow.height + deltaHeight
+
         newX, newY, newWidth, newHeight = window.x, window.y, window.width, window.height
 
-        # go through anchor combinations and change coordinates and width/height accordingly
-        if topAnchor and rightAnchor and bottomAnchor and leftAnchor:
+        # HORIZONTAL ANCHORING:
+        # not anchored to either left or right: keep relative distance to left and right
+        if not (leftAnchor or rightAnchor):
+            newX += deltaWidth / 2
+        # anchored to left and right: resize horizontally
+        elif leftAnchor and rightAnchor:
             newWidth += deltaWidth
-            newHeight += deltaHeight
-
-        elif topAnchor and rightAnchor:
-            # window is only moved on x-axis by the width delta of the parent
-            if newX + deltaWidth >= 0:
-                newX += deltaWidth
-
-        elif topAnchor and leftAnchor:
-            pass
-
-        elif bottomAnchor and rightAnchor:
-            # window is moved on x- and y-axis by the width/height delta of the parent
-            if newX + deltaWidth >= 0:
-                newX += deltaWidth
-            if newY + deltaHeight >= 0:
-                newY += deltaHeight
-
-        elif bottomAnchor and leftAnchor:
-            if newY + deltaHeight >= 0:
-                newY += deltaHeight
-
-        elif topAnchor:
-            # window keeps distance to left and right and does not change height
-            newX += deltaWidth / 2
-
-        elif bottomAnchor:
-            # window keeps distance to left and right and moves on y-axis by height delta of parent
-            newX += deltaWidth / 2
-            if newY + deltaHeight >= 0:
-                newY += deltaHeight
-
+        # only anchored to right: keep exact distance to the right
         elif rightAnchor:
-            # window keeps distance to top and bottom and moves on x-axis by width delta of parent
-            newY += deltaHeight / 2
-            if newX + deltaWidth >= 0:
-                newX += deltaWidth
+            newX += deltaWidth
 
-        elif leftAnchor:
-            # window keeps distance to top and bottom
+        # VERTICAL ANCHORING:
+        # not anchored to either top or bottom: keep relative distance to top and bottom
+        if not (topAnchor or bottomAnchor):
             newY += deltaHeight / 2
+        # anchored to top and bottom: resize vertically
+        elif topAnchor and bottomAnchor:
+            newHeight += deltaHeight / 2
+        # only anchored to bottom: keep exact distance to bottom
+        elif bottomAnchor:
+            newY += deltaHeight
 
+        # CONSTRAINTS:
+
+        # if x or y get negative, stick them to left side of window
+        if newX < 0:
+            newX = 0
+        if newY < 0:
+            newY = 0
+        # minimum size values
+        if newWidth < 20:
+            width = 20
+        if newHeight < 20:
+            height = 20
+
+        # if window reaches out of parent on any side, clip it (set hidden)
+        window.isHidden = newX + newWidth > newParentWidth or newY + newHeight > newParentHeight
+
+        # resize window with updated values
         window.resize(newX, newY, newWidth, newHeight)
 
         # resize child windows
