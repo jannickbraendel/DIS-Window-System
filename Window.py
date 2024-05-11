@@ -53,7 +53,10 @@ class Window:
         else:
             screen = self.getTopLevelWindow().parentWindow
 
-        # check if child window exceeds parent window in size and adjust accordingly
+        # check if child window exceeds parent window in size and adjust accordingly (NOT NEEDED FOR TL WINDOWS)
+        if self.identifier == "SCREEN":
+            return
+
         if window.x < 0:
             window.x = 0
 
