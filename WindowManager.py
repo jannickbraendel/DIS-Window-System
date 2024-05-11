@@ -20,18 +20,17 @@ class WindowManager:
         self.resizeCornerTolerance = 10
 
     def checkWindowPosition(self, window, x, y):
-        # TODO: Function does not yet work correctly
         # check if window is top-level window and return otherwise
         if window.parentWindow.identifier != "SCREEN":
             pass
         screen = window.parentWindow
-
-        minimumTitleBarVisibility = 6
-        titleBarVisibleLeft = x + window.width > 0 + minimumTitleBarVisibility + (3 * self.titleBarButtonWidth)
+        # amount of pixels of titlebar that should still be visible
+        minimumTitleBarVisibility = 10
+        titleBarVisibleLeft = x + window.width > minimumTitleBarVisibility + (3 * self.titleBarButtonWidth)
         titleBarVisibleRight = x < screen.width - minimumTitleBarVisibility
 
-        titleBarVisibleTop = y > 0
-        titleBarVisibleBottom = y < screen.height - minimumTitleBarVisibility
+        titleBarVisibleTop = y + minimumTitleBarVisibility > 0
+        titleBarVisibleBottom = y < screen.height - minimumTitleBarVisibility - self.taskBarHeight
         # returns true if title bar is visible towards all directions
         return titleBarVisibleLeft and titleBarVisibleRight and titleBarVisibleTop and titleBarVisibleBottom
 
