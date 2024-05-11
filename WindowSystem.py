@@ -10,6 +10,7 @@ and Jannick Brändel (#405391)
 import GraphicsEventSystem
 from Window import *
 from WindowManager import WindowManager
+from UITK import *
 
 
 class WindowSystem(GraphicsEventSystem):
@@ -147,6 +148,9 @@ class WindowSystem(GraphicsEventSystem):
             if child.identifier == "SCREEN":
                 return
             self.bringWindowToFront(child)
+            # check if button was pressed and change its state accordingly
+            if child is Button:
+                child.changeState("PRESSED")
             # save which window was pressed for dragging
             self.tempMouseDownWindow = child
             # get the top level window and calculate the offset between the window origin and
@@ -159,7 +163,6 @@ class WindowSystem(GraphicsEventSystem):
 
             if x > topLevelWindow.x + topLevelWindow.width - self.windowManager.resizeCornerTolerance and y > topLevelWindow.y + topLevelWindow.height - self.windowManager.resizeCornerTolerance:
                 self.tempMouseDownResizing = True
-
 
     def handleMouseReleased(self, x, y):
         """
@@ -188,8 +191,12 @@ class WindowSystem(GraphicsEventSystem):
                         clickedWindow.handleMouseClicked(x, y)
 
     def handleMouseMoved(self, x, y):
-        pass
-        # TODO (optional): change background color of buttons when mouse is moved there
+        hoveredWindow = self.screen.childWindowAtLocation(x, y)
+        if hoveredWindow is None:
+            return
+
+        if hoveredWindow is Button:
+            hoveredWindow.changeState("HOVERED")
 
     def handleMouseDragged(self, x, y):
         clickedX, clickedY = self.tempMouseDown
