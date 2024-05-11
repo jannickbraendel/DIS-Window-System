@@ -17,7 +17,7 @@ class WindowManager:
         self.titleBarHeight = 18
         self.titleBarButtonWidth = 10
         self.taskBarHeight = 35
-        self.resizeCornerTolerance = 10
+        self.resizeCornerTolerance = 8
 
     def checkWindowPosition(self, window, x, y):
         # check if window is top-level window and return otherwise
@@ -123,6 +123,15 @@ class WindowManager:
         ctx.setOrigin(closeButtonX, closeButtonY)
         ctx.drawLine(0, 0, buttonWidth, buttonHeight)
         ctx.drawLine(0, buttonHeight, buttonWidth, 0)
+        # draw resizing area in bottom right corner
+        distResizeLines = self.resizeCornerTolerance/2
+        ctx.setStrokeColor(COLOR_BLACK)
+        for i in range(2):
+            ctx.setOrigin(startX + window.width - self.resizeCornerTolerance + i * distResizeLines,
+                          startY + window.height)
+            ctx.drawLine(0, 0, 0, -self.resizeCornerTolerance + i * distResizeLines)
+            ctx.drawLine(0, -self.resizeCornerTolerance + i * distResizeLines, self.resizeCornerTolerance - i * distResizeLines,
+                         -self.resizeCornerTolerance + i * distResizeLines)
 
     def drawDesktop(self, ctx):
         # desktop is filled with light blue color
