@@ -18,7 +18,7 @@ LayoutAnchor = AllAnchors(1 << 0, 1 << 1, 1 << 2, 1 << 3)
 class Window:
     def __init__(self, originX, originY, width, height, identifier, layoutAnchors=LayoutAnchor.top | LayoutAnchor.left):
         """
-        Constructor for a new window setting the relevant attributes and the default background color to BLUE
+        Constructor for a new window setting the relevant attributes and the default background color
         :param originX: X coordinate of the top left corner of the window (coordinate system of parent window)
         :param originY: Y coordinate of the top left corner of the window (coordinate system of parent window)
         :param width: Width of the window
