@@ -40,6 +40,10 @@ class Window:
         # window is anchored to top-left by default
         self.layoutAnchors = layoutAnchors
 
+        # non-top level windows: save margins to bottom and right
+        self.marginRight = 0
+        self.marginBottom = 0
+
     def addChildWindow(self, window):
         """
         Add given window as child window.
@@ -78,6 +82,10 @@ class Window:
             if windowLowerBorder > self.height:
                 heightToRemove = windowLowerBorder - self.height
                 window.height -= heightToRemove
+
+            # save margins to bottom and right: they might be broken while resizing and have to be re-established
+            window.marginRight = self.width - windowRightBorder
+            window.marginBottom = self.height - windowLowerBorder
 
     def removeFromParentWindow(self):
         """
@@ -199,15 +207,87 @@ class Window:
 
         return topLevelWindow
 
-    def resize(self, x, y, width, height):
-        # minimum size:
-        if width < 20 or height < 20:
-            return
+    # resizes itself and all its child windows
+    def resize(self, x, y, deltaWidth, deltaHeight):
+        newX, newY = x, y
+        if self.parentWindow.identifier == "SCREEN":
+            # TOP-LEVEL WINDOW: RESIZING
+            newWidth, newHeight = self.width + deltaWidth, self.height + deltaHeight
+            # new width/height should not be lower than min width/height
+            newWidth = max(self.parentWindow.windowSystem.windowManager.tlwMinWidth, newWidth)
+            newHeight = max(self.parentWindow.windowSystem.windowManager.tlwMinHeight, newHeight)
 
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+            # resize window with updated values
+            self.x = newX
+            self.y = newY
+            self.width = newWidth
+            self.height = newHeight
+
+        else:
+            # NO TOP-LEVEL WINDOW: RESIZING
+            # save "start values", which are changed while evaluating anchoring
+            newWidth, newHeight = self.width, self.height
+            # store current window anchors to use in the following
+            topAnchor = self.layoutAnchors & LayoutAnchor.top
+            rightAnchor = self.layoutAnchors & LayoutAnchor.right
+            bottomAnchor = self.layoutAnchors & LayoutAnchor.bottom
+            leftAnchor = self.layoutAnchors & LayoutAnchor.left
+
+            # HORIZONTAL ANCHORING:
+            # not anchored to either left or right: keep relative distance to left and right
+            if not (leftAnchor or rightAnchor):
+                newX += deltaWidth / 2
+            # anchored to left and right: keep exact margins to left and right
+            elif leftAnchor and rightAnchor:
+                newWidth += deltaWidth
+            # only anchored to right: keep exact distance to the right
+            elif rightAnchor:
+                newX += deltaWidth
+
+            # VERTICAL ANCHORING:
+            # not anchored to either top or bottom: keep relative distance to top and bottom
+            if not (topAnchor or bottomAnchor):
+                newY += deltaHeight / 2
+            # anchored to top and bottom: resize vertically
+            elif topAnchor and bottomAnchor:
+                newHeight += deltaHeight
+            # only anchored to bottom: keep exact distance to bottom
+            elif bottomAnchor:
+                newY += deltaHeight
+
+            # CONSTRAINTS:
+            # if x or y get negative, stick them to left side of window
+            if newX < 0:
+                newX = 0
+            if newY < 0:
+                newY = 0
+            # minimum size values for child windows
+            if newWidth < 20:
+                newWidth = 20
+            if newHeight < 20:
+                newHeight = 20
+
+            # if window reaches out of parent on any side, clip it (set hidden)
+            self.isHidden = newX + newWidth > self.parentWindow.width or newY + newHeight > self.parentWindow.height
+
+            # CHECK MARGINS FOR LEFT-RIGHT AND TOP-BOTTOM
+            marginRightCorrect = True
+            marginLeftCorrect = True
+            if leftAnchor and rightAnchor:
+                marginRightCorrect = self.parentWindow.width - (newX + newWidth) >= self.marginRight
+            if topAnchor and bottomAnchor:
+                marginLeftCorrect = self.parentWindow.height - (newY + newHeight) >= self.marginBottom
+
+            # resize window with updated values if not clipped
+            if not self.isHidden and marginRightCorrect and marginLeftCorrect:
+                self.x = newX
+                self.y = newY
+                self.width = newWidth
+                self.height = newHeight
+
+        # resize child windows
+        for child in self.childWindows:
+            child.resize(child.x, child.y, deltaWidth, deltaHeight)
 
 
 class Screen(Window):

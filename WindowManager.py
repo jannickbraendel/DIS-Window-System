@@ -18,6 +18,8 @@ class WindowManager:
         self.titleBarButtonWidth = 10
         self.taskBarHeight = 35
         self.resizeCornerTolerance = 8
+        self.tlwMinWidth = 3 * self.titleBarButtonWidth + 30
+        self.tlwMinHeight = self.titleBarHeight + 10
 
     def checkWindowPosition(self, window, x, y):
         # check if window is top-level window and return otherwise
@@ -106,7 +108,12 @@ class WindowManager:
         ctx.setOrigin(titleWindowX, titleWindowY)
         ctx.setStrokeColor(COLOR_WHITE)
         ctx.setFont(Font(family="Helvetica", size=10, weight="bold"))
-        ctx.drawString(window.identifier, 3, 1)
+        if window.width > 100:
+            # draw full title as window is wide enough
+            ctx.drawString(window.identifier, 3, 1)
+        else:
+            # draw first letters of identifier
+            ctx.drawString(window.identifier[:3], 3, 1)
 
         buttonWidth = self.titleBarButtonWidth
         buttonHeight = self.titleBarHeight - 8
@@ -221,75 +228,7 @@ class WindowManager:
 
     def handleResizeDragged(self, window, width, height):
         topLevelWindow = window.getTopLevelWindow()
-        deltaWidth = width - topLevelWindow.width
-        deltaHeight = height - topLevelWindow.height
-        topLevelWindow.resize(window.x, window.y, width, height)
-
-        for child in topLevelWindow.childWindows:
-            self.resizeAnchoredWindow(child, deltaWidth, deltaHeight)
-
-    def resizeAnchoredWindow(self, window, deltaWidth, deltaHeight):
-        """
-        Resizes windows with anchors to any side (e.g. child windows of top-level windows)
-        :param window: Current window to be resized
-        :param deltaWidth: Change in width of parent window
-        :param deltaHeight: Change in height of parent window
-        """
-        # store current window anchors to use in the following
-        topAnchor = window.layoutAnchors & LayoutAnchor.top
-        rightAnchor = window.layoutAnchors & LayoutAnchor.right
-        bottomAnchor = window.layoutAnchors & LayoutAnchor.bottom
-        leftAnchor = window.layoutAnchors & LayoutAnchor.left
-
-        newParentWidth = window.parentWindow.width + deltaWidth
-        newParentHeight = window.parentWindow.height + deltaHeight
-
-        newX, newY, newWidth, newHeight = window.x, window.y, window.width, window.height
-
-        # HORIZONTAL ANCHORING:
-        # not anchored to either left or right: keep relative distance to left and right
-        if not (leftAnchor or rightAnchor):
-            newX += deltaWidth / 2
-        # anchored to left and right: resize horizontally
-        elif leftAnchor and rightAnchor:
-            newWidth += deltaWidth
-        # only anchored to right: keep exact distance to the right
-        elif rightAnchor:
-            newX += deltaWidth
-
-        # VERTICAL ANCHORING:
-        # not anchored to either top or bottom: keep relative distance to top and bottom
-        if not (topAnchor or bottomAnchor):
-            newY += deltaHeight / 2
-        # anchored to top and bottom: resize vertically
-        elif topAnchor and bottomAnchor:
-            newHeight += deltaHeight / 2
-        # only anchored to bottom: keep exact distance to bottom
-        elif bottomAnchor:
-            newY += deltaHeight
-
-        # CONSTRAINTS:
-
-        # if x or y get negative, stick them to left side of window
-        if newX < 0:
-            newX = 0
-        if newY < 0:
-            newY = 0
-        # minimum size values
-        if newWidth < 20:
-            width = 20
-        if newHeight < 20:
-            height = 20
-
-        # if window reaches out of parent on any side, clip it (set hidden)
-        window.isHidden = newX + newWidth > newParentWidth or newY + newHeight > newParentHeight
-
-        # resize window with updated values
-        window.resize(newX, newY, newWidth, newHeight)
-
-        # resize child windows
-        for child in window.childWindows:
-            self.resizeAnchoredWindow(child, deltaWidth, deltaHeight)
+        topLevelWindow.resize(topLevelWindow.x, topLevelWindow.y, width - topLevelWindow.width, height - topLevelWindow.height)
 
     def handleTitleBarClicked(self, window):
         """
