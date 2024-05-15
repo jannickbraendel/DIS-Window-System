@@ -25,8 +25,15 @@ class WindowSystem(GraphicsEventSystem):
         self.tempMouseDown = (0, 0)
         # temporarily save the window that the mouse down event happened on, used for dragging
         self.tempMouseDownWindow = None
-        # temporarily save the offset with which a window's title bar was clicked, used for draggingß
+        # temporarily save the TOP-LEVEL window that the mouse down event happened on, used for dragging (especially
+        # getting new title bar)
+        self.tempMouseDownTLWindow = None
+        # temporarily save the offset with which a window's title bar was clicked, used for dragging
         self.tempMouseDragOffset = (0, 0)
+        # temporarily save the dimensions of the window on mouse down
+        self.tempMouseDownDimensions = (0, 0)
+        # set a boolean, when this is true the bottom right corner was pressed for resizing
+        self.tempMouseDownResizing = False
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
 
@@ -37,22 +44,42 @@ class WindowSystem(GraphicsEventSystem):
         window2.setBackgroundColor(COLOR_WHITE)
         window3 = Window(20, 20, 40, 40, "3")
         window3.setBackgroundColor(COLOR_ORANGE)
-        window4 = Window(400, 300, 300, 400, "Third Window")
-        window4.setBackgroundColor(COLOR_WHITE)
-        window5 = Window(20, 30, 120, 120, "5")
-        window5.setBackgroundColor(COLOR_GREEN)
-        window6 = Window(40, 40, 120, 120, "6")
-        window6.setBackgroundColor(COLOR_BROWN)
-        window7 = Window(60, 20, 200, 200, "7")
-        window7.setBackgroundColor(COLOR_PINK)
+        # test resizing
+        resizing = Window(400, 120, 300, 300, "Resizing Test")
+        resizing.setBackgroundColor(COLOR_WHITE)
+        top_left = Window(15, 25, 70, 40, "top-left")
+        top_left.setBackgroundColor(COLOR_GREEN)
+        top = Window(115, 25, 70, 40, "top", LayoutAnchor.top)
+        top.setBackgroundColor(COLOR_ORANGE)
+        top_right = Window(215, 25, 70, 40, "top-right", LayoutAnchor.top | LayoutAnchor.right)
+        top_right.setBackgroundColor(COLOR_GREEN)
+        right = Window(215, 135, 70, 40, "right", LayoutAnchor.right)
+        right.setBackgroundColor(COLOR_PURPLE)
+        bottom_right = Window(215, 245, 70, 40, "bottom-right", LayoutAnchor.bottom | LayoutAnchor.right)
+        bottom_right.setBackgroundColor(COLOR_PINK)
+        bottom = Window(115, 245, 70, 40, "bottom", LayoutAnchor.bottom)
+        bottom.setBackgroundColor(COLOR_BLACK)
+        bottom_left = Window(15, 245, 70, 40, "bottom-left", LayoutAnchor.bottom | LayoutAnchor.left)
+        bottom_left.setBackgroundColor(COLOR_BROWN)
+        left = Window(15, 135, 70, 40, "left", LayoutAnchor.left)
+        left.setBackgroundColor(COLOR_PURPLE)
+        allAnchors = Window(115, 135, 70, 40, "all", LayoutAnchor.top | LayoutAnchor.bottom | LayoutAnchor.left | LayoutAnchor.right)
+        allAnchors.setBackgroundColor(COLOR_RED)
         # print(window1.convertPositionFromScreen(30,30))
         self.screen.addChildWindow(window1)
         self.screen.addChildWindow(window2)
-        self.screen.addChildWindow(window4)
+        self.screen.addChildWindow(resizing)
         window2.addChildWindow(window3)
-        window4.addChildWindow(window5)
-        window5.addChildWindow(window6)
-        window5.addChildWindow(window7)
+
+        resizing.addChildWindow(top_left)
+        resizing.addChildWindow(top)
+        resizing.addChildWindow(top_right)
+        resizing.addChildWindow(right)
+        resizing.addChildWindow(bottom_right)
+        resizing.addChildWindow(bottom)
+        resizing.addChildWindow(bottom_left)
+        resizing.addChildWindow(left)
+        resizing.addChildWindow(allAnchors)
 
     """
     WINDOW MANAGEMENT
@@ -92,8 +119,6 @@ class WindowSystem(GraphicsEventSystem):
         # add window as top level window
         self.screen.addChildWindow(topLevelWindow)
 
-        print("Window " + topLevelWindow.identifier + " was brought to front")
-
     """
     DRAWING
     """
@@ -127,7 +152,14 @@ class WindowSystem(GraphicsEventSystem):
             # get the top level window and calculate the offset between the window origin and
             # where the mouse clicked the title bar (only used for dragging)
             topLevelWindow = child.getTopLevelWindow()
+            # save top level window for dragging (to get updated child windows (e.g. title bar))
+            self.tempMouseDownTLWindow = topLevelWindow
             self.tempMouseDragOffset = x - topLevelWindow.x, y - topLevelWindow.y
+            self.tempMouseDownDimensions = topLevelWindow.width, topLevelWindow.height
+
+            if x > topLevelWindow.x + topLevelWindow.width - self.windowManager.resizeCornerTolerance and y > topLevelWindow.y + topLevelWindow.height - self.windowManager.resizeCornerTolerance:
+                self.tempMouseDownResizing = True
+
 
     def handleMouseReleased(self, x, y):
         """
@@ -137,6 +169,8 @@ class WindowSystem(GraphicsEventSystem):
         :param y: y value of mouse position when released
         """
         self.tempMouseDownWindow = None
+        self.tempMouseDownTLWindow = None
+        self.tempMouseDownResizing = False
         # calculate distance between release and pressed position
         deltaX, deltaY = abs(self.tempMouseDown[0] - x), abs(self.tempMouseDown[1] - y)
         # if distance is less than mouseClickTolerance send mouse-click event to child where click occurred.
@@ -159,14 +193,24 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleMouseDragged(self, x, y):
         clickedX, clickedY = self.tempMouseDown
+        if self.tempMouseDownWindow is None:
+            return
+        window = self.tempMouseDownWindow
         # calculate the delta between the originally clicked position and the current drag position
         deltaX, deltaY = x - clickedX, y - clickedY
 
-        if "- Title Bar" in self.tempMouseDownWindow.identifier and "Button" not in self.tempMouseDownWindow.identifier:
+        if self.tempMouseDownResizing:
+            self.windowManager.handleResizeDragged(
+                window,
+                self.tempMouseDownDimensions[0] + deltaX,
+                self.tempMouseDownDimensions[1] + deltaY
+            )
+
+        if "- Title Bar" in window.identifier and "Button" not in window.identifier:
             # title bar is dragged but not title bar buttons
             # reposition the window with the absolute position and mouse offset
             self.windowManager.handleTitleBarDragged(
-                self.tempMouseDownWindow,
+                self.tempMouseDownTLWindow,
                 clickedX + deltaX,
                 clickedY + deltaY,
                 self.tempMouseDragOffset[0],

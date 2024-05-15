@@ -8,10 +8,15 @@ and Jannick Brändel (#405391)
 """
 
 from GraphicsEventSystem import *
+from collections import namedtuple
+
+# initialize bit mask for resizing/anchoring
+AllAnchors = namedtuple('AllAnchors', "top right bottom left")
+LayoutAnchor = AllAnchors(1 << 0, 1 << 1, 1 << 2, 1 << 3)
 
 
 class Window:
-    def __init__(self, originX, originY, width, height, identifier):
+    def __init__(self, originX, originY, width, height, identifier, layoutAnchors=LayoutAnchor.top | LayoutAnchor.left):
         """
         Constructor for a new window setting the relevant attributes and the default background color to BLUE
         :param originX: X coordinate of the top left corner of the window (coordinate system of parent window)
@@ -19,6 +24,7 @@ class Window:
         :param width: Width of the window
         :param height: Height of the window
         :param identifier: window ID
+        :param layoutAnchors: anchors to parent window in all directions (default: top-left)
         """
         self.x = originX
         self.y = originY
@@ -31,6 +37,12 @@ class Window:
         self.parentWindow = None
         # used to minimize top-level windows
         self.isHidden = False
+        # window is anchored to top-left by default
+        self.layoutAnchors = layoutAnchors
+
+        # non-top level windows: save margins to bottom and right
+        self.marginRight = 0
+        self.marginBottom = 0
 
     def addChildWindow(self, window):
         """
@@ -45,7 +57,10 @@ class Window:
         else:
             screen = self.getTopLevelWindow().parentWindow
 
-        # check if child window exceeds parent window in size and adjust accordingly
+        # check if child window exceeds parent window in size and adjust accordingly (NOT NEEDED FOR TL WINDOWS)
+        if self.identifier == "SCREEN":
+            return
+
         if window.x < 0:
             window.x = 0
 
@@ -58,14 +73,19 @@ class Window:
             if window.y < 0:
                 window.y = 0
 
-        windowRightBorder = window.x + window.width
-        windowLowerBorder = window.y + window.height
-        if windowRightBorder > self.width:
-            widthToRemove = windowRightBorder - self.width
-            window.width -= widthToRemove
-        if windowLowerBorder > self.height:
-            heightToRemove = windowLowerBorder - self.height
-            window.height -= heightToRemove
+        if window.parentWindow.identifier != "SCREEN":
+            windowRightBorder = window.x + window.width
+            windowLowerBorder = window.y + window.height
+            if windowRightBorder > self.width:
+                widthToRemove = windowRightBorder - self.width
+                window.width -= widthToRemove
+            if windowLowerBorder > self.height:
+                heightToRemove = windowLowerBorder - self.height
+                window.height -= heightToRemove
+
+            # save margins to bottom and right: they might be broken while resizing and have to be re-established
+            window.marginRight = self.width - windowRightBorder
+            window.marginBottom = self.height - windowLowerBorder
 
     def removeFromParentWindow(self):
         """
@@ -149,7 +169,10 @@ class Window:
         Draw current window and all child windows on screen and filling them with the specified background color.
         :param ctx: Current graphics context
         """
-        # print("Drawing:", self.identifier)
+        # do not draw if hidden currently:
+        if self.isHidden:
+            return
+
         # set ctx origin to the global position of the window's origin
         position = self.convertPositionToScreen(0, 0)
         ctx.setOrigin(position[0], position[1])
@@ -157,6 +180,7 @@ class Window:
         ctx.setFillColor(self.backgroundColor)
         # fill the complete window
         ctx.fillRect(0, 0, self.width, self.height)
+
         # recursively draw child windows in ascending z-order
         for child in self.childWindows:
             child.draw(ctx)
@@ -173,15 +197,90 @@ class Window:
         self.backgroundColor = color
 
     def getTopLevelWindow(self):
-        if self.parentWindow.identifier == "SCREEN":
-            # self is already top-level window
-            return self
+
+        if self.identifier == "SCREEN":
+            return None
 
         topLevelWindow = self
         while topLevelWindow.parentWindow.identifier != "SCREEN":
             topLevelWindow = topLevelWindow.parentWindow
 
         return topLevelWindow
+
+    # resizes itself and all its child windows
+    def resize(self, x, y, deltaWidth, deltaHeight):
+        parentWidth = self.parentWindow.width
+        parentHeight = self.parentWindow.height
+        if self.parentWindow.identifier == "SCREEN":
+            # TOP-LEVEL WINDOW: RESIZING
+            # new width/height should not be lower than min width/height
+            width = max(self.parentWindow.windowSystem.windowManager.tlwMinWidth, self.width + deltaWidth)
+            height = max(self.parentWindow.windowSystem.windowManager.tlwMinHeight, self.height + deltaHeight)
+
+            # resize window with updated values
+            self.x = x
+            self.y = y
+            self.width = width
+            self.height = height
+
+        else:
+            # NO TOP-LEVEL WINDOW: RESIZING
+            # save "start values", which are changed while evaluating anchoring
+            width, height = self.width, self.height
+            # store current window anchors to use in the following
+            topAnchor = self.layoutAnchors & LayoutAnchor.top
+            rightAnchor = self.layoutAnchors & LayoutAnchor.right
+            bottomAnchor = self.layoutAnchors & LayoutAnchor.bottom
+            leftAnchor = self.layoutAnchors & LayoutAnchor.left
+
+            # HORIZONTAL ANCHORING:
+            # not anchored to either left or right: keep relative distance to left and right
+            if not (leftAnchor or rightAnchor):
+                x = parentWidth/2 - self.width/2
+            # anchored to left and right: keep exact margins to left and right
+            elif leftAnchor and rightAnchor:
+                width = parentWidth - 2 * x
+            # only anchored to right: keep exact distance to the right
+            elif rightAnchor:
+                x = parentWidth - width - self.marginRight
+                # x += deltaWidth
+
+            # VERTICAL ANCHORING:
+            # not anchored to either top or bottom: keep relative distance to top and bottom
+            if not (topAnchor or bottomAnchor):
+                y = parentHeight/2 - self.height/2
+            # anchored to top and bottom: resize vertically
+            elif topAnchor and bottomAnchor:
+                height = parentHeight - 2 * y
+            # only anchored to bottom: keep exact distance to bottom
+            elif bottomAnchor:
+                y = parentHeight - height - self.marginBottom
+                # y += deltaHeight
+
+            # CONSTRAINTS:
+            # if x or y get negative, stick them to left side of window
+            titleBarHeight = self.getTopLevelWindow().parentWindow.windowSystem.windowManager.titleBarHeight
+            if x < 0:
+                x = 0
+            if y < titleBarHeight:
+                y = titleBarHeight
+            # minimum size values for child windows
+            if width < 20:
+                width = 20
+            if height < 20:
+                height = 20
+
+            # if window reaches out of parent on any side, clip it (set hidden)
+            self.isHidden = x + width > self.parentWindow.width or y + height > self.parentWindow.height
+
+            self.x = x
+            self.y = y
+            self.width = width
+            self.height = height
+
+        # resize child windows
+        for child in self.childWindows:
+            child.resize(child.x, child.y, deltaWidth, deltaHeight)
 
 
 class Screen(Window):
@@ -202,7 +301,8 @@ class Screen(Window):
         # call draw function on top-level windows and decorate them using the WM.
         for topLevelWindow in self.childWindows:
             if not topLevelWindow.isHidden:
-                topLevelWindow.draw(ctx)
                 self.windowSystem.windowManager.decorateWindow(topLevelWindow, ctx)
+                topLevelWindow.draw(ctx)
+                self.windowSystem.windowManager.drawWindowDecorations(topLevelWindow, ctx)
         # task bar is drawn in the end to be in the foreground compared to other windows
         self.windowSystem.windowManager.drawTaskbar(ctx)

@@ -17,31 +17,27 @@ class WindowManager:
         self.titleBarHeight = 18
         self.titleBarButtonWidth = 10
         self.taskBarHeight = 35
+        self.resizeCornerTolerance = 8
+        self.tlwMinWidth = 3 * self.titleBarButtonWidth + 50
+        self.tlwMinHeight = self.titleBarHeight + 10
 
     def checkWindowPosition(self, window, x, y):
-        # TODO: Check later if function is implemented correctly when handling window-dragging
         # check if window is top-level window and return otherwise
         if window.parentWindow.identifier != "SCREEN":
             pass
         screen = window.parentWindow
-
-        minimumTitleBarVisibility = 6
-        titleBarVisibleLeft = x + window.width > 0 + minimumTitleBarVisibility + (3 * self.titleBarButtonWidth)
+        # amount of pixels of titlebar that should still be visible
+        minimumTitleBarVisibility = 10
+        titleBarVisibleLeft = x + window.width > minimumTitleBarVisibility + (3 * self.titleBarButtonWidth)
         titleBarVisibleRight = x < screen.width - minimumTitleBarVisibility
 
-        titleBarVisibleTop = y > 0
-        titleBarVisibleBottom = y < screen.height - minimumTitleBarVisibility
+        titleBarVisibleTop = y + minimumTitleBarVisibility > 0
+        titleBarVisibleBottom = y < screen.height - minimumTitleBarVisibility - self.taskBarHeight
         # returns true if title bar is visible towards all directions
         return titleBarVisibleLeft and titleBarVisibleRight and titleBarVisibleTop and titleBarVisibleBottom
 
-    # TODO: Title bar only appears after clicking for the first time (children are appended after drawing -> see
-    #  Screen.draw())
+    # creates windows for window decorations (title bar, buttons)
     def decorateWindow(self, window, ctx):
-        # stroke border around window
-        ctx.setStrokeColor(COLOR_GRAY)
-        startX, startY = window.convertPositionToScreen(0, 0)
-        ctx.setOrigin(startX, startY)
-        ctx.strokeRect(0, 0, window.width, window.height)
         # add title bar
         titleBar = Window(0, 0, window.width, self.titleBarHeight, window.identifier + " - Title Bar")
         # set background color based on if window is selected
@@ -55,16 +51,14 @@ class WindowManager:
             titleBar.setBackgroundColor(COLOR_LIGHT_GREEN)
         # append title bar to window
         window.addChildWindow(titleBar)
+        # remove old title bar if already existing
+        if len(window.childWindows) > 1 and "- Title Bar" in window.childWindows[len(window.childWindows) - 2].identifier:
+            window.childWindows[len(window.childWindows) - 2].removeFromParentWindow()
 
-        # add title to title Bar
+        # add title window to title Bar
         titleWindow = Window(0, 0, titleBar.width/2, titleBar.height, titleBar.identifier + " - Title")
         titleWindow.setBackgroundColor(titleBar.backgroundColor)
         titleBar.addChildWindow(titleWindow)
-        titleWindowX, titleWindowY = titleWindow.convertPositionToScreen(0, 0)
-        ctx.setOrigin(titleWindowX, titleWindowY)
-        ctx.setStrokeColor(COLOR_WHITE)
-        ctx.setFont(Font(family="Helvetica", size=10, weight="bold"))
-        ctx.drawString(window.identifier, 3, 1)
 
         # add buttons windows
         buttonWidth = self.titleBarButtonWidth
@@ -82,10 +76,51 @@ class WindowManager:
         titleBar.addChildWindow(closeButton)
         titleBar.addChildWindow(maximizeButton)
         titleBar.addChildWindow(minimizeButton)
+
+    # Does the drawing part of window decoration (title string, button icons)
+    def drawWindowDecorations(self, window, ctx):
+        # stroke border around window
+        ctx.setStrokeColor(COLOR_GRAY)
+        startX, startY = window.convertPositionToScreen(0, 0)
+        ctx.setOrigin(startX, startY)
+        ctx.strokeRect(0, 0, window.width, window.height)
+
+        # get title and button window objects
+        titleBar = window.childWindows[len(window.childWindows) - 1]
+        titleWindow = None
+        minimizeButton = None
+        maximizeButton = None
+        closeButton = None
+        for child in titleBar.childWindows:
+            if "- Minimize Button" in child.identifier:
+                minimizeButton = child
+            elif "- Maximize Button" in child.identifier:
+                maximizeButton = child
+            elif "- Close Button" in child.identifier:
+                closeButton = child
+            elif "- Title" in child.identifier:
+                titleWindow = child
+        # draw title string
+        if None in (titleWindow, minimizeButton, maximizeButton, closeButton):
+            return
+
+        titleWindowX, titleWindowY = titleWindow.convertPositionToScreen(0, 0)
+        ctx.setOrigin(titleWindowX, titleWindowY)
+        ctx.setStrokeColor(COLOR_WHITE)
+        ctx.setFont(Font(family="Helvetica", size=10, weight="bold"))
+        if window.width > 100:
+            # draw full title as window is wide enough
+            ctx.drawString(window.identifier, 3, 1)
+        else:
+            # draw first letters of identifier
+            ctx.drawString(window.identifier[:3], 3, 1)
+
+        buttonWidth = self.titleBarButtonWidth
+        buttonHeight = self.titleBarHeight - 8
         # draw minimize button
         minButtonX, minButtonY = minimizeButton.convertPositionToScreen(0, 0)
         ctx.setOrigin(minButtonX, minButtonY)
-        ctx.drawLine(0, minimizeButton.height/2, buttonWidth, minimizeButton.height/2)
+        ctx.drawLine(0, minimizeButton.height / 2, buttonWidth, minimizeButton.height / 2)
         # draw maximize button
         maxButtonX, maxButtonY = maximizeButton.convertPositionToScreen(0, 0)
         ctx.setOrigin(maxButtonX, maxButtonY)
@@ -95,6 +130,15 @@ class WindowManager:
         ctx.setOrigin(closeButtonX, closeButtonY)
         ctx.drawLine(0, 0, buttonWidth, buttonHeight)
         ctx.drawLine(0, buttonHeight, buttonWidth, 0)
+        # draw resizing area in bottom right corner
+        distResizeLines = self.resizeCornerTolerance/2
+        ctx.setStrokeColor(COLOR_BLACK)
+        for i in range(2):
+            ctx.setOrigin(startX + window.width - self.resizeCornerTolerance + i * distResizeLines,
+                          startY + window.height)
+            ctx.drawLine(0, 0, 0, -self.resizeCornerTolerance + i * distResizeLines)
+            ctx.drawLine(0, -self.resizeCornerTolerance + i * distResizeLines, self.resizeCornerTolerance - i * distResizeLines,
+                         -self.resizeCornerTolerance + i * distResizeLines)
 
     def drawDesktop(self, ctx):
         # desktop is filled with light blue color
@@ -102,6 +146,7 @@ class WindowManager:
         ctx.fillRect(0, 0, self.windowSystem.width, self.windowSystem.height)
 
     def drawTaskbar(self, ctx):
+        # TODO: Border around icon buttons only when the window is selected not everywhere
         # set origin to top-left corner of task bar
         ctx.setOrigin(0, self.windowSystem.height - self.taskBarHeight)
         # draw task bar
@@ -165,7 +210,6 @@ class WindowManager:
             self.windowSystem.bringWindowToFront(window)
             self.windowSystem.requestRepaint()
 
-
     def handleTitleBarDragged(self, window, x, y, offsetX, offsetY):
         """
 
@@ -174,12 +218,17 @@ class WindowManager:
         :param y:
         """
         # find top level window this window belongs to
-        topLevelWindow = window.getTopLevelWindow()
+        if window.getTopLevelWindow() is not None:
+            topLevelWindow = window.getTopLevelWindow()
         if self.checkWindowPosition(topLevelWindow, x - offsetX, y - offsetY):
             # reposition the window using the absolute position and subtracting the mouse offset
             # (offset is important, so you can click anywhere on the title bar to drag)
             topLevelWindow.x = x - offsetX
             topLevelWindow.y = y - offsetY
+
+    def handleResizeDragged(self, window, width, height):
+        topLevelWindow = window.getTopLevelWindow()
+        topLevelWindow.resize(topLevelWindow.x, topLevelWindow.y, width - topLevelWindow.width, height - topLevelWindow.height)
 
     def handleTitleBarClicked(self, window):
         """
@@ -196,12 +245,10 @@ class WindowManager:
             self.minimizeWindow(topLevelWindow)
 
     def closeWindow(self, window):
-        print("Pressed close-button of window", window.identifier)
         window.removeFromParentWindow()
         self.windowSystem.requestRepaint()
 
     def minimizeWindow(self, window):
-        print("Pressed minimize-button of window", window.identifier)
         window.isHidden = True
         window.parentWindow.childWindows.remove(window)
         window.parentWindow.childWindows.insert(0, window)
