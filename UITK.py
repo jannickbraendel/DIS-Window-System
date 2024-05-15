@@ -27,9 +27,13 @@ class Container(Widget):
 
 class Label(Widget):
     def __init__(self, originX, originY, width, height, identifier, layoutAnchors, text, backgroundColor,
-                 font=Font(family="Helvetica", size=12), fontColor="COLOR_BLACK"):
+                 font=None, fontColor=None):
         self.backgroundColor = backgroundColor
         self.text = text
+        if font is None:
+            font = Font(family="Helvetica", size=12)
+        if fontColor is None:
+            fontColor = "COLOR_BLACK"
         self.font = font
         self.fontColor = fontColor
         super().__init__(originX, originY, width, height, identifier, layoutAnchors)
@@ -38,19 +42,24 @@ class Label(Widget):
         # draw background with superclass function
         super().draw(ctx)
         # draw text with specified font (color) into label
-        ctx.setOrigin(self.convertPositionToScreen(0, 0))
+        x, y = self.convertPositionToScreen(0, 0)
+        ctx.setOrigin(x, y)
         ctx.setStrokeColor(self.fontColor)
         ctx.setFont(self.font)
-        ctx.drawString(3, 1, self.text)
+        ctx.drawString(self.text, 3, 1)
 
 
 class Button(Label):
     def __init__(self, originX, originY, width, height, identifier, layoutAnchors, text, backgroundColor,
-                 font=Font(family="Helvetica", size=12), fontColor="COLOR_BLACK", action=None):
+                 font=None, fontColor=None, action=None):
         # lambda function that is executed when button is clicked
         self.action = action
         # state can either be "NORMAL", "HOVERED", or "PRESSED"
         self.state = "NORMAL"
+        if font is None:
+            font = Font(family="Helvetica", size=12)
+        if fontColor is None:
+            fontColor = "COLOR_BLACK"
         super().__init__(originX, originY, width, height, identifier, layoutAnchors, text, backgroundColor, font, fontColor)
 
     def draw(self, ctx):

@@ -71,6 +71,7 @@ class WindowSystem(GraphicsEventSystem):
         self.screen.addChildWindow(window2)
         self.screen.addChildWindow(resizing)
         window2.addChildWindow(window3)
+        window2.addChildWindow(Label(40, 40, 30, 10, "Label1", LayoutAnchor.top, "Hello World", "COLOR_BLUE"))
 
         resizing.addChildWindow(top_left)
         resizing.addChildWindow(top)
