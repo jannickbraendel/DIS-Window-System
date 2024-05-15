@@ -57,7 +57,7 @@ class WindowSystem(GraphicsEventSystem):
         right.setBackgroundColor(COLOR_PURPLE)
         bottom_right = Window(215, 245, 70, 40, "bottom-right", LayoutAnchor.bottom | LayoutAnchor.right)
         bottom_right.setBackgroundColor(COLOR_PINK)
-        bottom = Window(40, 245, 70, 40, "bottom", LayoutAnchor.bottom)
+        bottom = Window(115, 245, 70, 40, "bottom", LayoutAnchor.bottom)
         bottom.setBackgroundColor(COLOR_BLACK)
         bottom_left = Window(15, 245, 70, 40, "bottom-left", LayoutAnchor.bottom | LayoutAnchor.left)
         bottom_left.setBackgroundColor(COLOR_BROWN)
