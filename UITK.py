@@ -33,7 +33,7 @@ class Label(Widget):
         if font is None:
             font = Font(family="Helvetica", size=12)
         if fontColor is None:
-            fontColor = "COLOR_BLACK"
+            fontColor = COLOR_BLACK
         self.font = font
         self.fontColor = fontColor
         super().__init__(originX, originY, width, height, identifier, layoutAnchors)
@@ -59,7 +59,7 @@ class Button(Label):
         if font is None:
             font = Font(family="Helvetica", size=12)
         if fontColor is None:
-            fontColor = "COLOR_BLACK"
+            fontColor = COLOR_BLACK
         super().__init__(originX, originY, width, height, identifier, layoutAnchors, text, backgroundColor, font, fontColor)
 
     def draw(self, ctx):
