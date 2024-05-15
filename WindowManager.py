@@ -18,7 +18,7 @@ class WindowManager:
         self.titleBarButtonWidth = 10
         self.taskBarHeight = 35
         self.resizeCornerTolerance = 8
-        self.tlwMinWidth = 3 * self.titleBarButtonWidth + 30
+        self.tlwMinWidth = 3 * self.titleBarButtonWidth + 50
         self.tlwMinHeight = self.titleBarHeight + 10
 
     def checkWindowPosition(self, window, x, y):

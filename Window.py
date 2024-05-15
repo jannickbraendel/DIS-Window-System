@@ -257,10 +257,11 @@ class Window:
 
             # CONSTRAINTS:
             # if x or y get negative, stick them to left side of window
+            titleBarHeight = self.getTopLevelWindow().parentWindow.windowSystem.windowManager.titleBarHeight
             if newX < 0:
                 newX = 0
-            if newY < 0:
-                newY = 0
+            if newY < titleBarHeight:
+                newY = titleBarHeight
             # minimum size values for child windows
             if newWidth < 20:
                 newWidth = 20
@@ -270,16 +271,35 @@ class Window:
             # if window reaches out of parent on any side, clip it (set hidden)
             self.isHidden = newX + newWidth > self.parentWindow.width or newY + newHeight > self.parentWindow.height
 
-            # CHECK MARGINS FOR LEFT-RIGHT AND TOP-BOTTOM
-            marginRightCorrect = True
-            marginLeftCorrect = True
-            if leftAnchor and rightAnchor:
-                marginRightCorrect = self.parentWindow.width - (newX + newWidth) >= self.marginRight
-            if topAnchor and bottomAnchor:
-                marginLeftCorrect = self.parentWindow.height - (newY + newHeight) >= self.marginBottom
+            if self.identifier == "all":
+                print("newX:", newX, "newY:", newY, "newWidth:", newWidth, "newHeight:", newHeight, "ParentWidth:", self.parentWindow.width, " ParentHeight:", self.parentWindow.height)
 
-            # resize window with updated values if not clipped
-            if not self.isHidden and marginRightCorrect and marginLeftCorrect:
+            '''if self.isHidden:
+                if newX + newWidth + self.marginRight <= self.parentWindow.width and newY + newHeight + self.marginBottom <= self.parentWindow.height:
+                    self.isHidden = False'''
+
+            # CHECK MARGINS FOR LEFT-RIGHT AND TOP-BOTTOM
+            marginRightCorrect = self.parentWindow.width - (newX + newWidth) >= self.marginRight
+            marginBottomCorrect = self.parentWindow.height - (newY + newHeight) >= self.marginBottom
+
+            # resize window with updated values if not clipped and margins are correct
+            if (leftAnchor and rightAnchor) or (topAnchor and bottomAnchor):
+                if marginRightCorrect and marginBottomCorrect:
+                    self.width = newWidth
+                    self.height = newHeight
+                elif not marginRightCorrect:
+                    self.height = newHeight
+                elif not marginBottomCorrect:
+                    self.width = newWidth
+            elif bottomAnchor:
+                self.x = newX
+                if not self.isHidden and marginBottomCorrect:
+                    self.y = newY
+            elif rightAnchor:
+                if not self.isHidden and marginRightCorrect:
+                    self.x = newX
+                self.y = newY
+            else:
                 self.x = newX
                 self.y = newY
                 self.width = newWidth
