@@ -211,24 +211,20 @@ class Window:
         return topLevelWindow
 
     # resizes itself and all its child windows
-    def resize(self, x, y, deltaWidth, deltaHeight):
+    def resize(self, x, y, width, height):
         parentWidth = self.parentWindow.width
         parentHeight = self.parentWindow.height
         if self.parentWindow.identifier == "SCREEN":
             # TOP-LEVEL WINDOW: RESIZING
-            # new width/height should not be lower than min width/height
-            width = max(self.parentWindow.windowSystem.windowManager.tlwMinWidth, self.width + deltaWidth)
-            height = max(self.parentWindow.windowSystem.windowManager.tlwMinHeight, self.height + deltaHeight)
-
             # resize window with updated values
             self.x = x
             self.y = y
-            self.width = width
-            self.height = height
-
+            # new width/height should not be lower than min width/height
+            self.width = max(self.parentWindow.windowSystem.windowManager.tlwMinWidth, width)
+            self.height = max(self.parentWindow.windowSystem.windowManager.tlwMinHeight, height)
         else:
             # NO TOP-LEVEL WINDOW: RESIZING
-            # save "start values", which are changed while evaluating anchoring
+            # keep width and height the same for anchored windows (unless it is changed below)
             width, height = self.width, self.height
             # store current window anchors to use in the following
             topAnchor = self.layoutAnchors & LayoutAnchor.top
@@ -283,7 +279,7 @@ class Window:
 
         # resize child windows
         for child in self.childWindows:
-            child.resize(child.x, child.y, deltaWidth, deltaHeight)
+            child.resize(child.x, child.y, child.width, child.height)
 
 
 class Screen(Window):

@@ -68,6 +68,8 @@ class WindowSystem(GraphicsEventSystem):
         left.setBackgroundColor(COLOR_PURPLE)
         allAnchors = Window(115, 135, 70, 40, "all", LayoutAnchor.top | LayoutAnchor.bottom | LayoutAnchor.left | LayoutAnchor.right)
         allAnchors.setBackgroundColor(COLOR_RED)
+        grandchild = Window(20, 30, 40, 40, "grandchild", LayoutAnchor.top | LayoutAnchor.bottom)
+        grandchild.setBackgroundColor(COLOR_GREEN)
         # print(window1.convertPositionFromScreen(30,30))
         self.screen.addChildWindow(window1)
         self.screen.addChildWindow(window2)
@@ -90,6 +92,7 @@ class WindowSystem(GraphicsEventSystem):
         resizing.addChildWindow(left)
         resizing.addChildWindow(allAnchors)
 
+        allAnchors.addChildWindow(grandchild)
     """
     WINDOW MANAGEMENT
     """

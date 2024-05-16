@@ -229,7 +229,7 @@ class WindowManager:
 
     def handleResizeDragged(self, window, width, height):
         topLevelWindow = window.getTopLevelWindow()
-        topLevelWindow.resize(topLevelWindow.x, topLevelWindow.y, width - topLevelWindow.width, height - topLevelWindow.height)
+        topLevelWindow.resize(topLevelWindow.x, topLevelWindow.y, width, height)
 
     def handleTitleBarClicked(self, window):
         """
