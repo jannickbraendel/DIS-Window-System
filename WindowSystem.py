@@ -41,8 +41,8 @@ class WindowSystem(GraphicsEventSystem):
         self.mouseClickTolerance = 2
 
         # add a few test windows
-        window1 = Window(80, 80, 280, 280, "First Window")
-        window1.setBackgroundColor(COLOR_WHITE)
+        containerTest = Window(80, 80, 280, 280, "Container Test")
+        containerTest.setBackgroundColor(COLOR_WHITE)
         window2 = Window(40, 40, 250, 250, "Second Window")
         window2.setBackgroundColor(COLOR_WHITE)
         window3 = Window(20, 20, 40, 40, "3")
@@ -71,7 +71,7 @@ class WindowSystem(GraphicsEventSystem):
         grandchild = Window(20, 30, 40, 40, "grandchild", LayoutAnchor.top | LayoutAnchor.bottom)
         grandchild.setBackgroundColor(COLOR_GREEN)
         # print(window1.convertPositionFromScreen(30,30))
-        self.screen.addChildWindow(window1)
+        self.screen.addChildWindow(containerTest)
         self.screen.addChildWindow(window2)
         self.screen.addChildWindow(resizing)
         window2.addChildWindow(window3)
@@ -93,6 +93,23 @@ class WindowSystem(GraphicsEventSystem):
         resizing.addChildWindow(allAnchors)
 
         allAnchors.addChildWindow(grandchild)
+
+        # container test:
+        conWin1 = Window(0, 0, 40, 20, "conWin1", layoutAnchors=LayoutAnchor.top)
+        conWin1.setBackgroundColor(COLOR_BLUE)
+        conWin2 = Window(0, 0, 40, 30, "conWin2", layoutAnchors=LayoutAnchor.top)
+        conWin2.setBackgroundColor(COLOR_ORANGE)
+        conWin3 = Window(0, 0, 40, 40, "conWin3", layoutAnchors=LayoutAnchor.top)
+        conWin3.setBackgroundColor(COLOR_GREEN)
+        conWin4 = Window(0, 0, 40, 20, "conWin4", layoutAnchors=LayoutAnchor.top)
+
+        container = Container(40, 40, 0, 0, "Container Test", LayoutAnchor.top, [conWin1, conWin2, conWin3], spacing=5, horizontalDist=False)
+        container.setBackgroundColor(COLOR_CLEAR)
+        containerTest.addChildWindow(conWin1)
+        containerTest.addChildWindow(conWin2)
+        containerTest.addChildWindow(conWin3)
+        containerTest.addChildWindow(conWin4)
+        containerTest.addChildWindow(container)
     """
     WINDOW MANAGEMENT
     """

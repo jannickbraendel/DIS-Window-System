@@ -21,9 +21,65 @@ class Widget(Window):
 
 
 class Container(Widget):
+    def __init__(self, originX, originY, width, height, identifier, layoutAnchors, containerWindows: [Window],
+                 horizontalDist=True, spacing=0):
+        super().__init__(originX, originY, width, height, identifier, layoutAnchors)
+        self.containerWindows = containerWindows
+        # boolean that is true when items should be horizontally distributed, otherwise they are vertically distributed
+        self.horizontalDist = horizontalDist
+        # spacing between items
+        self.spacing = spacing
+
+    
+    def addWindowToContainer(self, window):
+        if window not in self.containerWindows:
+            self.containerWindows.append(window)
+            # adapt container to added window
+            self.resize(self.x, self.y, self.width, self.height)
+    
+    def removeWindowFromContainer(self, window):
+        if window in self.containerWindows:
+            self.containerWindows.remove(window)
+            # adapt container to removed window
+            self.resize(self.x, self.y, self.width, self.height)
+
     def resize(self, x, y, width, height):
         super().resize(x, y, width, height)
+        if self.horizontalDist:
+            # DISTRIBUTE HORIZONTALLY
+            # calculate total width and position container windows
+            totalContainerWindowWidth = 0
+            currentX = self.x
+            for window in self.containerWindows:
+                window.x = currentX
+                window.y = self.y
+                currentX += window.width + self.spacing
+                totalContainerWindowWidth += window.width
+            self.width = totalContainerWindowWidth + (len(self.containerWindows)-1) * self.spacing
+            # container height is the same as the maximum container window height
+            self.height = max(window.height for window in self.containerWindows)
+        else:
+            # DISTRIBUTE VERTICALLY
+            # calculate total height and position container windows
+            totalContainerWindowHeight = 0
+            currentY = self.y
+            for window in self.containerWindows:
+                window.x = self.x
+                window.y = currentY
+                currentY += (window.height + self.spacing)
+                totalContainerWindowHeight += window.height
+            self.height = totalContainerWindowHeight + (len(self.containerWindows) - 1) * self.spacing
+            # container width is the same as the maximum container window width
+            self.width = max(window.width for window in self.containerWindows)
 
+    def draw(self, ctx):
+        super().draw(ctx)
+        if not self.isHidden:
+            # draw border to test container resizing
+            x, y = self.convertPositionToScreen(0, 0)
+            ctx.setOrigin(x, y)
+            ctx.setStrokeColor(COLOR_BLACK)
+            ctx.strokeRect(0, 0, self.width, self.height)
 
 class Label(Widget):
     def __init__(self, originX, originY, width, height, identifier, layoutAnchors, text,

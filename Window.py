@@ -86,6 +86,9 @@ class Window:
             # save margins to bottom and right: they might be broken while resizing and have to be re-established
             window.marginRight = self.width - windowRightBorder
             window.marginBottom = self.height - windowLowerBorder
+        # trigger resize to ensure window is correctly positioned according to anchors
+        if "- Title Bar" not in window.identifier:
+            self.resize(self.x, self.y, self.width, self.height)
 
     def removeFromParentWindow(self):
         """
@@ -202,7 +205,7 @@ class Window:
     def getTopLevelWindow(self):
 
         if self.identifier == "SCREEN":
-            return None
+            return self
 
         topLevelWindow = self
         while topLevelWindow.parentWindow.identifier != "SCREEN":
@@ -212,6 +215,7 @@ class Window:
 
     # resizes itself and all its child windows
     def resize(self, x, y, width, height):
+        titleBarHeight = self.getTopLevelWindow().parentWindow.windowSystem.windowManager.titleBarHeight
         parentWidth = self.parentWindow.width
         parentHeight = self.parentWindow.height
         if self.parentWindow.identifier == "SCREEN":
@@ -258,7 +262,6 @@ class Window:
 
             # CONSTRAINTS:
             # if x or y get negative, stick them to left side of window
-            titleBarHeight = self.getTopLevelWindow().parentWindow.windowSystem.windowManager.titleBarHeight
             if x < 0:
                 x = 0
             if y < titleBarHeight:
@@ -280,7 +283,6 @@ class Window:
         # resize child windows
         for child in self.childWindows:
             child.resize(child.x, child.y, child.width, child.height)
-
 
 class Screen(Window):
     def __init__(self, windowSystem):
