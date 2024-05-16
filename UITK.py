@@ -103,5 +103,64 @@ class Button(Label):
             raise ValueError("Button state must be 'NORMAL' or 'HOVERED' or 'PRESSED'")
 
 class Slider(Widget):
+    def __init__(self, originX, originY, width, height, identifier, layoutAnchors, defaultSliderValue=0.5):
+        # Value is in range [0,1]
+        self.sliderValue = defaultSliderValue
+        # Size of the element that can be moved around
+        self.sliderElementWidth = 30
+        # Position of the slider element, this is offset from the value, because the position
+        # is set from the center, and the value is measured from the left side of the element
+        self.sliderPosition = self.sliderValue * width
+        self.state = "NORMAL"
+        super().__init__(originX, originY, width, height, identifier, layoutAnchors)
+
+    def changeState(self, state):
+        if state in ["NORMAL", "PRESSED"]:
+            self.state = state
+        else:
+            raise ValueError("Button state must be 'NORMAL' or 'HOVERED' or 'PRESSED'")
+
+    def changeSlider(self, x):
+        # The left most position is elementWidth/2 but has to be value 0
+        # The right most position is width-elementWidth/2 but has to be value 1
+        # so the actual usable position range is from elementWidth/2 to width-elementWidth/2
+        if x >= (self.sliderElementWidth/2) and x <= (self.width - self.sliderElementWidth/2):
+            # value is calculated from the left side of the element, so from x - elementWidth/2
+            leftPosition = x-self.sliderElementWidth/2
+            # The usable value range is (width - elementWidth) because having the slider
+            # at the right most position means the left slide (where we measure value) of the element isn't at 100%
+            usableRange = self.width-self.sliderElementWidth
+            # normalize the position to a value in range [0,1]
+            self.sliderValue = leftPosition/usableRange
+            print(self.sliderValue)
+            self.sliderPosition = x
+            print(self.sliderPosition)
+
+
     def draw(self, ctx):
         super().draw(ctx)
+        # Draw stroke
+        if not self.isHidden:
+            # Stroke
+            x,y = self.convertPositionToScreen(0,0)
+            ctx.setOrigin(x,y)
+            ctx.setStrokeColor(COLOR_BLACK)
+            ctx.drawLine(0, 0, self.width, 0)
+            ctx.drawLine(0, 0, 0, self.height)
+            ctx.setStrokeColor(COLOR_LIGHT_GRAY)
+            ctx.drawLine(self.width, 0, self.width, self.height)
+            ctx.drawLine(0, self.height, self.width, self.height)
+
+            # Slider Element Fill
+            x, y = self.convertPositionToScreen(self.sliderPosition-(self.sliderElementWidth/2), 0)
+            ctx.setOrigin(x,y)
+            ctx.setFillColor(COLOR_LIGHT_GRAY)
+            ctx.fillRect(0, 0, self.sliderElementWidth, self.height)
+
+            # Slider Element Stroke
+            ctx.setStrokeColor(COLOR_LIGHT_GRAY)
+            ctx.drawLine(0, 0, self.sliderElementWidth, 0)
+            ctx.drawLine(0, 0, 0, self.height)
+            ctx.setStrokeColor(COLOR_BLACK)
+            ctx.drawLine(self.sliderElementWidth, 0, self.sliderElementWidth, self.height)
+            ctx.drawLine(0, self.height, self.sliderElementWidth, self.height)
