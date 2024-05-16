@@ -31,7 +31,7 @@ class Window:
         self.width = width
         self.height = height
         self.identifier = identifier
-        self.backgroundColor = COLOR_GRAY
+        self.backgroundColor = None
 
         self.childWindows = []
         self.parentWindow = None
@@ -177,7 +177,10 @@ class Window:
         position = self.convertPositionToScreen(0, 0)
         ctx.setOrigin(position[0], position[1])
         # ctx should draw with bg color
-        ctx.setFillColor(self.backgroundColor)
+        if self.backgroundColor is not None:
+            ctx.setFillColor(self.backgroundColor)
+        else:
+            ctx.setFillColor(COLOR_CLEAR)
         # fill the complete window
         ctx.fillRect(0, 0, self.width, self.height)
 

@@ -35,6 +35,8 @@ class WindowSystem(GraphicsEventSystem):
         self.tempMouseDownDimensions = (0, 0)
         # set a boolean, when this is true the bottom right corner was pressed for resizing
         self.tempMouseDownResizing = False
+        # temporarily save hovered window to compare in next hovering event (used for buttons)
+        self.tempHoveredWindow = None
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
 
@@ -47,7 +49,7 @@ class WindowSystem(GraphicsEventSystem):
         window3.setBackgroundColor(COLOR_ORANGE)
         # test resizing
         resizing = Window(400, 120, 300, 300, "Resizing Test")
-        resizing.setBackgroundColor(COLOR_WHITE)
+        # resizing.setBackgroundColor(COLOR_WHITE)
         top_left = Window(15, 25, 70, 40, "top-left")
         top_left.setBackgroundColor(COLOR_GREEN)
         top = Window(115, 25, 70, 40, "top", LayoutAnchor.top)
@@ -71,7 +73,12 @@ class WindowSystem(GraphicsEventSystem):
         self.screen.addChildWindow(window2)
         self.screen.addChildWindow(resizing)
         window2.addChildWindow(window3)
-        window2.addChildWindow(Label(40, 40, 30, 10, "Label1", LayoutAnchor.top, "Hello World", "COLOR_BLUE"))
+        label = Label(40, 40, 30, 20, "Label1", LayoutAnchor.top, "Hello World", fontColor=COLOR_RED)
+        label.setBackgroundColor(COLOR_BLUE)
+        window2.addChildWindow(label)
+        button = Button(69, 69, 70,30, "Button", LayoutAnchor.right, "MyButton", COLOR_LIGHT_GRAY, COLOR_GRAY)
+        button.setBackgroundColor(COLOR_ORANGE)
+        window2.addChildWindow(button)
 
         resizing.addChildWindow(top_left)
         resizing.addChildWindow(top)
@@ -150,8 +157,9 @@ class WindowSystem(GraphicsEventSystem):
                 return
             self.bringWindowToFront(child)
             # check if button was pressed and change its state accordingly
-            if child is Button:
+            if isinstance(child,Button):
                 child.changeState("PRESSED")
+                self.requestRepaint()
             # save which window was pressed for dragging
             self.tempMouseDownWindow = child
             # get the top level window and calculate the offset between the window origin and
@@ -190,14 +198,21 @@ class WindowSystem(GraphicsEventSystem):
                         self.windowManager.handleTitleBarClicked(clickedWindow)
                     else:
                         clickedWindow.handleMouseClicked(x, y)
+                        self.requestRepaint()
 
     def handleMouseMoved(self, x, y):
         hoveredWindow = self.screen.childWindowAtLocation(x, y)
         if hoveredWindow is None:
             return
 
-        if hoveredWindow is Button:
+        if isinstance(hoveredWindow, Button):
             hoveredWindow.changeState("HOVERED")
+        else:
+            if isinstance(self.tempHoveredWindow, Button):
+                self.tempHoveredWindow.changeState("NORMAL")
+
+        self.tempHoveredWindow = hoveredWindow
+        self.requestRepaint()
 
     def handleMouseDragged(self, x, y):
         clickedX, clickedY = self.tempMouseDown
