@@ -218,8 +218,9 @@ class WindowManager:
         :param y:
         """
         # find top level window this window belongs to
-        if window.getTopLevelWindow() is not None:
-            topLevelWindow = window.getTopLevelWindow()
+        if window.getTopLevelWindow() is None:
+            return
+        topLevelWindow = window.getTopLevelWindow()
         if self.checkWindowPosition(topLevelWindow, x - offsetX, y - offsetY):
             # reposition the window using the absolute position and subtracting the mouse offset
             # (offset is important, so you can click anywhere on the title bar to drag)
@@ -228,7 +229,8 @@ class WindowManager:
 
     def handleResizeDragged(self, window, width, height):
         topLevelWindow = window.getTopLevelWindow()
-        topLevelWindow.resize(topLevelWindow.x, topLevelWindow.y, width - topLevelWindow.width, height - topLevelWindow.height)
+        topLevelWindow.resize(topLevelWindow.x, topLevelWindow.y, width, height)
+        self.windowSystem.requestRepaint()
 
     def handleTitleBarClicked(self, window):
         """

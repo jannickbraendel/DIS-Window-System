@@ -10,6 +10,7 @@ and Jannick Brändel (#405391)
 import GraphicsEventSystem
 from Window import *
 from WindowManager import WindowManager
+from UITK import *
 
 
 class WindowSystem(GraphicsEventSystem):
@@ -34,19 +35,21 @@ class WindowSystem(GraphicsEventSystem):
         self.tempMouseDownDimensions = (0, 0)
         # set a boolean, when this is true the bottom right corner was pressed for resizing
         self.tempMouseDownResizing = False
+        # temporarily save hovered window to compare in next hovering event (used for buttons)
+        self.tempHoveredWindow = None
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
 
         # add a few test windows
-        window1 = Window(80, 80, 280, 280, "First Window")
-        window1.setBackgroundColor(COLOR_WHITE)
+        containerTest = Window(80, 80, 280, 280, "Container Test")
+        containerTest.setBackgroundColor(COLOR_WHITE)
         window2 = Window(40, 40, 250, 250, "Second Window")
         window2.setBackgroundColor(COLOR_WHITE)
         window3 = Window(20, 20, 40, 40, "3")
         window3.setBackgroundColor(COLOR_ORANGE)
         # test resizing
         resizing = Window(400, 120, 300, 300, "Resizing Test")
-        resizing.setBackgroundColor(COLOR_WHITE)
+        # resizing.setBackgroundColor(COLOR_WHITE)
         top_left = Window(15, 25, 70, 40, "top-left")
         top_left.setBackgroundColor(COLOR_GREEN)
         top = Window(115, 25, 70, 40, "top", LayoutAnchor.top)
@@ -65,11 +68,22 @@ class WindowSystem(GraphicsEventSystem):
         left.setBackgroundColor(COLOR_PURPLE)
         allAnchors = Window(115, 135, 70, 40, "all", LayoutAnchor.top | LayoutAnchor.bottom | LayoutAnchor.left | LayoutAnchor.right)
         allAnchors.setBackgroundColor(COLOR_RED)
+        grandchild = Window(20, 30, 40, 40, "grandchild", LayoutAnchor.top | LayoutAnchor.bottom)
+        grandchild.setBackgroundColor(COLOR_GREEN)
         # print(window1.convertPositionFromScreen(30,30))
-        self.screen.addChildWindow(window1)
+        self.screen.addChildWindow(containerTest)
         self.screen.addChildWindow(window2)
         self.screen.addChildWindow(resizing)
         window2.addChildWindow(window3)
+        label = Label(40, 40, 30, 20, "Label1", LayoutAnchor.top, "Hello World", fontColor=COLOR_RED)
+        label.setBackgroundColor(COLOR_BLUE)
+        window2.addChildWindow(label)
+        button = Button(69, 69, 70,30, "Button", LayoutAnchor.right, "MyButton", COLOR_LIGHT_GRAY, COLOR_GRAY)
+        button.setBackgroundColor(COLOR_ORANGE)
+        window2.addChildWindow(button)
+        slider = Slider(20,200, 200, 20, "Slider", LayoutAnchor.bottom)
+        slider.setBackgroundColor(COLOR_GRAY)
+        window2.addChildWindow(slider)
 
         resizing.addChildWindow(top_left)
         resizing.addChildWindow(top)
@@ -81,6 +95,25 @@ class WindowSystem(GraphicsEventSystem):
         resizing.addChildWindow(left)
         resizing.addChildWindow(allAnchors)
 
+        allAnchors.addChildWindow(grandchild)
+
+        # container test:
+        conWin1 = Window(0, 0, 40, 20, "conWin1", layoutAnchors=LayoutAnchor.top)
+        conWin1.setBackgroundColor(COLOR_BLUE)
+        conWin2 = Window(0, 0, 40, 30, "conWin2", layoutAnchors=LayoutAnchor.top)
+        conWin2.setBackgroundColor(COLOR_ORANGE)
+        conWin3 = Window(0, 0, 40, 40, "conWin3", layoutAnchors=LayoutAnchor.top)
+        conWin3.setBackgroundColor(COLOR_GREEN)
+        conWin4 = Window(0, 0, 40, 20, "conWin4", layoutAnchors=LayoutAnchor.top)
+        conWin4.setBackgroundColor(COLOR_YELLOW)
+
+        container = Container(40, 40, 200, 100, "Container Test", LayoutAnchor.top, [conWin1, conWin2, conWin3, conWin4], spacing=10, horizontalDist=False)
+        container.setBackgroundColor(COLOR_CLEAR)
+        containerTest.addChildWindow(conWin1)
+        containerTest.addChildWindow(conWin2)
+        containerTest.addChildWindow(conWin3)
+        containerTest.addChildWindow(conWin4)
+        containerTest.addChildWindow(container)
     """
     WINDOW MANAGEMENT
     """
@@ -147,6 +180,15 @@ class WindowSystem(GraphicsEventSystem):
             if child.identifier == "SCREEN":
                 return
             self.bringWindowToFront(child)
+            # check if button was pressed and change its state accordingly
+            if isinstance(child,Button):
+                child.changeState("PRESSED")
+                self.requestRepaint()
+            elif isinstance(child, Slider):
+                child.changeState("PRESSED")
+                localX, _ = child.convertPositionFromScreen(x, y)
+                child.changeSlider(localX)
+                self.requestRepaint()
             # save which window was pressed for dragging
             self.tempMouseDownWindow = child
             # get the top level window and calculate the offset between the window origin and
@@ -159,7 +201,6 @@ class WindowSystem(GraphicsEventSystem):
 
             if x > topLevelWindow.x + topLevelWindow.width - self.windowManager.resizeCornerTolerance and y > topLevelWindow.y + topLevelWindow.height - self.windowManager.resizeCornerTolerance:
                 self.tempMouseDownResizing = True
-
 
     def handleMouseReleased(self, x, y):
         """
@@ -186,10 +227,21 @@ class WindowSystem(GraphicsEventSystem):
                         self.windowManager.handleTitleBarClicked(clickedWindow)
                     else:
                         clickedWindow.handleMouseClicked(x, y)
+                        self.requestRepaint()
 
     def handleMouseMoved(self, x, y):
-        pass
-        # TODO (optional): change background color of buttons when mouse is moved there
+        hoveredWindow = self.screen.childWindowAtLocation(x, y)
+        if hoveredWindow is None:
+            return
+
+        if isinstance(hoveredWindow, Button):
+            hoveredWindow.changeState("HOVERED")
+        else:
+            if isinstance(self.tempHoveredWindow, Button):
+                self.tempHoveredWindow.changeState("NORMAL")
+
+        self.tempHoveredWindow = hoveredWindow
+        self.requestRepaint()
 
     def handleMouseDragged(self, x, y):
         clickedX, clickedY = self.tempMouseDown
@@ -198,6 +250,12 @@ class WindowSystem(GraphicsEventSystem):
         window = self.tempMouseDownWindow
         # calculate the delta between the originally clicked position and the current drag position
         deltaX, deltaY = x - clickedX, y - clickedY
+
+        if isinstance(window, Slider):
+            window.changeState("PRESSED")
+            localX, _ = window.convertPositionFromScreen(x, y)
+            window.changeSlider(localX)
+            self.requestRepaint()
 
         if self.tempMouseDownResizing:
             self.windowManager.handleResizeDragged(
