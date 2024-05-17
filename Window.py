@@ -86,6 +86,9 @@ class Window:
             # save margins to bottom and right: they might be broken while resizing and have to be re-established
             window.marginRight = self.width - windowRightBorder
             window.marginBottom = self.height - windowLowerBorder
+        # trigger resize to ensure window is correctly positioned according to anchors
+        if "- Title Bar" not in window.identifier:
+            self.resize(self.x, self.y, self.width, self.height)
 
     def removeFromParentWindow(self):
         """
@@ -202,7 +205,7 @@ class Window:
     def getTopLevelWindow(self):
 
         if self.identifier == "SCREEN":
-            return None
+            return self
 
         topLevelWindow = self
         while topLevelWindow.parentWindow.identifier != "SCREEN":
@@ -211,24 +214,21 @@ class Window:
         return topLevelWindow
 
     # resizes itself and all its child windows
-    def resize(self, x, y, deltaWidth, deltaHeight):
+    def resize(self, x, y, width, height):
+        titleBarHeight = self.getTopLevelWindow().parentWindow.windowSystem.windowManager.titleBarHeight
         parentWidth = self.parentWindow.width
         parentHeight = self.parentWindow.height
         if self.parentWindow.identifier == "SCREEN":
             # TOP-LEVEL WINDOW: RESIZING
-            # new width/height should not be lower than min width/height
-            width = max(self.parentWindow.windowSystem.windowManager.tlwMinWidth, self.width + deltaWidth)
-            height = max(self.parentWindow.windowSystem.windowManager.tlwMinHeight, self.height + deltaHeight)
-
             # resize window with updated values
             self.x = x
             self.y = y
-            self.width = width
-            self.height = height
-
+            # new width/height should not be lower than min width/height
+            self.width = max(self.parentWindow.windowSystem.windowManager.tlwMinWidth, width)
+            self.height = max(self.parentWindow.windowSystem.windowManager.tlwMinHeight, height)
         else:
             # NO TOP-LEVEL WINDOW: RESIZING
-            # save "start values", which are changed while evaluating anchoring
+            # keep width and height the same for anchored windows (unless it is changed below)
             width, height = self.width, self.height
             # store current window anchors to use in the following
             topAnchor = self.layoutAnchors & LayoutAnchor.top
@@ -262,7 +262,6 @@ class Window:
 
             # CONSTRAINTS:
             # if x or y get negative, stick them to left side of window
-            titleBarHeight = self.getTopLevelWindow().parentWindow.windowSystem.windowManager.titleBarHeight
             if x < 0:
                 x = 0
             if y < titleBarHeight:
@@ -283,8 +282,7 @@ class Window:
 
         # resize child windows
         for child in self.childWindows:
-            child.resize(child.x, child.y, deltaWidth, deltaHeight)
-
+            child.resize(child.x, child.y, child.width, child.height)
 
 class Screen(Window):
     def __init__(self, windowSystem):
