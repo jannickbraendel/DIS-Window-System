@@ -79,6 +79,9 @@ class WindowSystem(GraphicsEventSystem):
         button = Button(69, 69, 70,30, "Button", LayoutAnchor.right, "MyButton", COLOR_LIGHT_GRAY, COLOR_GRAY)
         button.setBackgroundColor(COLOR_ORANGE)
         window2.addChildWindow(button)
+        slider = Slider(20,200, 200, 20, "Slider", LayoutAnchor.bottom)
+        slider.setBackgroundColor(COLOR_GRAY)
+        window2.addChildWindow(slider)
 
         resizing.addChildWindow(top_left)
         resizing.addChildWindow(top)
@@ -160,6 +163,11 @@ class WindowSystem(GraphicsEventSystem):
             if isinstance(child,Button):
                 child.changeState("PRESSED")
                 self.requestRepaint()
+            elif isinstance(child, Slider):
+                child.changeState("PRESSED")
+                localX, _ = child.convertPositionFromScreen(x, y)
+                child.changeSlider(localX)
+                self.requestRepaint()
             # save which window was pressed for dragging
             self.tempMouseDownWindow = child
             # get the top level window and calculate the offset between the window origin and
@@ -221,6 +229,12 @@ class WindowSystem(GraphicsEventSystem):
         window = self.tempMouseDownWindow
         # calculate the delta between the originally clicked position and the current drag position
         deltaX, deltaY = x - clickedX, y - clickedY
+
+        if isinstance(window, Slider):
+            window.changeState("PRESSED")
+            localX, _ = window.convertPositionFromScreen(x, y)
+            window.changeSlider(localX)
+            self.requestRepaint()
 
         if self.tempMouseDownResizing:
             self.windowManager.handleResizeDragged(
