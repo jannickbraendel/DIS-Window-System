@@ -102,8 +102,9 @@ class WindowSystem(GraphicsEventSystem):
         conWin3 = Window(0, 0, 40, 40, "conWin3", layoutAnchors=LayoutAnchor.top)
         conWin3.setBackgroundColor(COLOR_GREEN)
         conWin4 = Window(0, 0, 40, 20, "conWin4", layoutAnchors=LayoutAnchor.top)
+        conWin4.setBackgroundColor(COLOR_YELLOW)
 
-        container = Container(40, 40, 0, 0, "Container Test", LayoutAnchor.top, [conWin1, conWin2, conWin3], spacing=5, horizontalDist=False)
+        container = Container(40, 40, 200, 100, "Container Test", LayoutAnchor.top, [conWin1, conWin2, conWin3, conWin4], spacing=10, horizontalDist=False)
         container.setBackgroundColor(COLOR_CLEAR)
         containerTest.addChildWindow(conWin1)
         containerTest.addChildWindow(conWin2)

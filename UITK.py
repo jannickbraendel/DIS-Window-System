@@ -45,31 +45,37 @@ class Container(Widget):
 
     def resize(self, x, y, width, height):
         super().resize(x, y, width, height)
+        totalSpacing = self.spacing * (len(self.containerWindows) - 1)
+        # if not self.isHidden:
         if self.horizontalDist:
             # DISTRIBUTE HORIZONTALLY
-            # calculate total width and position container windows
-            totalContainerWindowWidth = 0
+            # calculate width for each window inside container
+            conWindowWidth = (self.width - totalSpacing) / len(self.containerWindows)
+            # x is increased for each containerWindow ensuring spacing
             currentX = self.x
             for window in self.containerWindows:
                 window.x = currentX
                 window.y = self.y
+                window.width = conWindowWidth
                 currentX += window.width + self.spacing
-                totalContainerWindowWidth += window.width
-            self.width = totalContainerWindowWidth + (len(self.containerWindows)-1) * self.spacing
+                # as window's width changed, check if it reaches out of parent window
+                window.isHidden = window.x + window.width > window.parentWindow.width or window.y + window.height > window.parentWindow.height
             # container height is the same as the maximum container window height
             self.height = max(window.height for window in self.containerWindows)
         else:
             # DISTRIBUTE VERTICALLY
-            # calculate total height and position container windows
-            totalContainerWindowHeight = 0
+            # calculate width for each window inside container
+            conWindowHeight = (self.height - totalSpacing) / len(self.containerWindows)
+            # y is increased for each containerWindow ensuring spacing
             currentY = self.y
             for window in self.containerWindows:
-                window.x = self.x
                 window.y = currentY
-                currentY += (window.height + self.spacing)
-                totalContainerWindowHeight += window.height
-            self.height = totalContainerWindowHeight + (len(self.containerWindows) - 1) * self.spacing
-            # container width is the same as the maximum container window width
+                window.x = self.x
+                window.height = conWindowHeight
+                currentY += window.height + self.spacing
+                # as window's height changed, check if it reaches out of parent window
+                window.isHidden = window.x + window.width > window.parentWindow.width or window.y + window.height > window.parentWindow.height
+            # container width is the same as the maximum container window height
             self.width = max(window.width for window in self.containerWindows)
 
     def draw(self, ctx):
