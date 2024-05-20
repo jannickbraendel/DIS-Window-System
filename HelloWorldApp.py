@@ -36,6 +36,7 @@ class HelloWorldApp:
             button.setBackgroundColor(COLOR_CLEAR)
             self.appWindow.addChildWindow(button)
 
+        # language buttons are put into horizontal container
         buttonContainer = Container(40, 100, self.windowSystem.width - 80, 0, "ButtonContainer",
                                     layoutAnchors=LayoutAnchor.left | LayoutAnchor.right, horizontalDist=True,
                                     containerWindows=buttons, spacing=30)
@@ -49,21 +50,13 @@ class HelloWorldApp:
         quitButton.setBackgroundColor(COLOR_CLEAR)
         self.appWindow.addChildWindow(quitButton)
 
-    def drawGreetLabel(self, greeting):
-        # remove old label window, which is overridden
         """
-        for child in self.appWindow.childWindows:
-            if child.identifier == "GreetingLabel":
-                child.removeFromParentWindow()
-                continue
-
-        # add label window with specified greeting
-        greetLabel = Label(20, 50, self.appWindow.width * 0.3, 50, "GreetingLabel",
-                           font=Font(family="Helvetica", size=20), fontColor=COLOR_ORANGE, text=greeting,
-                           layoutAnchors=LayoutAnchor.top)
-        self.appWindow.addChildWindow(greetLabel)
+        # VERTICAL CONTAINER
+        contWindows = [self.greetLabel, buttonContainer, quitButton]
+        verticalContainer = Container(20, 40, 0, self.appWindow.height - 120, "VerticalContainer",
+                                      layoutAnchors=0, horizontalDist=False, containerWindows=contWindows, spacing=50)
+        self.appWindow.addChildWindow(verticalContainer)
         """
-
 
     def changeLanguage(self, language):
         assert language in self.languages
