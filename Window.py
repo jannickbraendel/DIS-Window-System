@@ -52,38 +52,6 @@ class Window:
         self.childWindows.append(window)
         window.parentWindow = self
 
-        """
-        if self.identifier == "SCREEN":
-            screen = self
-        else:
-            screen = self.getTopLevelWindow().parentWindow
-        
-        # check if child window exceeds parent window in size and adjust accordingly (NOT NEEDED FOR TL WINDOWS)
-        if self.identifier == "SCREEN":
-            return
-
-        if window.x < 0:
-            window.x = 0
-
-        titleBarHeight = screen.windowSystem.windowManager.titleBarHeight
-        if window.parentWindow.parentWindow == screen and "- Title Bar" not in window.identifier:
-            # child windows of top-level windows (that are not the title bar itself) should not cover the title bar
-            if window.y < titleBarHeight:
-                window.y = titleBarHeight
-        else:
-            if window.y < 0:
-                window.y = 0
-
-        if window.parentWindow.identifier != "SCREEN":
-            windowRightBorder = window.x + window.width
-            windowLowerBorder = window.y + window.height
-            if windowRightBorder > self.width:
-                widthToRemove = windowRightBorder - self.width
-                window.width -= widthToRemove
-            if windowLowerBorder > self.height:
-                heightToRemove = windowLowerBorder - self.height
-                window.height -= heightToRemove
-        """
         # save margins to bottom and right: they might be broken while resizing and have to be re-established
         window.marginRight = self.width - (window.x + window.width)
         window.marginBottom = self.height - (window.y + window.height)
