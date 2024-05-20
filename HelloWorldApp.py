@@ -13,17 +13,16 @@ class HelloWorldApp:
                                 "Hello World - Graphical")
         self.appWindow.setBackgroundColor(COLOR_LIGHT_GRAY)
         self.windowSystem.screen.addChildWindow(self.appWindow)
-
+        self.greetLabel = None
         self.languages = ["German", "English", "French"]
-        self.greeting = "Hello!"
         self.drawWidgets()
 
     def drawWidgets(self):
         # GREETING LABEL
-        greetLabel = Label(20, 50, self.appWindow.width*0.3, 50, "GreetingLabel",
-                           font=Font(family="Helvetica", size=20), fontColor=COLOR_ORANGE, text=self.greeting,
+        self.greetLabel = Label(20, 50, self.appWindow.width * 0.3, 50, "GreetingLabel",
+                           font=Font(family="Helvetica", size=20), fontColor=COLOR_ORANGE, text="Hello!",
                            layoutAnchors=LayoutAnchor.top)
-        self.appWindow.addChildWindow(greetLabel)
+        self.appWindow.addChildWindow(self.greetLabel)
 
         # LANGUAGE BUTTONS
         buttons = []
@@ -37,7 +36,7 @@ class HelloWorldApp:
             button.setBackgroundColor(COLOR_CLEAR)
             self.appWindow.addChildWindow(button)
 
-        buttonContainer = Container(40, greetLabel.y + 50, self.windowSystem.width - 80, 0, "ButtonContainer",
+        buttonContainer = Container(40, 100, self.windowSystem.width - 80, 0, "ButtonContainer",
                                     layoutAnchors=LayoutAnchor.left | LayoutAnchor.right, horizontalDist=True,
                                     containerWindows=buttons, spacing=30)
         self.appWindow.addChildWindow(buttonContainer)
@@ -45,17 +44,32 @@ class HelloWorldApp:
         # QUIT BUTTON
         quitButton = Button(self.appWindow.width - 80, self.appWindow.height - 80, 60, 40, "QuitButton",
                             layoutAnchors=LayoutAnchor.right | LayoutAnchor.bottom, text="Quit",
-                            hoverBackgroundColor=COLOR_RED, pressedBackgroundColor="#8B0000", borderColor= COLOR_BLACK,
+                            hoverBackgroundColor=COLOR_RED, pressedBackgroundColor="#8B0000", borderColor=COLOR_BLACK,
                             action=self.appWindow.removeFromParentWindow)
         quitButton.setBackgroundColor(COLOR_CLEAR)
         self.appWindow.addChildWindow(quitButton)
 
+    def drawGreetLabel(self, greeting):
+        # remove old label window, which is overridden
+        """
+        for child in self.appWindow.childWindows:
+            if child.identifier == "GreetingLabel":
+                child.removeFromParentWindow()
+                continue
+
+        # add label window with specified greeting
+        greetLabel = Label(20, 50, self.appWindow.width * 0.3, 50, "GreetingLabel",
+                           font=Font(family="Helvetica", size=20), fontColor=COLOR_ORANGE, text=greeting,
+                           layoutAnchors=LayoutAnchor.top)
+        self.appWindow.addChildWindow(greetLabel)
+        """
+
+
     def changeLanguage(self, language):
-        # TODO: Label not redrawn correctly
         assert language in self.languages
         if language == "German":
-            self.greeting = "Guten Tag!"
+            self.greetLabel.text = "Guten Tag!"
         elif language == "English":
-            self.greeting = "Hello!"
+            self.greetLabel.text = "Hello!"
         elif language == "French":
-            self.greeting = "Bonjour!"
+            self.greetLabel.text = "Bonjour!"
