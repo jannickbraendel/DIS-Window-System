@@ -117,7 +117,7 @@ class Window:
                     # top-most child window (with no children) found and returned
                     return child
 
-        # no child window was hit -> return None
+        # no child window was hit -> return Self
         return self
 
     def hitTest(self, x, y):

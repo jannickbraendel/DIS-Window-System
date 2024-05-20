@@ -8,6 +8,7 @@ and Jannick Brändel (#405391)
 """
 
 import GraphicsEventSystem
+from HelloWorldApp import HelloWorldApp
 from Window import *
 from WindowManager import WindowManager
 from UITK import *
@@ -40,9 +41,10 @@ class WindowSystem(GraphicsEventSystem):
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
 
+        # start Hello World App
+        helloWorldApp = HelloWorldApp(self)
+
         # add a few test windows
-        containerTest = Window(80, 80, 280, 280, "Container Test")
-        containerTest.setBackgroundColor(COLOR_WHITE)
         window2 = Window(40, 40, 250, 250, "Second Window")
         window2.setBackgroundColor(COLOR_WHITE)
         window3 = Window(20, 20, 40, 40, "3")
@@ -71,7 +73,6 @@ class WindowSystem(GraphicsEventSystem):
         grandchild = Window(20, 30, 40, 40, "grandchild", LayoutAnchor.top | LayoutAnchor.bottom)
         grandchild.setBackgroundColor(COLOR_GREEN)
         # print(window1.convertPositionFromScreen(30,30))
-        self.screen.addChildWindow(containerTest)
         self.screen.addChildWindow(window2)
         self.screen.addChildWindow(resizing)
         window2.addChildWindow(window3)
@@ -96,24 +97,6 @@ class WindowSystem(GraphicsEventSystem):
         resizing.addChildWindow(allAnchors)
 
         allAnchors.addChildWindow(grandchild)
-
-        # container test:
-        conWin1 = Window(0, 0, 40, 20, "conWin1", layoutAnchors=LayoutAnchor.top)
-        conWin1.setBackgroundColor(COLOR_BLUE)
-        conWin2 = Window(0, 0, 40, 30, "conWin2", layoutAnchors=LayoutAnchor.top)
-        conWin2.setBackgroundColor(COLOR_ORANGE)
-        conWin3 = Window(0, 0, 40, 40, "conWin3", layoutAnchors=LayoutAnchor.top)
-        conWin3.setBackgroundColor(COLOR_GREEN)
-        conWin4 = Window(0, 0, 40, 20, "conWin4", layoutAnchors=LayoutAnchor.top)
-        conWin4.setBackgroundColor(COLOR_YELLOW)
-
-        container = Container(40, 40, 200, 100, "Container Test", LayoutAnchor.top, [conWin1, conWin2, conWin3, conWin4], spacing=10, horizontalDist=False)
-        container.setBackgroundColor(COLOR_CLEAR)
-        containerTest.addChildWindow(conWin1)
-        containerTest.addChildWindow(conWin2)
-        containerTest.addChildWindow(conWin3)
-        containerTest.addChildWindow(conWin4)
-        containerTest.addChildWindow(container)
     """
     WINDOW MANAGEMENT
     """
@@ -233,11 +216,12 @@ class WindowSystem(GraphicsEventSystem):
         hoveredWindow = self.screen.childWindowAtLocation(x, y)
         if hoveredWindow is None:
             return
-
         if isinstance(hoveredWindow, Button):
+            # mouse is moved over a button -> change its state to HOVERED
             hoveredWindow.changeState("HOVERED")
         else:
             if isinstance(self.tempHoveredWindow, Button):
+                # mouse moved away from button -> change its state to NORMAL
                 self.tempHoveredWindow.changeState("NORMAL")
 
         self.tempHoveredWindow = hoveredWindow
@@ -280,4 +264,4 @@ class WindowSystem(GraphicsEventSystem):
 
 
 # Let's start your window system!
-w = WindowSystem(800, 600)
+w = WindowSystem(1600, 800)
