@@ -98,6 +98,7 @@ class Container(Widget):
     def hitTest(self, x, y):
         return False
 
+
 class Label(Widget):
     def __init__(self, originX, originY, width, height, identifier, layoutAnchors, text, centered=True,
                  font=None, fontColor=None):
@@ -114,6 +115,9 @@ class Label(Widget):
     def draw(self, ctx):
         # draw background with superclass function
         super().draw(ctx)
+
+        tempWidth, tempHeight = self.getDrawingSize()
+
         # draw text with specified font (color) into label
         if not self.isHidden:
             x, y = self.convertPositionToScreen(0, 0)
@@ -121,9 +125,9 @@ class Label(Widget):
             ctx.setStrokeColor(self.fontColor)
             ctx.setFont(self.font)
             if self.centered:
-                ctx.drawString(self.text, self.width/2, self.height/2, centered=True)
+                ctx.drawString(self.text, tempWidth/2, tempHeight/2, centered=True)
             else:
-                ctx.drawString(self.text, 1, self.height*0.2)
+                ctx.drawString(self.text, 1, tempHeight*0.2)
 
 
 class Button(Label):
@@ -153,15 +157,20 @@ class Button(Label):
             if self.tempBackgroundColor is not None:
                 self.setBackgroundColor(self.tempBackgroundColor)
 
+        # check temporary size to ensure clipping
+        tempWidth, tempHeight = self.getDrawingSize()
+
         if not self.isHidden:
-            x,y = self.convertPositionToScreen(0,0)
-            ctx.setOrigin(x,y)
+            x, y = self.convertPositionToScreen(0,0)
+            ctx.setOrigin(x, y)
+            # draw border in two colors to get depth effect
             ctx.setStrokeColor(self.borderColor)
-            ctx.drawLine(0, 0, self.width, 0)
-            ctx.drawLine(0, 0, 0, self.height)
+            ctx.drawLine(0, 0, tempWidth, 0)
+            ctx.drawLine(0, 0, 0, tempHeight)
             ctx.setStrokeColor(COLOR_BLACK)
-            ctx.drawLine(self.width, 0, self.width, self.height)
-            ctx.drawLine(0, self.height, self.width, self.height)
+            ctx.drawLine(tempWidth, 0, tempWidth, tempHeight)
+            ctx.drawLine(0, tempHeight, tempWidth, tempHeight)
+
     # Call-back function that is executed when button is clicked
     def handleMouseClicked(self, x, y):
         if self.action is not None:
@@ -178,6 +187,7 @@ class Button(Label):
             self.state = state
         else:
             raise ValueError("Button state must be 'NORMAL' or 'HOVERED' or 'PRESSED'")
+
 
 class Slider(Widget):
     def __init__(self, originX, originY, width, height, identifier, layoutAnchors, defaultSliderValue=0.5):
@@ -215,28 +225,35 @@ class Slider(Widget):
 
     def draw(self, ctx):
         super().draw(ctx)
+
+        tempWidth, tempHeight = self.getDrawingSize()
+
         # Draw stroke
         if not self.isHidden:
             # Stroke
             x,y = self.convertPositionToScreen(0,0)
             ctx.setOrigin(x,y)
             ctx.setStrokeColor(COLOR_BLACK)
-            ctx.drawLine(0, 0, self.width, 0)
-            ctx.drawLine(0, 0, 0, self.height)
+            ctx.drawLine(0, 0, tempWidth, 0)
+            ctx.drawLine(0, 0, 0, tempHeight)
             ctx.setStrokeColor(COLOR_LIGHT_GRAY)
-            ctx.drawLine(self.width, 0, self.width, self.height)
-            ctx.drawLine(0, self.height, self.width, self.height)
+            ctx.drawLine(tempWidth, 0, tempWidth, tempHeight)
+            ctx.drawLine(0, tempHeight, tempWidth, tempHeight)
+
+            # slider element exceeds parent window and disappears
+            if self.sliderPosition + self.sliderElementWidth/2 > self.parentWindow.width:
+                return
 
             # Slider Element Fill
             x, y = self.convertPositionToScreen(self.sliderPosition-(self.sliderElementWidth/2), 0)
             ctx.setOrigin(x,y)
             ctx.setFillColor(COLOR_LIGHT_GRAY)
-            ctx.fillRect(0, 0, self.sliderElementWidth, self.height)
+            ctx.fillRect(0, 0, self.sliderElementWidth, tempHeight)
 
             # Slider Element Stroke
             ctx.setStrokeColor(COLOR_LIGHT_GRAY)
             ctx.drawLine(0, 0, self.sliderElementWidth, 0)
-            ctx.drawLine(0, 0, 0, self.height)
+            ctx.drawLine(0, 0, 0, tempHeight)
             ctx.setStrokeColor(COLOR_BLACK)
-            ctx.drawLine(self.sliderElementWidth, 0, self.sliderElementWidth, self.height)
-            ctx.drawLine(0, self.height, self.sliderElementWidth, self.height)
+            ctx.drawLine(self.sliderElementWidth, 0, self.sliderElementWidth, tempHeight)
+            ctx.drawLine(0, tempHeight, self.sliderElementWidth, tempHeight)

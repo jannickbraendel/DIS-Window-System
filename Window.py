@@ -52,11 +52,12 @@ class Window:
         self.childWindows.append(window)
         window.parentWindow = self
 
+        """
         if self.identifier == "SCREEN":
             screen = self
         else:
             screen = self.getTopLevelWindow().parentWindow
-
+        
         # check if child window exceeds parent window in size and adjust accordingly (NOT NEEDED FOR TL WINDOWS)
         if self.identifier == "SCREEN":
             return
@@ -82,12 +83,12 @@ class Window:
             if windowLowerBorder > self.height:
                 heightToRemove = windowLowerBorder - self.height
                 window.height -= heightToRemove
-
-            # save margins to bottom and right: they might be broken while resizing and have to be re-established
-            window.marginRight = self.width - windowRightBorder
-            window.marginBottom = self.height - windowLowerBorder
+        """
+        # save margins to bottom and right: they might be broken while resizing and have to be re-established
+        window.marginRight = self.width - (window.x + window.width)
+        window.marginBottom = self.height - (window.y + window.height)
         # trigger resize to ensure window is correctly positioned according to anchors
-        if "- Title Bar" not in window.identifier:
+        if not self.identifier == "SCREEN" and "- Title Bar" not in window.identifier:
             self.resize(self.x, self.y, self.width, self.height)
 
     def removeFromParentWindow(self):
@@ -172,6 +173,9 @@ class Window:
         Draw current window and all child windows on screen and filling them with the specified background color.
         :param ctx: Current graphics context
         """
+        # temporary width and height values are based on if the window is clipped by its parent
+        tempWidth, tempHeight = self.getDrawingSize()
+
         # do not draw if hidden currently:
         if self.isHidden:
             return
@@ -185,7 +189,7 @@ class Window:
         else:
             ctx.setFillColor(COLOR_CLEAR)
         # fill the complete window
-        ctx.fillRect(0, 0, self.width, self.height)
+        ctx.fillRect(0, 0, tempWidth, tempHeight)
 
         # recursively draw child windows in ascending z-order
         for child in self.childWindows:
@@ -272,9 +276,11 @@ class Window:
             if height < 20:
                 height = 20
 
+            """
             # if window reaches out of parent on any side, clip it (set hidden)
             self.isHidden = x + width > self.parentWindow.width or y + height > self.parentWindow.height
-
+            """
+            # resize window with updated values
             self.x = x
             self.y = y
             self.width = width
@@ -283,6 +289,28 @@ class Window:
         # resize child windows
         for child in self.childWindows:
             child.resize(child.x, child.y, child.width, child.height)
+
+    # returns temporary width and height values of a window to clip it to the bounds of its parent window (if exceeding)
+    def getDrawingSize(self):
+        # TODO: Check edge case where grandchild window exceeds tl window but is not clipped
+        tempWidth = self.width
+        tempHeight = self.height
+        # TL windows keep their size
+        if not self.parentWindow.identifier == "SCREEN":
+            # HORIZONTALLY
+            if self.x + self.width > self.parentWindow.width:
+                # width set to distance between parent's right border and x origin (has to be <=0)
+                tempWidth = max(0, self.parentWindow.width - self.x)
+            # VERTICALLY
+            if self.y + self.height > self.parentWindow.height:
+                # height set to distance between parent's lower border and y origin (has to be <=0)
+                tempHeight = max(0, self.parentWindow.height - self.y)
+
+            # window should disappear in the case of temp width or height being 0
+            self.isHidden = tempWidth == 0 or tempHeight == 0
+
+        return tempWidth, tempHeight
+
 
 class Screen(Window):
     def __init__(self, windowSystem):
