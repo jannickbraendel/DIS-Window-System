@@ -26,6 +26,12 @@ class ColorsApp:
         self.appWindow.setBackgroundColor(COLOR_WHITE)
         self.windowSystem.screen.addChildWindow(self.appWindow)
         self.hexLabel = None
+
+        # Initialize Colors
+        # self.red = 0
+        # self.green = 0
+        # self.blue = 0
+
         self.sliders = []
         self.drawWidgets()
 
@@ -33,7 +39,7 @@ class ColorsApp:
     def drawWidgets(self):
         # Sliders
         for i in range(3):
-            slider = Slider(0, 0, self.appWindow.width*0.8, 20, "Slider" + str(i+1), LayoutAnchor.top, 0)
+            slider = Slider(0, 0, self.appWindow.width*0.8, 20, "Slider" + str(i+1), LayoutAnchor.top | LayoutAnchor.left | LayoutAnchor.right, 0, self.updateColors)
             self.sliders.append(slider)
             self.appWindow.addChildWindow(slider)
 
@@ -42,27 +48,28 @@ class ColorsApp:
         for i in range(3):
             text = ""
             if i == 0:
-                text = "R"
+                text = "RED"
             elif i == 1:
-                text = "G"
+                text = "GREEN"
             elif i == 2:
-                text = "B"
+                text = "BLUE"
             label = Label(0, 0, self.appWindow.width * 0.8, 20, "Label" + str(i + 1), LayoutAnchor.top, text)
             slidersAndLabels.append(label)
             slidersAndLabels.append(self.sliders[i])
             self.appWindow.addChildWindow(label)
 
         # Label for displaying color hex value
-        self.hexLabel = Label(self.appWindow.width/2, 350, self.appWindow.width * 0.8, 100, "HexLabel", font=Font(family="Helvetica", size=20), fontColor=COLOR_WHITE, text="#000000", layoutAnchors=LayoutAnchor.bottom)
+        self.hexLabel = Label(0, 350, self.appWindow.width * 0.8, 100, "HexLabel", font=Font(family="Helvetica", size=20), fontColor=COLOR_WHITE, text="#000000", layoutAnchors=LayoutAnchor.bottom)
         self.appWindow.addChildWindow(self.hexLabel)
-        self.setColor()
+        self.updateColors()
 
         # Container
-        sliderContainer = Container(40, 100, self.appWindow.width - 80, 0, "sliderContainer",
+        sliderContainer = Container(50, 50, self.appWindow.width * 0.8, 0, "sliderContainer",
                                     layoutAnchors=LayoutAnchor.top, horizontalDist=False, containerWindows=slidersAndLabels,
                                     spacing=10)
         self.appWindow.addChildWindow(sliderContainer)
 
-    def setColor(self):
+    def updateColors(self):
         color = rgb_to_hex(self.sliders[0].sliderValue, self.sliders[1].sliderValue, self.sliders[2].sliderValue)
+        self.hexLabel.text = color
         self.hexLabel.setBackgroundColor(color)
