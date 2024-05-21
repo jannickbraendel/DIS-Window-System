@@ -190,7 +190,7 @@ class Button(Label):
 
 
 class Slider(Widget):
-    def __init__(self, originX, originY, width, height, identifier, layoutAnchors, defaultSliderValue=0.5):
+    def __init__(self, originX, originY, width, height, identifier, layoutAnchors, defaultSliderValue=0.5, action=None):
         # Value is in range [0,1]
         self.sliderValue = defaultSliderValue
         # Size of the element that can be moved around
@@ -199,6 +199,7 @@ class Slider(Widget):
         # is set from the center, and the value is measured from the left side of the element
         self.sliderPosition = self.sliderValue * width
         self.state = "NORMAL"
+        self.action = action
         super().__init__(originX, originY, width, height, identifier, layoutAnchors)
         self.changeSlider(self.sliderValue * width)
 
@@ -206,7 +207,9 @@ class Slider(Widget):
         if state in ["NORMAL", "PRESSED"]:
             self.state = state
         else:
-            raise ValueError("Button state must be 'NORMAL' or 'HOVERED' or 'PRESSED'")
+            raise ValueError("Slider state must be 'NORMAL' or 'PRESSED' instead of: " + str(state))
+        if state == "PRESSED" and self.action is not None:
+            self.action()
 
     def changeSlider(self, x):
         # clamp values to min and max range
@@ -250,7 +253,10 @@ class Slider(Widget):
             # Slider Element Fill
             x, y = self.convertPositionToScreen(self.sliderPosition-(self.sliderElementWidth/2), 0)
             ctx.setOrigin(x,y)
-            ctx.setFillColor(COLOR_LIGHT_GRAY)
+            if self.state == "NORMAL":
+                ctx.setFillColor(COLOR_LIGHT_GRAY)
+            if self.state == "PRESSED":
+                ctx.setFillColor(COLOR_GRAY)
             ctx.fillRect(0, 0, self.sliderElementWidth, tempHeight)
 
             # Slider Element Stroke

@@ -196,9 +196,6 @@ class WindowSystem(GraphicsEventSystem):
         :param x: x value of mouse position when released
         :param y: y value of mouse position when released
         """
-        self.tempMouseDownWindow = None
-        self.tempMouseDownTLWindow = None
-        self.tempMouseDownResizing = False
         # calculate distance between release and pressed position
         deltaX, deltaY = abs(self.tempMouseDown[0] - x), abs(self.tempMouseDown[1] - y)
         # if distance is less than mouseClickTolerance send mouse-click event to child where click occurred.
@@ -215,6 +212,14 @@ class WindowSystem(GraphicsEventSystem):
                     else:
                         clickedWindow.handleMouseClicked(x, y)
                         self.requestRepaint()
+        else:
+            if isinstance(self.tempMouseDownWindow, Slider):
+                self.tempMouseDownWindow.changeState("NORMAL")
+
+        # reset temp variables
+        self.tempMouseDownWindow = None
+        self.tempMouseDownTLWindow = None
+        self.tempMouseDownResizing = False
 
     def handleMouseMoved(self, x, y):
         hoveredWindow = self.screen.childWindowAtLocation(x, y)
