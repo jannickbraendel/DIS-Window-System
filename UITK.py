@@ -200,6 +200,7 @@ class Slider(Widget):
         self.sliderPosition = self.sliderValue * width
         self.state = "NORMAL"
         super().__init__(originX, originY, width, height, identifier, layoutAnchors)
+        self.changeSlider(self.sliderValue * width)
 
     def changeState(self, state):
         if state in ["NORMAL", "PRESSED"]:
@@ -208,20 +209,22 @@ class Slider(Widget):
             raise ValueError("Button state must be 'NORMAL' or 'HOVERED' or 'PRESSED'")
 
     def changeSlider(self, x):
+        # clamp values to min and max range
         # The left most position is elementWidth/2 but has to be value 0
         # The right most position is width-elementWidth/2 but has to be value 1
         # so the actual usable position range is from elementWidth/2 to width-elementWidth/2
-        if (self.sliderElementWidth / 2) <= x <= (self.width - self.sliderElementWidth / 2):
-            # value is calculated from the left side of the element, so from x - elementWidth/2
-            leftPosition = x-self.sliderElementWidth/2
-            # The usable value range is (width - elementWidth) because having the slider
-            # at the right most position means the left slide (where we measure value) of the element isn't at 100%
-            usableRange = self.width-self.sliderElementWidth
-            # normalize the position to a value in range [0,1]
-            self.sliderValue = leftPosition/usableRange
-            print(self.sliderValue)
-            self.sliderPosition = x
-            print(self.sliderPosition)
+        x = max(self.sliderElementWidth / 2, x)
+        x = min(self.width - self.sliderElementWidth / 2, x)
+        # value is calculated from the left side of the element, so from x - elementWidth/2
+        leftPosition = x-self.sliderElementWidth/2
+        # The usable value range is (width - elementWidth) because having the slider
+        # at the right most position means the left slide (where we measure value) of the element isn't at 100%
+        usableRange = self.width-self.sliderElementWidth
+        # normalize the position to a value in range [0,1]
+        self.sliderValue = leftPosition/usableRange
+        print(self.sliderValue)
+        self.sliderPosition = x
+        print(self.sliderPosition)
 
     def draw(self, ctx):
         super().draw(ctx)
