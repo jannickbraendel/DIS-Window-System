@@ -8,6 +8,7 @@ and Jannick Brändel (#405391)
 """
 
 import GraphicsEventSystem
+from ColorsApp import ColorsApp
 from HelloWorldApp import HelloWorldApp
 from Window import *
 from WindowManager import WindowManager
@@ -43,6 +44,9 @@ class WindowSystem(GraphicsEventSystem):
 
         # start Hello World App
         helloWorldApp = HelloWorldApp(self)
+
+        # start colors app
+        colorsApp = ColorsApp(self)
 
         # add a few test windows
         window2 = Window(40, 40, 250, 250, "Second Window")
