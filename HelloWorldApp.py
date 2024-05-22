@@ -37,7 +37,7 @@ class HelloWorldApp:
             self.appWindow.addChildWindow(button)
 
         # language buttons are put into horizontal container
-        buttonContainer = Container(40, 100, self.windowSystem.width - 80, 0, "ButtonContainer",
+        buttonContainer = Container(40, 100, self.appWindow.width - 80, 40, "ButtonContainer",
                                     layoutAnchors=LayoutAnchor.left | LayoutAnchor.right, horizontalDist=True,
                                     containerWindows=buttons, spacing=30)
         self.appWindow.addChildWindow(buttonContainer)
@@ -49,12 +49,11 @@ class HelloWorldApp:
                             action=self.appWindow.removeFromParentWindow)
         quitButton.setBackgroundColor(COLOR_CLEAR)
         self.appWindow.addChildWindow(quitButton)
-
         """
         # VERTICAL CONTAINER
-        contWindows = [self.greetLabel, buttonContainer, quitButton]
-        verticalContainer = Container(20, 40, 0, self.appWindow.height - 120, "VerticalContainer",
-                                      layoutAnchors=0, horizontalDist=False, containerWindows=contWindows, spacing=50)
+        contWindows = [self.greetLabel, buttonContainer]
+        verticalContainer = Container(20, 40, self.appWindow.width, 190, "VerticalContainer",
+                                      layoutAnchors=0, horizontalDist=False, containerWindows=contWindows, spacing=100)
         self.appWindow.addChildWindow(verticalContainer)
         """
 

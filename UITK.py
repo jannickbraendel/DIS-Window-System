@@ -60,11 +60,12 @@ class Container(Widget):
                 window.x = currentX
                 window.y = self.y
                 window.width = conWindowWidth
+                window.height = self.height
                 currentX += window.width + self.spacing
                 # as window's width changed, check if it reaches out of parent window
                 window.isHidden = window.x + window.width > window.parentWindow.width or window.y + window.height > window.parentWindow.height
             # container height is the same as the maximum container window height
-            self.height = max(window.height for window in self.containerWindows)
+            # self.height = max(window.height for window in self.containerWindows)
         else:
             # DISTRIBUTE VERTICALLY
             # calculate width for each window inside container
@@ -76,12 +77,13 @@ class Container(Widget):
             for window in self.containerWindows:
                 window.y = currentY
                 window.x = self.x
+                window.width = self.width
                 window.height = conWindowHeight
                 currentY += window.height + self.spacing
                 # as window's height changed, check if it reaches out of parent window
                 window.isHidden = window.x + window.width > window.parentWindow.width or window.y + window.height > window.parentWindow.height
             # container width is the same as the maximum container window height
-            self.width = max(window.width for window in self.containerWindows)
+            # self.width = max(window.width for window in self.containerWindows)
 
     def draw(self, ctx):
         super().draw(ctx)

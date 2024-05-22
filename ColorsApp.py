@@ -69,6 +69,8 @@ class ColorsApp:
                                     spacing=10)
         self.appWindow.addChildWindow(sliderContainer)
 
+        # TODO (opt): another vert. container with sliders and hexLabel inside to avoid that label crosses sliders while resizing
+
     def updateColors(self):
         color = rgb_to_hex(self.sliders[0].sliderValue, self.sliders[1].sliderValue, self.sliders[2].sliderValue)
         self.hexLabel.text = color
