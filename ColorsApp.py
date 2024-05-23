@@ -59,7 +59,8 @@ class ColorsApp:
             self.appWindow.addChildWindow(label)
 
         # Label for displaying color hex value
-        self.hexLabel = Label(0, 350, self.appWindow.width * 0.8, 100, "HexLabel", font=Font(family="Helvetica", size=20), fontColor=COLOR_WHITE, text="#000000", layoutAnchors=LayoutAnchor.bottom)
+        self.hexLabel = Label(0, 350, self.appWindow.width * 0.8, 100, "HexLabel", font=Font(family="Helvetica", size=20),
+                              fontColor=COLOR_WHITE, text="#000000", layoutAnchors=LayoutAnchor.bottom)
         self.appWindow.addChildWindow(self.hexLabel)
         self.updateColors()
 
@@ -68,6 +69,12 @@ class ColorsApp:
                                     layoutAnchors=LayoutAnchor.top, horizontalDist=False, containerWindows=slidersAndLabels,
                                     spacing=10)
         self.appWindow.addChildWindow(sliderContainer)
+
+        # Container Wrapper for Sliders and label
+        elements = [sliderContainer, self.hexLabel]
+        wrapperContainer = Container(50, 50, self.appWindow.width * 0.8, self.appWindow.height*0.8, "wrapperContainer",
+                                     layoutAnchors=LayoutAnchor.top, horizontalDist=False,containerWindows=elements, spacing=30)
+        self.appWindow.addChildWindow(wrapperContainer)
 
         # TODO (opt): another vert. container with sliders and hexLabel inside to avoid that label crosses sliders while resizing
 
