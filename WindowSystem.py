@@ -232,9 +232,14 @@ class WindowSystem(GraphicsEventSystem):
         if isinstance(hoveredWindow, Button):
             # mouse is moved over a button -> change its state to HOVERED
             hoveredWindow.changeState("HOVERED")
-        else:
+        elif isinstance(self.tempHoveredWindow, Button):
+            # mouse moved away from button -> change its state to NORMAL
+            self.tempHoveredWindow.changeState("NORMAL")
+
+        if self.tempHoveredWindow != hoveredWindow:
             if isinstance(self.tempHoveredWindow, Button):
-                # mouse moved away from button -> change its state to NORMAL
+                # make sure that the last hovered window is set to normal again
+                # this makes sure that fast mouse movements don't create several hovered buttons
                 self.tempHoveredWindow.changeState("NORMAL")
 
         self.tempHoveredWindow = hoveredWindow
