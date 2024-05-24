@@ -43,15 +43,6 @@ class WindowSystem(GraphicsEventSystem):
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
 
-        # start Hello World App
-        helloWorldApp = HelloWorldApp(self)
-
-        # start colors app
-        colorsApp = ColorsApp(self)
-
-        # start calculator app
-        calculatorApp = CalculatorApp(self)
-
         # add a few test windows
         window2 = Window(40, 40, 250, 250, "Second Window")
         window2.setBackgroundColor(COLOR_WHITE)
@@ -153,6 +144,8 @@ class WindowSystem(GraphicsEventSystem):
         """
         self.screen.draw(self.graphicsContext)
         self.windowManager.drawTaskbar(self.graphicsContext)
+        if self.windowManager.startMenuVisible:
+            self.windowManager.drawStartMenu(self.graphicsContext)
 
     """
     INPUT EVENTS
@@ -166,6 +159,13 @@ class WindowSystem(GraphicsEventSystem):
         """
         # save mouse position to check when button is released
         self.tempMouseDown = (x, y)
+
+        # check if the start menu was clicked
+        if (self.windowManager.startMenuVisible and x <= self.windowManager.startMenuWidth
+                and self.height - self.windowManager.startMenuHeight - self.windowManager.taskBarHeight <= y <= self.height - self.windowManager.taskBarHeight):
+            # start menu was pressed
+            return
+
         child = self.screen.childWindowAtLocation(x, y)
         if child:
             if child.identifier == "SCREEN":
@@ -207,6 +207,10 @@ class WindowSystem(GraphicsEventSystem):
             if y >= self.height - self.windowManager.taskBarHeight:
                 # task bar was clicked
                 self.windowManager.handleTaskBarClicked(x)
+            elif (self.windowManager.startMenuVisible and x <= self.windowManager.startMenuWidth
+                  and self.height - self.windowManager.startMenuHeight - self.windowManager.taskBarHeight <= y <= self.height - self.windowManager.taskBarHeight):
+                # start menu was clicked
+                self.windowManager.handleStartMenuClicked(y)
             else:
                 clickedWindow = self.screen.childWindowAtLocation(x, y)
                 if clickedWindow:

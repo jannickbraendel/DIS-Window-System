@@ -6,9 +6,11 @@ Window System - Submission
 by  Felix Umland (#406886)
 and Jannick Brändel (#405391)
 """
-
+from ColorsApp import ColorsApp
+from CalculatorApp import CalculatorApp
 from GraphicsEventSystem import *
 from Window import *
+from HelloWorldApp import HelloWorldApp
 
 
 class WindowManager:
@@ -20,6 +22,12 @@ class WindowManager:
         self.resizeCornerTolerance = 8
         self.tlwMinWidth = 3 * self.titleBarButtonWidth + 50
         self.tlwMinHeight = self.titleBarHeight + 10
+        self.startMenuVisible = False
+        self.startMenuWidth = 200
+        self.startMenuHeight = 250
+        self.startMenuItemHeight = 50
+        self.startMenuItemHovered = None
+        self.apps = ["Hello World", "Colors", "Calculator", "Resizing"]
 
     def checkWindowPosition(self, window, x, y):
         # check if window is top-level window and return otherwise
@@ -201,14 +209,59 @@ class WindowManager:
                 iconIndex += 1
 
         if iconIndex == 0:
-            # quit button was clicked
-            quit()
+            # start menu button was clicked
+            self.startMenuVisible = not self.startMenuVisible
         else:
             # selected window is brought to front or reopened if minimized before
             window = topLevelWindowsSorted[iconIndex-1]
             window.isHidden = False
             self.windowSystem.bringWindowToFront(window)
             self.windowSystem.requestRepaint()
+
+    def drawStartMenu(self, ctx):
+        startMenuOriginY = self.windowSystem.height-self.taskBarHeight-self.startMenuHeight
+        iconSize = 35
+        itemSpacing = 10
+
+        # background
+        ctx.setOrigin(0, startMenuOriginY)
+        ctx.setFillColor("#BDBDBD")
+        ctx.fillRect(0, 0, self.startMenuWidth, self.startMenuHeight)
+
+        for i in range(len(self.apps)):
+            # Item Area
+            ctx.setFillColor(COLOR_BLUE)
+            y = (i * self.startMenuItemHeight)
+            ctx.fillRect(0, y, self.startMenuWidth, y + self.startMenuItemHeight)
+
+            # App Icon
+            ctx.setFillColor(COLOR_RED)
+            x = itemSpacing
+            y = i * self.startMenuItemHeight + (self.startMenuItemHeight - iconSize) / 2
+            ctx.fillRect(x, y, x + iconSize, y + iconSize)
+
+            # App String
+            ctx.setStrokeColor(COLOR_BLACK)
+            ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
+            ctx.drawString(self.apps[i], itemSpacing * 2 + iconSize, i * self.startMenuItemHeight + self.startMenuItemHeight / 4)
+
+    def handleStartMenuClicked(self, y):
+        print("start menu clicked")
+        startMenuOriginY = self.windowSystem.height-self.taskBarHeight-self.startMenuHeight
+        relativeY = y - startMenuOriginY
+
+        item = int(relativeY / self.startMenuItemHeight)
+
+        if item == 0:
+            HelloWorldApp(self.windowSystem)
+        elif item == 1:
+            ColorsApp(self.windowSystem)
+        elif item == 2:
+            CalculatorApp(self.windowSystem)
+        elif item == 3:
+            pass
+
+
 
     def handleTitleBarDragged(self, window, x, y, offsetX, offsetY):
         """
