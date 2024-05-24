@@ -177,8 +177,14 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleMouseMoved(self, x, y):
         hoveredWindow = self.screen.childWindowAtLocation(x, y)
-        if hoveredWindow is None:
-            return
+        if hoveredWindow.identifier == "SCREEN":
+            if (self.windowManager.startMenuVisible and x <= self.windowManager.startMenuWidth
+                and self.height - self.windowManager.startMenuHeight - self.windowManager.taskBarHeight <= y <= self.height - self.windowManager.taskBarHeight):
+                # start menu was hovered, now highlight the element at that location
+                self.windowManager.handleStartMenuHovered(y)
+                self.requestRepaint()
+            else:
+                return
         if isinstance(hoveredWindow, Button):
             # mouse is moved over a button -> change its state to HOVERED
             hoveredWindow.changeState("HOVERED")

@@ -23,12 +23,17 @@ class WindowManager:
         self.resizeCornerTolerance = 8
         self.tlwMinWidth = 3 * self.titleBarButtonWidth + 50
         self.tlwMinHeight = self.titleBarHeight + 10
+
+        # Start Menu Variables
         self.startMenuVisible = False
-        self.startMenuWidth = 200
-        self.startMenuHeight = 250
+        self.apps = ["Hello World", "Colors", "Calculator", "Resizing", "Shutdown"]
+        # height of a single element in the start menu
         self.startMenuItemHeight = 50
         self.startMenuItemHovered = None
-        self.apps = ["Hello World", "Colors", "Calculator", "Resizing"]
+        # set size of the start menu
+        self.startMenuWidth = 200
+        self.startMenuHeight = len(self.apps * self.startMenuItemHeight)
+
 
     def checkWindowPosition(self, window, x, y):
         # check if window is top-level window and return otherwise
@@ -208,7 +213,7 @@ class WindowManager:
             if xCounter < x:
                 xCounter += self.taskBarHeight + 1
                 iconIndex += 1
-
+        # todo: clicking taskbar where there is no item leads to an exception
         if iconIndex == 0:
             # start menu button was clicked
             self.startMenuVisible = not self.startMenuVisible
@@ -231,9 +236,11 @@ class WindowManager:
 
         for i in range(len(self.apps)):
             # Item Area
-            ctx.setFillColor(COLOR_BLUE)
-            y = (i * self.startMenuItemHeight)
-            ctx.fillRect(0, y, self.startMenuWidth, y + self.startMenuItemHeight)
+            # Only draw if item i is hovered
+            if self.startMenuItemHovered == i:
+                ctx.setFillColor("#030280")
+                y = (i * self.startMenuItemHeight)
+                ctx.fillRect(0, y, self.startMenuWidth, y + self.startMenuItemHeight)
 
             # App Icon
             ctx.setFillColor(COLOR_RED)
@@ -247,12 +254,7 @@ class WindowManager:
             ctx.drawString(self.apps[i], itemSpacing * 2 + iconSize, i * self.startMenuItemHeight + self.startMenuItemHeight / 4)
 
     def handleStartMenuClicked(self, y):
-        print("start menu clicked")
-        startMenuOriginY = self.windowSystem.height-self.taskBarHeight-self.startMenuHeight
-        relativeY = y - startMenuOriginY
-
-        item = int(relativeY / self.startMenuItemHeight)
-
+        item = self.startMenuItemAtY(y)
         if item == 0:
             HelloWorldApp(self.windowSystem)
         elif item == 1:
@@ -261,6 +263,17 @@ class WindowManager:
             CalculatorApp(self.windowSystem)
         elif item == 3:
             ResizingApp(self.windowSystem)
+        elif item == 4:
+            quit()
+
+    def handleStartMenuHovered(self, y):
+        self.startMenuItemHovered = self.startMenuItemAtY(y)
+
+    def startMenuItemAtY(self, y):
+        startMenuOriginY = self.windowSystem.height - self.taskBarHeight - self.startMenuHeight
+        relativeY = y - startMenuOriginY
+
+        return int(relativeY / self.startMenuItemHeight)
 
 
 
