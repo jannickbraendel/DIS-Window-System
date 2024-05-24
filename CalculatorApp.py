@@ -7,28 +7,8 @@ from UITK import *
 
 
 def floatToString(num):
-    return str(f"{num:.4f}")
-
-
-def format_number(num):
-    try:
-        dec = decimal.Decimal(num)
-    except:
-        return 'bad'
-    tup = dec.as_tuple()
-    delta = len(tup.digits) + tup.exponent
-    digits = ''.join(str(d) for d in tup.digits)
-    if delta <= 0:
-        zeros = abs(tup.exponent) - len(tup.digits)
-        val = '0.' + ('0' * zeros) + digits
-    else:
-        val = digits[:delta] + ('0' * tup.exponent) + '.' + digits[delta:]
-    val = val.rstrip('0')
-    if val[-1] == '.':
-        val = val[:-1]
-    if tup.sign:
-        return '-' + val
-    return val
+    num = round(num, 4)
+    return f'{num:g}'
 
 
 class CalculatorApp:
@@ -39,11 +19,15 @@ class CalculatorApp:
         self.appWindow.setBackgroundColor("#3b3b3b")
         self.windowSystem.screen.addChildWindow(self.appWindow)
 
+        self.buttons = []
+
         self.inputLabel = None
         # temporarily stores the current result of the calculation
         self.currentResult = 0
         # boolean that is true if input should be overridden
         self.overrideInput = True
+        # boolean that is true if arithmetic operation is running -> e.g. "=" button can not be pressed
+        self.inOperation = False
         self.drawWidgets()
 
     def drawWidgets(self):
@@ -70,35 +54,34 @@ class CalculatorApp:
                                 fontColor=COLOR_WHITE, font=Font(family="Helvetica", size=14, weight=BOLD),
                                 borderColor=COLOR_BLACK)
                 button.action = partial(self.handleInput, button.text)
-                if i == 0:
-                    # first row
-                    if not j == 3:
-                        # first three buttons in row
-                        button.setBackgroundColor("#B4B4B8")
-                    else:
-                        # last button in row
-                        button.setBackgroundColor("#FFC100")
+                if i == 0 and j != 3:
+                    # First row, first three buttons
+                    button.setBackgroundColor("#B4B4B8")
+                elif j == 3:
+                    # operation buttons
+                    button.setBackgroundColor("#FFC100")
                 else:
-                    # other rows
-                    if not j == 3:
-                        # first three buttons in row
-                        button.setBackgroundColor("#C07F00")
-                    else:
-                        # last button in row
-                        button.setBackgroundColor("#FFC100")
+                    # First three buttons in rows 2 to
+                    button.setBackgroundColor("#C07F00")
+                self.buttons.append(button)
                 self.appWindow.addChildWindow(button)
                 buttonRow.append(button)
 
             buttonRowContainer = Container(10, 100 + i * 50, self.appWindow.width - 20, 40, "horContainer" + str(i),
-                                           layoutAnchors=LayoutAnchor.left | LayoutAnchor.top, horizontalDist=True,
+                                           layoutAnchors=LayoutAnchor.top | LayoutAnchor.left, horizontalDist=True,
                                            containerWindows=buttonRow, spacing=10)
             self.appWindow.addChildWindow(buttonRowContainer)
             buttonRowContainers.append(buttonRowContainer)
 
-        # TODO: Add vertical container for rowContainers
+        # Add vertical container for rowContainers
+        buttonContainer = Container(10, 100, self.appWindow.width - 20, self.appWindow.height - 110, "vertContainer",
+                                    layoutAnchors=LayoutAnchor.bottom, horizontalDist=False, containerWindows=buttonRowContainers, spacing=10)
+        self.appWindow.addChildWindow(buttonContainer)
 
     def handleInput(self, char):
-        numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]
+        operations = ["+", "-", "*", "/"]
+        # string value which is displayed
         inputText = self.inputLabel.text
         if char in numbers:
             if inputText == "0" or self.overrideInput:
@@ -106,21 +89,21 @@ class CalculatorApp:
                 self.overrideInput = False
             else:
                 inputText += char
-        elif char == "+":
-            inputText = self.add()
-            self.overrideInput = True
-        elif char == "-":
-            inputText = self.subtract()
-            self.overrideInput = True
-        elif char == "*":
-            inputText = self.multiply()
-            self.overrideInput = True
-        elif char == "/":
-            inputText = self.divide()
+        elif char in operations:
+            if char == "+":
+                inputText = self.add()
+            elif char == "-":
+                inputText = self.subtract()
+            elif char == "*":
+                inputText = self.multiply()
+            elif char == "/":
+                inputText = self.divide()
             self.overrideInput = True
         elif char == "%":
             inputText = self.percent()
         elif char == "AC":
+            # remove marking of operation buttons
+            self.changeOperationColor()
             # reset calculator to 0
             inputText = "0"
             self.currentResult = 0
@@ -131,29 +114,50 @@ class CalculatorApp:
                 else:
                     inputText = inputText[:-1]
         elif char == "=":
-            # display result
-            inputText = floatToString(self.currentResult)
-        inputText = format_number(round(float(inputText), 4))
+            # remove marking of operation buttons
+            self.changeOperationColor()
+            if not self.overrideInput:
+                # display result
+                # TODO: Not working correctly
+                inputText = floatToString(self.currentResult)
+
         self.inputLabel.text = inputText
 
     def add(self):
-        if "." in self.inputLabel.text:
-            self.currentResult += float(self.inputLabel.text)
-        else:
-            self.currentResult += int(self.inputLabel.text)
-
+        self.changeOperationColor(0)
+        self.currentResult += float(self.inputLabel.text)
         return floatToString(self.currentResult)
 
     def subtract(self):
-        return 0
+        self.changeOperationColor(1)
+        self.currentResult -= float(self.inputLabel.text)
+        return floatToString(self.currentResult)
 
     def multiply(self):
-        return 0
+        self.changeOperationColor(2)
+        self.currentResult *= float(self.inputLabel.text)
+        return floatToString(self.currentResult)
 
     def divide(self):
-        return 0
+        self.changeOperationColor(3)
+        self.currentResult /= float(self.inputLabel.text)
+        return floatToString(self.currentResult)
 
     def percent(self):
-        # divides current number by 100 and presents float with two
+        # divides current number by 100
         res = float(self.inputLabel.text) / 100
         return floatToString(res)
+
+    def changeOperationColor(self, opNum=None):
+        # TODO: Background color is overridden somewhere..
+        # operation numbers: 3 - Add, 2 - Subtract, 1 - Multiply, 0 - Divide, None - No operation
+        operationButtons = [self.buttons[15], self.buttons[11], self.buttons[7], self.buttons[3]]
+        # reset background colors for all op buttons:
+        for button in operationButtons:
+            button.setBackgroundColor("#FFC100")
+
+        if opNum is None:
+            return
+
+        # mark selected operation
+        operationButtons[opNum].setBackgroundColor(COLOR_ORANGE)
