@@ -6,10 +6,13 @@ Window System - Submission
 by  Felix Umland (#406886)
 and Jannick Brändel (#405391)
 """
+import datetime
+
 from ColorsApp import ColorsApp
 from CalculatorApp import CalculatorApp
 from GraphicsEventSystem import *
 from ResizingApp import ResizingApp
+from Wallpaper import draw_wallpaper
 from Window import *
 from HelloWorldApp import HelloWorldApp
 
@@ -156,8 +159,12 @@ class WindowManager:
 
     def drawDesktop(self, ctx):
         # desktop is filled with light blue color
-        ctx.setFillColor(COLOR_LIGHT_BLUE)
-        ctx.fillRect(0, 0, self.windowSystem.width, self.windowSystem.height)
+        # ctx.setFillColor(COLOR_LIGHT_BLUE)
+        # ctx.fillRect(0, 0, self.windowSystem.width, self.windowSystem.height)
+
+        # draw wallpaper
+        draw_wallpaper(ctx)
+
 
     def drawTaskbar(self, ctx):
         # TODO: Border around icon buttons only when the window is selected not everywhere
@@ -170,16 +177,27 @@ class WindowManager:
         ctx.strokeRect(0, 0, self.windowSystem.width, self.taskBarHeight)
 
         # draw start menu button
-        # ctx.setFillColor("#BDBDBD")
-        # ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
-        # Add button stroke
-        ctx.setStrokeColor(COLOR_WHITE)
-        ctx.drawLine(0, 0, self.taskBarHeight, 0)
-        ctx.drawLine(0, 0, 0, self.taskBarHeight)
+        if self.startMenuVisible:
+            ctx.setFillColor("#DDDDDD")
+            ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
+            # Add button stroke
+            ctx.setStrokeColor(COLOR_BLACK)
+            ctx.drawLine(0, 0, self.taskBarHeight, 0)
+            ctx.drawLine(0, 0, 0, self.taskBarHeight)
+            ctx.setStrokeColor(COLOR_WHITE)
+            ctx.drawLine(0, self.taskBarHeight, self.taskBarHeight, self.taskBarHeight)
+            ctx.drawLine(self.taskBarHeight, 0, self.taskBarHeight, self.taskBarHeight)
+        else:
+            ctx.setFillColor("#BDBDBD")
+            ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
+            # Add button stroke
+            ctx.setStrokeColor(COLOR_WHITE)
+            ctx.drawLine(0, 0, self.taskBarHeight, 0)
+            ctx.drawLine(0, 0, 0, self.taskBarHeight)
+            ctx.setStrokeColor(COLOR_BLACK)
+            ctx.drawLine(0, self.taskBarHeight, self.taskBarHeight, self.taskBarHeight)
+            ctx.drawLine(self.taskBarHeight, 0, self.taskBarHeight, self.taskBarHeight)
 
-        ctx.setStrokeColor(COLOR_BLACK)
-        ctx.drawLine(0, self.taskBarHeight, self.taskBarHeight, self.taskBarHeight)
-        ctx.drawLine(self.taskBarHeight, 0, self.taskBarHeight, self.taskBarHeight)
 
         # Add start menu icon
         ctx.setFillColor(COLOR_RED)
@@ -191,6 +209,14 @@ class WindowManager:
         ctx.setFillColor(COLOR_YELLOW)
         ctx.fillRect(self.taskBarHeight / 2, self.taskBarHeight / 2, self.taskBarHeight / 4 * 3, self.taskBarHeight / 4 * 3)
 
+        # draw date and time
+        # not sure if we are allowed to do this lol
+        # todo: maybe remove
+        dateStr = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+        ctx.setStrokeColor(COLOR_BLACK)
+        ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
+        ctx.drawString(dateStr, self.windowSystem.width - 250, self.taskBarHeight / 4)
+
         # draw window icons
         curX, curY = (self.taskBarHeight + 1, self.windowSystem.height - self.taskBarHeight)
         topLevelWindows = self.windowSystem.screen.childWindows
@@ -199,22 +225,38 @@ class WindowManager:
         # add icon for each top level window
         for topLevelWindow in topLevelWindowsSorted:
             ctx.setOrigin(curX, curY)
-            ctx.setStrokeColor(COLOR_BLACK)
-            ctx.strokeRect(0, 0, self.taskBarHeight, self.taskBarHeight)
+            # todo: we still need to enforce unique identifiers so that this doesn't highlight multiple instances of the same app
             windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == topLevelWindow.identifier
             if windowIsSelected:
                 # window is selected
-                ctx.setFillColor(COLOR_DARK_GREEN)
+                ctx.setFillColor("#DDDDDD")
                 ctx.setStrokeColor(COLOR_WHITE)
             else:
                 # window is in the background
-                ctx.setFillColor(COLOR_LIGHT_GREEN)
-                ctx.setStrokeColor(COLOR_WHITE)
-
+                ctx.setFillColor("#BDBDBD")
+                ctx.setStrokeColor(COLOR_BLACK)
+            # icon background
             ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
+            # icon letter
             windowIcon = topLevelWindow.identifier[0]
             ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
             ctx.drawString(windowIcon, self.taskBarHeight * 0.23, self.taskBarHeight * 0.1)
+
+            # Add button stroke
+            if windowIsSelected:
+                ctx.setStrokeColor(COLOR_BLACK)
+                ctx.drawLine(0, 0, self.taskBarHeight, 0)
+                ctx.drawLine(0, 0, 0, self.taskBarHeight)
+                ctx.setStrokeColor(COLOR_WHITE)
+                ctx.drawLine(0, self.taskBarHeight, self.taskBarHeight, self.taskBarHeight)
+                ctx.drawLine(self.taskBarHeight, 0, self.taskBarHeight, self.taskBarHeight)
+            else:
+                ctx.setStrokeColor(COLOR_WHITE)
+                ctx.drawLine(0, 0, self.taskBarHeight, 0)
+                ctx.drawLine(0, 0, 0, self.taskBarHeight)
+                ctx.setStrokeColor(COLOR_BLACK)
+                ctx.drawLine(0, self.taskBarHeight, self.taskBarHeight, self.taskBarHeight)
+                ctx.drawLine(self.taskBarHeight, 0, self.taskBarHeight, self.taskBarHeight)
 
             curX += self.taskBarHeight + 1
 
@@ -266,7 +308,10 @@ class WindowManager:
             self.drawStartMenuIcon(i, ctx)
 
             # App String
-            ctx.setStrokeColor(COLOR_BLACK)
+            if self.startMenuItemHovered == i:
+                ctx.setStrokeColor(COLOR_WHITE)
+            else:
+                ctx.setStrokeColor(COLOR_BLACK)
             ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
             ctx.drawString(self.apps[i], itemSpacing * 2 + iconSize, i * self.startMenuItemHeight + self.startMenuItemHeight / 4)
 
