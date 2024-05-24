@@ -62,10 +62,10 @@ class WindowManager:
         windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == window.identifier
         if windowIsSelected:
             # window is selected
-            titleBar.setBackgroundColor(COLOR_DARK_GREEN)
+            titleBar.setBackgroundColor("#063EA4")
         else:
             # window is in the background
-            titleBar.setBackgroundColor(COLOR_LIGHT_GREEN)
+            titleBar.setBackgroundColor("#959595")
         # append title bar to window
         window.addChildWindow(titleBar)
         # remove old title bar if already existing
@@ -81,7 +81,7 @@ class WindowManager:
         buttonWidth = self.titleBarButtonWidth
         buttonHeight = self.titleBarHeight - 8
         distanceBetweenButtons = 5
-
+        # todo: remove maximize button because we dont need it (and it doesn't do anything)
         closeButton = Window(titleBar.width - buttonWidth - distanceBetweenButtons, 4, buttonWidth, buttonHeight, titleBar.identifier + " - Close Button")
         maximizeButton = Window(titleBar.width - (2 * buttonWidth + 2 * distanceBetweenButtons), 4, buttonWidth, buttonHeight, titleBar.identifier + " - Maximize Button")
         minimizeButton = Window(titleBar.width - (3 * buttonWidth + 3 * distanceBetweenButtons), 4, buttonWidth, buttonHeight, titleBar.identifier + " - Minimize Button")
