@@ -9,6 +9,7 @@ and Jannick Brändel (#405391)
 from ColorsApp import ColorsApp
 from CalculatorApp import CalculatorApp
 from GraphicsEventSystem import *
+from ResizingApp import ResizingApp
 from Window import *
 from HelloWorldApp import HelloWorldApp
 
@@ -259,7 +260,7 @@ class WindowManager:
         elif item == 2:
             CalculatorApp(self.windowSystem)
         elif item == 3:
-            pass
+            ResizingApp(self.windowSystem)
 
 
 
