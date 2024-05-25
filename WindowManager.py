@@ -17,6 +17,42 @@ from Window import *
 from HelloWorldApp import HelloWorldApp
 
 
+def drawTaskbarIcon(identifier, ctx):
+    if "HelloWorld" in identifier:
+        # Draw "H"
+        # Hello World App
+        ctx.setFont(Font(family="Helvetica", size=25, weight="bold"))
+        ctx.setStrokeColor(COLOR_BLACK)
+        ctx.drawString("H", 7, 5)
+    elif "Colors" in identifier:
+        # red line
+        # ctx.setFillColor("#D80000")
+        ctx.setFillColor(COLOR_BLACK)
+        ctx.fillRect(10, 5, 25, 10)
+        # green line
+        # ctx.setFillColor("#0EB102")
+        ctx.fillRect(10, 15, 25, 20)
+        # blue line
+        # ctx.setFillColor("#0001F8")
+        ctx.fillRect(10, 25, 25, 30)
+    elif "Calculator" in identifier:
+        ctx.setFillColor(COLOR_BLACK)
+        # Top dot
+        ctx.fillRect(12.5, 5, 21, 12.5)
+        # Middle Line
+        ctx.fillRect(5, 15, 30, 20)
+        # Bottom dot
+        ctx.fillRect(12.5, 22.5, 21, 30)
+    elif "Resizing" in identifier:
+        ctx.setFillColor(COLOR_BLACK)
+        # Top Left Bracket
+        ctx.fillRect(5, 5, 20, 10)
+        ctx.fillRect(5, 5, 10, 20)
+        # Bottom Right Bracket
+        ctx.fillRect(15, 25, 30, 30)
+        ctx.fillRect(25, 15, 30, 30)
+
+
 class WindowManager:
     def __init__(self, windowSystem):
         self.windowSystem = windowSystem
@@ -126,8 +162,8 @@ class WindowManager:
         ctx.setStrokeColor(COLOR_WHITE)
         ctx.setFont(Font(family="Helvetica", size=10, weight="bold"))
         if window.width > 100:
-            # draw full title as window is wide enough
-            ctx.drawString(window.identifier, 3, 1)
+            # draw full title (without instance number) as window is wide enough
+            ctx.drawString(window.identifier.split(" ", 1)[1], 3, 1)
         else:
             # draw first letters of identifier
             ctx.drawString(window.identifier[:3], 3, 1)
@@ -222,9 +258,10 @@ class WindowManager:
         curX, curY = (self.taskBarHeight + 1, self.windowSystem.height - self.taskBarHeight)
         topLevelWindows = self.windowSystem.screen.childWindows
         # sort windows alphabetically to have fixed order of icons
-        topLevelWindowsSorted = sorted(topLevelWindows, key=lambda x: x.identifier)
+        # topLevelWindowsSorted = sorted(topLevelWindows, key=lambda x: x.identifier)
         # add icon for each top level window
-        for topLevelWindow in topLevelWindowsSorted:
+        for app in self.windowSystem.apps:
+            topLevelWindow = app.appWindow
             ctx.setOrigin(curX, curY)
             # todo: we still need to enforce unique identifiers so that this doesn't highlight multiple instances of the same app
             windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == topLevelWindow.identifier
@@ -238,10 +275,13 @@ class WindowManager:
                 ctx.setStrokeColor(COLOR_BLACK)
             # icon background
             ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
-            # icon letter
-            windowIcon = topLevelWindow.identifier[0]
-            ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
-            ctx.drawString(windowIcon, self.taskBarHeight * 0.23, self.taskBarHeight * 0.1)
+            # draw icon string
+            # windowIcon = topLevelWindow.identifier.split(" ", 1)[1][0]
+            # ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
+            # ctx.drawString(windowIcon, self.taskBarHeight * 0.23, self.taskBarHeight * 0.1)
+
+            # draw app icon
+            drawTaskbarIcon(topLevelWindow.identifier, ctx)
 
             # Add button stroke
             if windowIsSelected:
@@ -263,7 +303,7 @@ class WindowManager:
 
     def handleTaskBarClicked(self, x):
         topLevelWindows = self.windowSystem.screen.childWindows
-        topLevelWindowsSorted = sorted(topLevelWindows, key=lambda win: win.identifier)
+        # topLevelWindowsSorted = sorted(topLevelWindows, key=lambda win: win.identifier)
         # counter goes through taskbar icons and stops when it reaches the x parameter, so we know which icon was clicked
         xCounter = self.taskBarHeight + 1
         iconIndex = 0
@@ -277,7 +317,7 @@ class WindowManager:
             self.startMenuVisible = not self.startMenuVisible
         else:
             # selected window is brought to front or reopened if minimized before
-            window = topLevelWindowsSorted[iconIndex-1]
+            window = self.windowSystem.apps[iconIndex-1].appWindow
             window.isHidden = False
             self.windowSystem.bringWindowToFront(window)
             self.windowSystem.requestRepaint()
@@ -373,17 +413,21 @@ class WindowManager:
             ctx.drawLine(x + 5, y + 5, x + 30, y + 30)
             ctx.drawLine(x+ 30, y + 5, x + 5, y + 30)
 
-
+    # todo: offset new window position if there already is a window at that position
     def handleStartMenuClicked(self, y):
         item = self.startMenuItemAtY(y)
         if item == 0:
-            HelloWorldApp(self.windowSystem)
+            app = HelloWorldApp(self.windowSystem)
+            self.windowSystem.apps.append(app)
         elif item == 1:
-            ColorsApp(self.windowSystem)
+            app = ColorsApp(self.windowSystem)
+            self.windowSystem.apps.append(app)
         elif item == 2:
-            CalculatorApp(self.windowSystem)
+            app = CalculatorApp(self.windowSystem)
+            self.windowSystem.apps.append(app)
         elif item == 3:
-            ResizingApp(self.windowSystem)
+            app = ResizingApp(self.windowSystem)
+            self.windowSystem.apps.append(app)
         elif item == 4:
             quit()
 
@@ -437,6 +481,10 @@ class WindowManager:
     def closeWindow(self, window):
         window.removeFromParentWindow()
         self.windowSystem.requestRepaint()
+        # remove app from the open apps list
+        for app in self.windowSystem.apps:
+            if app.appWindow.identifier == window.identifier:
+                self.windowSystem.apps.remove(app)
 
     def minimizeWindow(self, window):
         window.isHidden = True

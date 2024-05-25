@@ -22,15 +22,11 @@ def rgb_to_hex(red, green, blue):
 class ColorsApp:
     def __init__(self, windowSystem):
         self.windowSystem = windowSystem
-        self.appWindow = Window(700,100, 300, 500, "Colors App")
+        identifier = "Colors"
+        self.appWindow = Window(700,100, 300, 500, self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
         self.appWindow.setBackgroundColor(COLOR_WHITE)
         self.windowSystem.screen.addChildWindow(self.appWindow)
         self.hexLabel = None
-
-        # Initialize Colors
-        # self.red = 0
-        # self.green = 0
-        # self.blue = 0
 
         self.sliders = []
         self.drawWidgets()
@@ -39,7 +35,8 @@ class ColorsApp:
     def drawWidgets(self):
         # Sliders
         for i in range(3):
-            slider = Slider(0, 0, self.appWindow.width*0.8, 20, "Slider" + str(i+1), LayoutAnchor.top | LayoutAnchor.left | LayoutAnchor.right, 0, self.updateColors)
+            slider = Slider(0, 0, self.appWindow.width*0.8, 20, "Slider" + str(i+1),
+                        LayoutAnchor.top | LayoutAnchor.left | LayoutAnchor.right, 0, self.updateColors)
             self.sliders.append(slider)
             self.appWindow.addChildWindow(slider)
 

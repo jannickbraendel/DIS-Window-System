@@ -23,8 +23,8 @@ class Operation(Enum):
 class CalculatorApp:
     def __init__(self, windowSystem):
         self.windowSystem = windowSystem
-
-        self.appWindow = Window(1200, 200, 220, 350, "Calculator")
+        identifier = "Calculator"
+        self.appWindow = Window(1200, 200, 220, 350, self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
         self.appWindow.setBackgroundColor("#3b3b3b")
         self.windowSystem.screen.addChildWindow(self.appWindow)
 
@@ -85,6 +85,7 @@ class CalculatorApp:
             buttonRowContainers.append(buttonRowContainer)
 
         # Add vertical container for rowContainers
+        # todo: Jannick fix resizing
         buttonContainer = Container(10, 100, self.appWindow.width - 20, self.appWindow.height - 110, "vertContainer",
                                     layoutAnchors=LayoutAnchor.bottom, horizontalDist=False,
                                     containerWindows=buttonRowContainers, spacing=10)

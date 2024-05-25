@@ -6,8 +6,9 @@ Window System - Submission
 by Felix Umland (#406886)
 and Jannick Brändel (#405391)
 """
-
+# todo: remove unused imports in all files
 import GraphicsEventSystem
+import re
 from CalculatorApp import CalculatorApp
 from ColorsApp import ColorsApp
 from HelloWorldApp import HelloWorldApp
@@ -42,6 +43,8 @@ class WindowSystem(GraphicsEventSystem):
         self.tempHoveredWindow = None
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
+        # list of apps
+        self.apps = []
     """
     WINDOW MANAGEMENT
     """
@@ -241,6 +244,19 @@ class WindowSystem(GraphicsEventSystem):
         focusedWindow = self.screen.childWindows[-1]
         if focusedWindow.identifier == "Calculator":
             self.calculatorApp.handleInput(char)
+
+    # When opening a new instance of an app, this function will be called
+    # it returns a unique instance number that is then used for the identifier
+    def getInstanceNumber(self, appName):
+        openInstances = 0
+        # check if the window is already open
+        for app in reversed(self.apps):
+            if appName in app.appWindow.identifier:
+                # find the highest instance number of this app
+                openInstances = int(re.findall("[0-9]+", app.appWindow.identifier)[0])
+                break
+        return str(openInstances + 1)
+
 
 
 # Let's start your window system!

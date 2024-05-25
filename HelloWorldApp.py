@@ -9,8 +9,9 @@ class HelloWorldApp:
     def __init__(self, windowSystem):
         self.windowSystem = windowSystem
         # add app as top-level window to window system
+        identifier = "HelloWorld"
         self.appWindow = Window(200, 200, self.windowSystem.width/2.5, self.windowSystem.height/2.5,
-                                "Hello World - Graphical")
+                                self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
         self.appWindow.setBackgroundColor(COLOR_LIGHT_GRAY)
         self.windowSystem.screen.addChildWindow(self.appWindow)
         self.greetLabel = None

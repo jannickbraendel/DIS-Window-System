@@ -5,7 +5,8 @@ from GraphicsEventSystem import *
 class ResizingApp:
     def __init__(self, windowSystem):
         self.windowSystem = windowSystem
-        self.appWindow = Window(400, 120, 300, 300, "Resizing Test")
+        identifier = "Resizing"
+        self.appWindow = Window(400, 120, 300, 300, self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
         self.appWindow.setBackgroundColor(COLOR_WHITE)
         self.windowSystem.screen.addChildWindow(self.appWindow)
         self.drawWindows()
