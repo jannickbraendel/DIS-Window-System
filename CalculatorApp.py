@@ -1,6 +1,6 @@
 import decimal
+from enum import Enum
 from functools import partial
-
 from GraphicsEventSystem import *
 from Window import *
 from UITK import *
@@ -9,6 +9,15 @@ from UITK import *
 def floatToString(num):
     num = round(num, 4)
     return f'{num:g}'
+
+
+# enum for arithmetic operations
+# Operation = Enum('Operation', ['ADD', 'SUBTRACT', 'MULTIPLY', 'DIVIDE'])
+class Operation(Enum):
+    ADD = 1
+    SUBTRACT = 2
+    MULTIPLY = 3
+    DIVIDE = 4
 
 
 class CalculatorApp:
@@ -25,9 +34,11 @@ class CalculatorApp:
         # temporarily stores the current result of the calculation
         self.currentResult = 0
         # boolean that is true if input should be overridden
-        self.overrideInput = True
-        # boolean that is true if arithmetic operation is running -> e.g. "=" button can not be pressed
-        self.inOperation = False
+        self.overrideInput = False
+        # store previous operation, which is executed after next function call
+        self.prevOperation = None
+        # store previous input to check edge cases
+        self.prevInput = None
         self.drawWidgets()
 
     def drawWidgets(self):
@@ -75,72 +86,96 @@ class CalculatorApp:
 
         # Add vertical container for rowContainers
         buttonContainer = Container(10, 100, self.appWindow.width - 20, self.appWindow.height - 110, "vertContainer",
-                                    layoutAnchors=LayoutAnchor.bottom, horizontalDist=False, containerWindows=buttonRowContainers, spacing=10)
+                                    layoutAnchors=LayoutAnchor.bottom, horizontalDist=False,
+                                    containerWindows=buttonRowContainers, spacing=10)
         self.appWindow.addChildWindow(buttonContainer)
 
     def handleInput(self, char):
         numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]
-        operations = ["+", "-", "*", "/"]
-        # string value which is displayed
+        operations = ["+", "-", "x", "/"]
+        # temporarily store string value which is displayed
         inputText = self.inputLabel.text
+
+        # check if ERROR is displayed and don't do anything except if AC is pressed
+        if inputText == "ERROR" and char != "AC":
+            return
+
         if char in numbers:
-            if inputText == "0" or self.overrideInput:
+            if (inputText == "0" and char != ".") or self.overrideInput:
+                # override input text after operation button or reset
                 inputText = char
                 self.overrideInput = False
             else:
                 inputText += char
+
         elif char in operations:
+            if self.prevInput not in ["+", "-", "x", "/"]:
+                # perform previous Operation, BUT if the user clicked on another operation button before,
+                # only update but not perform operation
+                inputText = self.performPreviousOperation()
+            # store current operation to last operation variable and color it
             if char == "+":
-                inputText = self.add()
+                self.prevOperation = Operation.ADD
+                self.changeOperationColor(Operation.ADD.value)
             elif char == "-":
-                inputText = self.subtract()
-            elif char == "*":
-                inputText = self.multiply()
+                self.prevOperation = Operation.SUBTRACT
+                self.changeOperationColor(Operation.SUBTRACT.value)
+            elif char == "x":
+                self.prevOperation = Operation.MULTIPLY
+                self.changeOperationColor(Operation.MULTIPLY.value)
             elif char == "/":
-                inputText = self.divide()
+                self.prevOperation = Operation.DIVIDE
+                self.changeOperationColor(Operation.DIVIDE.value)
+
+            # lets user override label with next input
             self.overrideInput = True
         elif char == "%":
             inputText = self.percent()
-        elif char == "AC":
+        elif char == "+/-":
+            inputText = self.negate()
+        elif char == "=":
             # remove marking of operation buttons
             self.changeOperationColor()
-            # reset calculator to 0
-            inputText = "0"
-            self.currentResult = 0
+            # display result
+            inputText = self.performPreviousOperation()
+
         elif char == "C":
             if not inputText == "0":
                 if len(inputText) == 1:
                     inputText = "0"
                 else:
                     inputText = inputText[:-1]
-        elif char == "=":
+        elif char == "AC":
             # remove marking of operation buttons
             self.changeOperationColor()
-            if not self.overrideInput:
-                # display result
-                # TODO: Not working correctly
-                inputText = floatToString(self.currentResult)
+            # reset calculator
+            inputText = "0"
+            self.currentResult = 0.0
+            self.prevOperation = None
+            self.prevInput = None
 
+        # set label text to updated inputText
         self.inputLabel.text = inputText
+        # update previous input
+        self.prevInput = char
 
-    def add(self):
-        self.changeOperationColor(0)
-        self.currentResult += float(self.inputLabel.text)
-        return floatToString(self.currentResult)
+    def performPreviousOperation(self):
+        # perform last operation on current result or set current result (if last operation is None)
+        fInputText = float(self.inputLabel.text)
+        if self.prevOperation is None:
+            self.currentResult = fInputText
+        elif self.prevOperation.name == 'ADD':
+            self.currentResult += fInputText
+        elif self.prevOperation.name == 'SUBTRACT':
+            self.currentResult -= fInputText
+        elif self.prevOperation.name == 'MULTIPLY':
+            self.currentResult *= fInputText
+        elif self.prevOperation.name == 'DIVIDE':
+            if fInputText == 0.0:
+                return "ERROR"
+            self.currentResult /= fInputText
 
-    def subtract(self):
-        self.changeOperationColor(1)
-        self.currentResult -= float(self.inputLabel.text)
-        return floatToString(self.currentResult)
-
-    def multiply(self):
-        self.changeOperationColor(2)
-        self.currentResult *= float(self.inputLabel.text)
-        return floatToString(self.currentResult)
-
-    def divide(self):
-        self.changeOperationColor(3)
-        self.currentResult /= float(self.inputLabel.text)
+        # set input label to temporary result
         return floatToString(self.currentResult)
 
     def percent(self):
@@ -148,16 +183,27 @@ class CalculatorApp:
         res = float(self.inputLabel.text) / 100
         return floatToString(res)
 
+    def negate(self):
+        # switch positive number to negative number and vice versa
+        fInputText = float(self.inputLabel.text)
+        if fInputText == 0:
+            res = 0
+        else:
+            res = -fInputText
+        return floatToString(res)
+
     def changeOperationColor(self, opNum=None):
-        # TODO: Background color is overridden somewhere..
-        # operation numbers: 3 - Add, 2 - Subtract, 1 - Multiply, 0 - Divide, None - No operation
+        # operation numbers: 1 - Add, 2 - Subtract, 3 - Multiply, 4 - Divide, None - No operation
         operationButtons = [self.buttons[15], self.buttons[11], self.buttons[7], self.buttons[3]]
         # reset background colors for all op buttons:
         for button in operationButtons:
-            button.setBackgroundColor("#FFC100")
+            # button.setBackgroundColor("#FFC100")
+            button.tempBackgroundColor = "#FFC100"
 
+        # all buttons reset to old bg color
         if opNum is None:
             return
 
         # mark selected operation
-        operationButtons[opNum].setBackgroundColor(COLOR_ORANGE)
+        # operationButtons[opNum].setBackgroundColor(COLOR_ORANGE)
+        operationButtons[opNum - 1].tempBackgroundColor = COLOR_ORANGE

@@ -177,8 +177,6 @@ class Button(Label):
         if self.action is not None:
             self.action()
         self.changeState("HOVERED")
-        print("button clicked")
-
 
     def changeState(self, state):
         if self.state == "NORMAL" and state == "HOVERED":
