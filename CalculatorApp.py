@@ -194,6 +194,7 @@ class CalculatorApp:
         return floatToString(res)
 
     def changeOperationColor(self, opNum=None):
+        # TODO: Not handled correctly for keyboard input (tempBackgroundColor not the correct way to handle this)
         # operation numbers: 1 - Add, 2 - Subtract, 3 - Multiply, 4 - Divide, None - No operation
         operationButtons = [self.buttons[15], self.buttons[11], self.buttons[7], self.buttons[3]]
         # reset background colors for all op buttons:
