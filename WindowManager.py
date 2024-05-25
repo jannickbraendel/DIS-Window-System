@@ -17,25 +17,25 @@ from Window import *
 from HelloWorldApp import HelloWorldApp
 
 
+# Draws monochrome versions of the app icons, used for the taskbar
 def drawTaskbarIcon(identifier, ctx):
     if "HelloWorld" in identifier:
-        # Draw "H"
         # Hello World App
+        # Draw "H"
         ctx.setFont(Font(family="Helvetica", size=25, weight="bold"))
         ctx.setStrokeColor(COLOR_BLACK)
         ctx.drawString("H", 7, 5)
     elif "Colors" in identifier:
-        # red line
-        # ctx.setFillColor("#D80000")
+        # Colors App
         ctx.setFillColor(COLOR_BLACK)
+        # Line 1
         ctx.fillRect(10, 5, 25, 10)
-        # green line
-        # ctx.setFillColor("#0EB102")
+        # Line 2
         ctx.fillRect(10, 15, 25, 20)
-        # blue line
-        # ctx.setFillColor("#0001F8")
+        # Line 3
         ctx.fillRect(10, 25, 25, 30)
     elif "Calculator" in identifier:
+        # Calculator App
         ctx.setFillColor(COLOR_BLACK)
         # Top dot
         ctx.fillRect(12.5, 5, 21, 12.5)
@@ -44,6 +44,7 @@ def drawTaskbarIcon(identifier, ctx):
         # Bottom dot
         ctx.fillRect(12.5, 22.5, 21, 30)
     elif "Resizing" in identifier:
+        # Resizing Test App
         ctx.setFillColor(COLOR_BLACK)
         # Top Left Bracket
         ctx.fillRect(5, 5, 20, 10)
@@ -254,7 +255,6 @@ class WindowManager:
         ctx.drawString(dateStr, self.windowSystem.width - 250, self.taskBarHeight / 4)
 
         # draw window icons
-        # todo: add icons to taskbar buttons
         curX, curY = (self.taskBarHeight + 1, self.windowSystem.height - self.taskBarHeight)
         topLevelWindows = self.windowSystem.screen.childWindows
         # sort windows alphabetically to have fixed order of icons
@@ -263,7 +263,6 @@ class WindowManager:
         for app in self.windowSystem.apps:
             topLevelWindow = app.appWindow
             ctx.setOrigin(curX, curY)
-            # todo: we still need to enforce unique identifiers so that this doesn't highlight multiple instances of the same app
             windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == topLevelWindow.identifier
             if windowIsSelected:
                 # window is selected
@@ -341,12 +340,6 @@ class WindowManager:
                 ctx.setFillColor("#030280")
                 y = (i * self.startMenuItemHeight)
                 ctx.fillRect(0, y, self.startMenuWidth, y + self.startMenuItemHeight)
-
-            # App Icon
-            # ctx.setFillColor(COLOR_RED)
-            # x = itemSpacing
-            # y = i * self.startMenuItemHeight + (self.startMenuItemHeight - iconSize) / 2
-            # ctx.fillRect(x, y, x + iconSize, y + iconSize)
 
             self.drawStartMenuIcon(i, ctx)
 
