@@ -235,6 +235,9 @@ class WindowSystem(GraphicsEventSystem):
             )
 
     def handleKeyPressed(self, char):
+        # TODO: Fix Keyboard input for calculator (check self.apps) and replace AC by A, etc.
+        if len(self.screen.childWindows) == 0:
+            return
         focusedWindow = self.screen.childWindows[-1]
         if focusedWindow.identifier == "Calculator":
             self.calculatorApp.handleInput(char)
