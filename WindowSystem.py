@@ -166,9 +166,9 @@ class WindowSystem(GraphicsEventSystem):
                     else:
                         clickedWindow.handleMouseClicked(x, y)
                         self.requestRepaint()
-        else:
-            if isinstance(self.tempMouseDownWindow, Slider):
-                self.tempMouseDownWindow.changeState("NORMAL")
+
+        if isinstance(self.tempMouseDownWindow, Slider):
+            self.tempMouseDownWindow.changeState("NORMAL")
 
         # reset temp variables
         self.tempMouseDownWindow = None
