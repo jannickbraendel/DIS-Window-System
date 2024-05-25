@@ -83,7 +83,6 @@ class Container(Widget):
                 # as window's height changed, check if it reaches out of parent window
                 window.isHidden = window.x + window.width > window.parentWindow.width or window.y + window.height > window.parentWindow.height
             # container width is the same as the maximum container window height
-            # self.width = max(window.width for window in self.containerWindows)
 
     def draw(self, ctx):
         super().draw(ctx)
@@ -178,8 +177,6 @@ class Button(Label):
         if self.action is not None:
             self.action()
         self.changeState("HOVERED")
-        print("button clicked")
-
 
     def changeState(self, state):
         if self.state == "NORMAL" and state == "HOVERED":
