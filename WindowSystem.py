@@ -44,13 +44,13 @@ class WindowSystem(GraphicsEventSystem):
         self.mouseClickTolerance = 2
 
         # start Hello World App
-        helloWorldApp = HelloWorldApp(self)
+        self.helloWorldApp = HelloWorldApp(self)
 
         # start colors app
-        colorsApp = ColorsApp(self)
+        self.colorsApp = ColorsApp(self)
 
         # start calculator app
-        calculatorApp = CalculatorApp(self)
+        self.calculatorApp = CalculatorApp(self)
 
         # add a few test windows
         window2 = Window(40, 40, 250, 250, "Second Window")
@@ -278,7 +278,9 @@ class WindowSystem(GraphicsEventSystem):
             )
 
     def handleKeyPressed(self, char):
-        pass
+        focusedWindow = self.screen.childWindows[-1]
+        if focusedWindow.identifier == "Calculator":
+            self.calculatorApp.handleInput(char)
 
 
 # Let's start your window system!

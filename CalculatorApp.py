@@ -138,7 +138,8 @@ class CalculatorApp:
             self.changeOperationColor()
             # display result
             inputText = self.performPreviousOperation()
-
+            # reset prevOperation
+            self.prevOperation = None
         elif char == "C":
             if not inputText == "0":
                 if len(inputText) == 1:
