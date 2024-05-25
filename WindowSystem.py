@@ -177,6 +177,7 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleMouseMoved(self, x, y):
         hoveredWindow = self.screen.childWindowAtLocation(x, y)
+        # todo: fix when there is a window behind the start menu
         if hoveredWindow.identifier == "SCREEN":
             if (self.windowManager.startMenuVisible and x <= self.windowManager.startMenuWidth
                 and self.height - self.windowManager.startMenuHeight - self.windowManager.taskBarHeight <= y <= self.height - self.windowManager.taskBarHeight):

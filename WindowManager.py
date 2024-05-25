@@ -218,6 +218,7 @@ class WindowManager:
         ctx.drawString(dateStr, self.windowSystem.width - 250, self.taskBarHeight / 4)
 
         # draw window icons
+        # todo: add icons to taskbar buttons
         curX, curY = (self.taskBarHeight + 1, self.windowSystem.height - self.taskBarHeight)
         topLevelWindows = self.windowSystem.screen.childWindows
         # sort windows alphabetically to have fixed order of icons
