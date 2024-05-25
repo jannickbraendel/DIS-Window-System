@@ -60,11 +60,12 @@ class Container(Widget):
                 window.x = currentX
                 window.y = self.y
                 window.width = conWindowWidth
+                window.height = self.height
                 currentX += window.width + self.spacing
                 # as window's width changed, check if it reaches out of parent window
                 window.isHidden = window.x + window.width > window.parentWindow.width or window.y + window.height > window.parentWindow.height
             # container height is the same as the maximum container window height
-            self.height = max(window.height for window in self.containerWindows)
+            # self.height = max(window.height for window in self.containerWindows)
         else:
             # DISTRIBUTE VERTICALLY
             # calculate width for each window inside container
@@ -76,12 +77,12 @@ class Container(Widget):
             for window in self.containerWindows:
                 window.y = currentY
                 window.x = self.x
+                window.width = self.width
                 window.height = conWindowHeight
                 currentY += window.height + self.spacing
                 # as window's height changed, check if it reaches out of parent window
                 window.isHidden = window.x + window.width > window.parentWindow.width or window.y + window.height > window.parentWindow.height
             # container width is the same as the maximum container window height
-            self.width = max(window.width for window in self.containerWindows)
 
     def draw(self, ctx):
         super().draw(ctx)
@@ -176,8 +177,6 @@ class Button(Label):
         if self.action is not None:
             self.action()
         self.changeState("HOVERED")
-        print("button clicked")
-
 
     def changeState(self, state):
         if self.state == "NORMAL" and state == "HOVERED":
@@ -190,7 +189,7 @@ class Button(Label):
 
 
 class Slider(Widget):
-    def __init__(self, originX, originY, width, height, identifier, layoutAnchors, defaultSliderValue=0.5):
+    def __init__(self, originX, originY, width, height, identifier, layoutAnchors, defaultSliderValue=0.5, action=None):
         # Value is in range [0,1]
         self.sliderValue = defaultSliderValue
         # Size of the element that can be moved around
@@ -199,29 +198,35 @@ class Slider(Widget):
         # is set from the center, and the value is measured from the left side of the element
         self.sliderPosition = self.sliderValue * width
         self.state = "NORMAL"
+        self.action = action
         super().__init__(originX, originY, width, height, identifier, layoutAnchors)
+        self.changeSlider(self.sliderValue * width)
 
     def changeState(self, state):
         if state in ["NORMAL", "PRESSED"]:
             self.state = state
         else:
-            raise ValueError("Button state must be 'NORMAL' or 'HOVERED' or 'PRESSED'")
+            raise ValueError("Slider state must be 'NORMAL' or 'PRESSED' instead of: " + str(state))
+        if state == "PRESSED" and self.action is not None:
+            self.action()
 
     def changeSlider(self, x):
+        # clamp values to min and max range
         # The left most position is elementWidth/2 but has to be value 0
         # The right most position is width-elementWidth/2 but has to be value 1
         # so the actual usable position range is from elementWidth/2 to width-elementWidth/2
-        if (self.sliderElementWidth / 2) <= x <= (self.width - self.sliderElementWidth / 2):
-            # value is calculated from the left side of the element, so from x - elementWidth/2
-            leftPosition = x-self.sliderElementWidth/2
-            # The usable value range is (width - elementWidth) because having the slider
-            # at the right most position means the left slide (where we measure value) of the element isn't at 100%
-            usableRange = self.width-self.sliderElementWidth
-            # normalize the position to a value in range [0,1]
-            self.sliderValue = leftPosition/usableRange
-            print(self.sliderValue)
-            self.sliderPosition = x
-            print(self.sliderPosition)
+        x = max(self.sliderElementWidth / 2, x)
+        x = min(self.width - self.sliderElementWidth / 2, x)
+        # value is calculated from the left side of the element, so from x - elementWidth/2
+        leftPosition = x-self.sliderElementWidth/2
+        # The usable value range is (width - elementWidth) because having the slider
+        # at the right most position means the left slide (where we measure value) of the element isn't at 100%
+        usableRange = self.width-self.sliderElementWidth
+        # normalize the position to a value in range [0,1]
+        self.sliderValue = leftPosition/usableRange
+        print(self.sliderValue)
+        self.sliderPosition = x
+        print(self.sliderPosition)
 
     def draw(self, ctx):
         super().draw(ctx)
@@ -247,7 +252,10 @@ class Slider(Widget):
             # Slider Element Fill
             x, y = self.convertPositionToScreen(self.sliderPosition-(self.sliderElementWidth/2), 0)
             ctx.setOrigin(x,y)
-            ctx.setFillColor(COLOR_LIGHT_GRAY)
+            if self.state == "NORMAL":
+                ctx.setFillColor(COLOR_LIGHT_GRAY)
+            if self.state == "PRESSED":
+                ctx.setFillColor(COLOR_GRAY)
             ctx.fillRect(0, 0, self.sliderElementWidth, tempHeight)
 
             # Slider Element Stroke

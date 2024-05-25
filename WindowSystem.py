@@ -8,6 +8,8 @@ and Jannick Brändel (#405391)
 """
 
 import GraphicsEventSystem
+from CalculatorApp import CalculatorApp
+from ColorsApp import ColorsApp
 from HelloWorldApp import HelloWorldApp
 from Window import *
 from WindowManager import WindowManager
@@ -40,63 +42,6 @@ class WindowSystem(GraphicsEventSystem):
         self.tempHoveredWindow = None
         # amount of pixels the user can move the mouse in between pressing and releasing
         self.mouseClickTolerance = 2
-
-        # start Hello World App
-        helloWorldApp = HelloWorldApp(self)
-
-        # add a few test windows
-        window2 = Window(40, 40, 250, 250, "Second Window")
-        window2.setBackgroundColor(COLOR_WHITE)
-        window3 = Window(20, 20, 40, 40, "3")
-        window3.setBackgroundColor(COLOR_ORANGE)
-        # test resizing
-        resizing = Window(400, 120, 300, 300, "Resizing Test")
-        # resizing.setBackgroundColor(COLOR_WHITE)
-        top_left = Window(15, 25, 70, 40, "top-left")
-        top_left.setBackgroundColor(COLOR_GREEN)
-        top = Window(115, 25, 70, 40, "top", LayoutAnchor.top)
-        top.setBackgroundColor(COLOR_ORANGE)
-        top_right = Window(215, 25, 70, 40, "top-right", LayoutAnchor.top | LayoutAnchor.right)
-        top_right.setBackgroundColor(COLOR_GREEN)
-        right = Window(215, 135, 70, 40, "right", LayoutAnchor.right)
-        right.setBackgroundColor(COLOR_PURPLE)
-        bottom_right = Window(215, 245, 70, 40, "bottom-right", LayoutAnchor.bottom | LayoutAnchor.right)
-        bottom_right.setBackgroundColor(COLOR_PINK)
-        bottom = Window(115, 245, 70, 40, "bottom", LayoutAnchor.bottom)
-        bottom.setBackgroundColor(COLOR_BLACK)
-        bottom_left = Window(15, 245, 70, 40, "bottom-left", LayoutAnchor.bottom | LayoutAnchor.left)
-        bottom_left.setBackgroundColor(COLOR_BROWN)
-        left = Window(15, 135, 70, 40, "left", LayoutAnchor.left)
-        left.setBackgroundColor(COLOR_PURPLE)
-        allAnchors = Window(115, 135, 70, 40, "all", LayoutAnchor.top | LayoutAnchor.bottom | LayoutAnchor.left | LayoutAnchor.right)
-        allAnchors.setBackgroundColor(COLOR_RED)
-        grandchild = Window(20, 30, 40, 40, "grandchild", LayoutAnchor.top | LayoutAnchor.bottom)
-        grandchild.setBackgroundColor(COLOR_GREEN)
-        # print(window1.convertPositionFromScreen(30,30))
-        self.screen.addChildWindow(window2)
-        self.screen.addChildWindow(resizing)
-        window2.addChildWindow(window3)
-        label = Label(40, 40, 30, 20, "Label1", LayoutAnchor.top, "Hello World", fontColor=COLOR_RED)
-        label.setBackgroundColor(COLOR_BLUE)
-        window2.addChildWindow(label)
-        button = Button(69, 69, 70,30, "Button", LayoutAnchor.right, "MyButton", COLOR_LIGHT_GRAY, COLOR_GRAY)
-        button.setBackgroundColor(COLOR_ORANGE)
-        window2.addChildWindow(button)
-        slider = Slider(20,200, 200, 20, "Slider", LayoutAnchor.bottom)
-        slider.setBackgroundColor(COLOR_GRAY)
-        window2.addChildWindow(slider)
-
-        resizing.addChildWindow(top_left)
-        resizing.addChildWindow(top)
-        resizing.addChildWindow(top_right)
-        resizing.addChildWindow(right)
-        resizing.addChildWindow(bottom_right)
-        resizing.addChildWindow(bottom)
-        resizing.addChildWindow(bottom_left)
-        resizing.addChildWindow(left)
-        resizing.addChildWindow(allAnchors)
-
-        allAnchors.addChildWindow(grandchild)
     """
     WINDOW MANAGEMENT
     """
@@ -145,6 +90,8 @@ class WindowSystem(GraphicsEventSystem):
         """
         self.screen.draw(self.graphicsContext)
         self.windowManager.drawTaskbar(self.graphicsContext)
+        if self.windowManager.startMenuVisible:
+            self.windowManager.drawStartMenu(self.graphicsContext)
 
     """
     INPUT EVENTS
@@ -158,6 +105,13 @@ class WindowSystem(GraphicsEventSystem):
         """
         # save mouse position to check when button is released
         self.tempMouseDown = (x, y)
+
+        # check if the start menu was clicked
+        if (self.windowManager.startMenuVisible and x <= self.windowManager.startMenuWidth
+                and self.height - self.windowManager.startMenuHeight - self.windowManager.taskBarHeight <= y <= self.height - self.windowManager.taskBarHeight):
+            # start menu was pressed
+            return
+
         child = self.screen.childWindowAtLocation(x, y)
         if child:
             if child.identifier == "SCREEN":
@@ -192,9 +146,6 @@ class WindowSystem(GraphicsEventSystem):
         :param x: x value of mouse position when released
         :param y: y value of mouse position when released
         """
-        self.tempMouseDownWindow = None
-        self.tempMouseDownTLWindow = None
-        self.tempMouseDownResizing = False
         # calculate distance between release and pressed position
         deltaX, deltaY = abs(self.tempMouseDown[0] - x), abs(self.tempMouseDown[1] - y)
         # if distance is less than mouseClickTolerance send mouse-click event to child where click occurred.
@@ -202,6 +153,10 @@ class WindowSystem(GraphicsEventSystem):
             if y >= self.height - self.windowManager.taskBarHeight:
                 # task bar was clicked
                 self.windowManager.handleTaskBarClicked(x)
+            elif (self.windowManager.startMenuVisible and x <= self.windowManager.startMenuWidth
+                  and self.height - self.windowManager.startMenuHeight - self.windowManager.taskBarHeight <= y <= self.height - self.windowManager.taskBarHeight):
+                # start menu was clicked
+                self.windowManager.handleStartMenuClicked(y)
             else:
                 clickedWindow = self.screen.childWindowAtLocation(x, y)
                 if clickedWindow:
@@ -212,16 +167,36 @@ class WindowSystem(GraphicsEventSystem):
                         clickedWindow.handleMouseClicked(x, y)
                         self.requestRepaint()
 
+        if isinstance(self.tempMouseDownWindow, Slider):
+            self.tempMouseDownWindow.changeState("NORMAL")
+
+        # reset temp variables
+        self.tempMouseDownWindow = None
+        self.tempMouseDownTLWindow = None
+        self.tempMouseDownResizing = False
+
     def handleMouseMoved(self, x, y):
         hoveredWindow = self.screen.childWindowAtLocation(x, y)
-        if hoveredWindow is None:
-            return
+        # todo: fix when there is a window behind the start menu
+        if hoveredWindow.identifier == "SCREEN":
+            if (self.windowManager.startMenuVisible and x <= self.windowManager.startMenuWidth
+                and self.height - self.windowManager.startMenuHeight - self.windowManager.taskBarHeight <= y <= self.height - self.windowManager.taskBarHeight):
+                # start menu was hovered, now highlight the element at that location
+                self.windowManager.handleStartMenuHovered(y)
+                self.requestRepaint()
+            else:
+                return
         if isinstance(hoveredWindow, Button):
             # mouse is moved over a button -> change its state to HOVERED
             hoveredWindow.changeState("HOVERED")
-        else:
+        elif isinstance(self.tempHoveredWindow, Button):
+            # mouse moved away from button -> change its state to NORMAL
+            self.tempHoveredWindow.changeState("NORMAL")
+
+        if self.tempHoveredWindow != hoveredWindow:
             if isinstance(self.tempHoveredWindow, Button):
-                # mouse moved away from button -> change its state to NORMAL
+                # make sure that the last hovered window is set to normal again
+                # this makes sure that fast mouse movements don't create several hovered buttons
                 self.tempHoveredWindow.changeState("NORMAL")
 
         self.tempHoveredWindow = hoveredWindow
@@ -260,7 +235,9 @@ class WindowSystem(GraphicsEventSystem):
             )
 
     def handleKeyPressed(self, char):
-        pass
+        focusedWindow = self.screen.childWindows[-1]
+        if focusedWindow.identifier == "Calculator":
+            self.calculatorApp.handleInput(char)
 
 
 # Let's start your window system!
