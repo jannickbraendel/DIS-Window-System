@@ -311,10 +311,12 @@ class WindowManager:
             if xCounter < x:
                 xCounter += self.taskBarHeight + 1
                 iconIndex += 1
-        # todo: clicking taskbar where there is no item leads to an exception
         if iconIndex == 0:
             # start menu button was clicked
             self.startMenuVisible = not self.startMenuVisible
+        elif iconIndex > len(topLevelWindows):
+            # clicked outside of app icons in the task bar, do nothing
+            pass
         else:
             # selected window is brought to front or reopened if minimized before
             window = self.windowSystem.apps[iconIndex-1].appWindow
