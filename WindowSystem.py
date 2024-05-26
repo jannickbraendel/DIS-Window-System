@@ -6,13 +6,8 @@ Window System - Submission
 by Felix Umland (#406886)
 and Jannick Brändel (#405391)
 """
-# todo: remove unused imports in all files
 import GraphicsEventSystem
 import re
-from CalculatorApp import CalculatorApp
-from ColorsApp import ColorsApp
-from HelloWorldApp import HelloWorldApp
-from Window import *
 from WindowManager import WindowManager
 from UITK import *
 
