@@ -75,7 +75,7 @@ class ColorsApp:
                                      layoutAnchors=LayoutAnchor.top, horizontalDist=False, containerWindows=elements, spacing=30)
         self.appWindow.addChildWindow(wrapperContainer)
 
-        # TODO: first resizing on colors window makes items jump around, find a way to prevent this
+        # TODO: Jannick: first resizing on colors window makes items jump around, find a way to prevent this
 
     def updateColors(self):
         color = rgb_to_hex(self.sliders[0].sliderValue, self.sliders[1].sliderValue, self.sliders[2].sliderValue)

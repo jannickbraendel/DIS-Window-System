@@ -188,7 +188,6 @@ class WindowManager:
 
 
     def drawTaskbar(self, ctx):
-        # TODO: Border around icon buttons only when the window is selected not everywhere
         # set origin to top-left corner of task bar
         ctx.setOrigin(0, self.windowSystem.height - self.taskBarHeight)
         # draw task bar
@@ -197,7 +196,7 @@ class WindowManager:
         ctx.fillRect(0, 0, self.windowSystem.width, self.taskBarHeight)
         ctx.strokeRect(0, 0, self.windowSystem.width, self.taskBarHeight)
 
-        # TODO: Close start window when screen is clicked (not only start menu icon)
+        # TODO: Felix: Close start window when screen is clicked (not only start menu icon)
         # draw start menu button
         if self.startMenuVisible:
             ctx.setFillColor("#DDDDDD")
@@ -232,7 +231,6 @@ class WindowManager:
 
         # draw date and time
         # not sure if we are allowed to do this lol
-        # todo: maybe remove
         dateStr = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
         ctx.setStrokeColor(COLOR_BLACK)
         ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))

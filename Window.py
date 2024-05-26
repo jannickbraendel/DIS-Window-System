@@ -258,7 +258,7 @@ class Window:
 
     # returns temporary width and height values of a window to clip it to the bounds of its parent window (if exceeding)
     def getDrawingSize(self):
-        # TODO: Check edge case where grandchild window exceeds tl window but is not clipped
+        # TODO: Jannick: Check edge case where grandchild window exceeds tl window but is not clipped
         tempWidth = self.width
         tempHeight = self.height
         # TL windows keep their size
