@@ -233,7 +233,6 @@ class WindowManager:
         ctx.fillRect(self.taskBarHeight / 2, self.taskBarHeight / 2, self.taskBarHeight / 4 * 3, self.taskBarHeight / 4 * 3)
 
         # draw date and time
-        # not sure if we are allowed to do this lol
         dateStr = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
         ctx.setStrokeColor(COLOR_BLACK)
         ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
@@ -338,13 +337,14 @@ class WindowManager:
 
             self.drawStartMenuIcon(i, ctx)
 
-            # App String
+            # Daw App Strings
             if self.startMenuItemHovered == i:
+                # white text if hovered
                 ctx.setStrokeColor(COLOR_WHITE)
             else:
+                # black text if not hovered
                 ctx.setStrokeColor(COLOR_BLACK)
-            # todo: make font sizes smaller because they are drawn larger on windows
-            ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
+            ctx.setFont(Font(family="Helvetica", size=17, weight="bold"))
             ctx.drawString(self.apps[i], itemSpacing * 2 + iconSize, i * self.startMenuItemHeight + self.startMenuItemHeight / 4)
 
     def drawStartMenuIcon(self, i, ctx):
