@@ -65,7 +65,9 @@ class WindowManager:
         self.titleBarButtonWidth = 10
         self.taskBarHeight = 35
         self.resizeCornerTolerance = 8
+        # minimum width of a top level window
         self.tlwMinWidth = 3 * self.titleBarButtonWidth + 50
+        # minimum height of a top level window
         self.tlwMinHeight = self.titleBarHeight + 10
 
         # Start Menu Variables
@@ -81,13 +83,14 @@ class WindowManager:
     def checkWindowPosition(self, window, x, y):
         # check if window is top-level window and return otherwise
         if window.parentWindow.identifier != "SCREEN":
-            pass
+            return True
         screen = window.parentWindow
         # amount of pixels of titlebar that should still be visible
         minimumTitleBarVisibility = 10
+        # check if the titlebar is still visible enough horizontally
         titleBarVisibleLeft = x + window.width > minimumTitleBarVisibility + (3 * self.titleBarButtonWidth)
         titleBarVisibleRight = x < screen.width - minimumTitleBarVisibility
-
+        # check if the titlebar is still visible enough vertically
         titleBarVisibleTop = y + minimumTitleBarVisibility > 0
         titleBarVisibleBottom = y < screen.height - minimumTitleBarVisibility - self.taskBarHeight
         # returns true if title bar is visible towards all directions
@@ -146,10 +149,11 @@ class WindowManager:
                 closeButton = child
             elif "- Title" in child.identifier:
                 titleWindow = child
-        # draw title string
+
         if None in (titleWindow, minimizeButton, closeButton):
             return
 
+        # draw title string
         titleWindowX, titleWindowY = titleWindow.convertPositionToScreen(0, 0)
         ctx.setOrigin(titleWindowX, titleWindowY)
         ctx.setStrokeColor(COLOR_WHITE)
@@ -161,6 +165,7 @@ class WindowManager:
             # draw first letters of identifier
             ctx.drawString(window.identifier.split(" ", 1)[1][:3], 3, 1)
 
+        # get button dimensions
         buttonWidth = self.titleBarButtonWidth
         buttonHeight = self.titleBarHeight - 8
         # draw minimize button
@@ -201,6 +206,7 @@ class WindowManager:
         ctx.strokeRect(0, 0, self.windowSystem.width, self.taskBarHeight)
 
         # draw start menu button
+        # different representation for being normal and pressed
         if self.startMenuVisible:
             ctx.setFillColor("#DDDDDD")
             ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
@@ -241,17 +247,20 @@ class WindowManager:
         # draw window icons
         curX, curY = (self.taskBarHeight + 1, self.windowSystem.height - self.taskBarHeight)
         topLevelWindows = self.windowSystem.screen.childWindows
-        # sort windows alphabetically to have fixed order of icons
-        # topLevelWindowsSorted = sorted(topLevelWindows, key=lambda x: x.identifier)
+
         # add icon for each top level window
         if len(topLevelWindows) <= 0:
             # no windows are opened -> don't draw anything
             return
 
+        # loop through open applications and draw their icons
         for app in self.windowSystem.apps:
             topLevelWindow = app.appWindow
+            # set origin for this item
             ctx.setOrigin(curX, curY)
+            # check if the window is currently focused
             windowIsSelected = topLevelWindows[-1].identifier == topLevelWindow.identifier
+            # select different color scheme if the window is currently selected
             if windowIsSelected:
                 # window is selected
                 ctx.setFillColor("#DDDDDD")
@@ -260,13 +269,9 @@ class WindowManager:
                 # window is in the background
                 ctx.setFillColor("#BDBDBD")
                 ctx.setStrokeColor(COLOR_BLACK)
-            # icon background
-            ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
-            # draw icon string
-            # windowIcon = topLevelWindow.identifier.split(" ", 1)[1][0]
-            # ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
-            # ctx.drawString(windowIcon, self.taskBarHeight * 0.23, self.taskBarHeight * 0.1)
 
+            # draw icon background
+            ctx.fillRect(0, 0, self.taskBarHeight, self.taskBarHeight)
             # draw app icon
             drawTaskbarIcon(topLevelWindow.identifier, ctx)
 
@@ -298,6 +303,7 @@ class WindowManager:
             if xCounter < x:
                 xCounter += self.taskBarHeight + 1
                 iconIndex += 1
+
         if iconIndex == 0:
             # start menu button was clicked
             self.startMenuVisible = not self.startMenuVisible
@@ -322,28 +328,31 @@ class WindowManager:
         iconSize = 35
         itemSpacing = 10
 
-        # background
+        # draw gray background of start menu
         ctx.setOrigin(0, startMenuOriginY)
         ctx.setFillColor("#BDBDBD")
         ctx.fillRect(0, 0, self.startMenuWidth, self.startMenuHeight)
 
         for i in range(len(self.apps)):
             # Item Area
-            # Only draw if item i is hovered
+            # Draw blue background if item i is hovered
             if self.startMenuItemHovered == i:
                 ctx.setFillColor("#030280")
                 y = (i * self.startMenuItemHeight)
                 ctx.fillRect(0, y, self.startMenuWidth, y + self.startMenuItemHeight)
 
+            # Draw the application icon
             self.drawStartMenuIcon(i, ctx)
 
-            # Daw App Strings
+            # Draw App Strings
             if self.startMenuItemHovered == i:
                 # white text if hovered
                 ctx.setStrokeColor(COLOR_WHITE)
             else:
                 # black text if not hovered
                 ctx.setStrokeColor(COLOR_BLACK)
+
+            # Draw application name
             ctx.setFont(Font(family="Helvetica", size=17, weight="bold"))
             ctx.drawString(self.apps[i], itemSpacing * 2 + iconSize, i * self.startMenuItemHeight + self.startMenuItemHeight / 4)
 
@@ -416,36 +425,45 @@ class WindowManager:
             y = 200
             # check if there already is a window at the coordinates
             x, y = self.findPossibleWindowPosition(x, y)
+            # create an instance of the app
             app = HelloWorldApp(self.windowSystem, x, y)
+            # append instance to the list of open apps
             self.windowSystem.apps.append(app)
         elif item == 1:
             x = 700
             y = 100
             # check if there already is a window at the coordinates
             x, y = self.findPossibleWindowPosition(x, y)
+            # create an instance of the app
             app = ColorsApp(self.windowSystem, x, y)
+            # append instance to the list of open apps
             self.windowSystem.apps.append(app)
         elif item == 2:
             x = 1200
             y = 200
             # check if there already is a window at the coordinates
             x, y = self.findPossibleWindowPosition(x, y)
+            # create an instance of the app
             app = CalculatorApp(self.windowSystem, x, y)
+            # append instance to the list of open apps
             self.windowSystem.apps.append(app)
         elif item == 3:
             x = 400
             y = 120
             # check if there already is a window at the coordinates
             x, y = self.findPossibleWindowPosition(x, y)
+            # create an instance of the app
             app = ResizingApp(self.windowSystem, x, y)
+            # append instance to the list of open apps
             self.windowSystem.apps.append(app)
         elif item == 4:
+            # goodbye
             quit()
 
     def findPossibleWindowPosition(self, x, y):
         offset = 10
         while True:
-            # Check if any window already exists at the current position
+            # Check if any top level window already exists at the current position
             position_occupied = False
             for window in self.windowSystem.screen.childWindows:
                 if window.x == x and window.y == y:
@@ -464,20 +482,17 @@ class WindowManager:
             y += offset
 
     def handleStartMenuHovered(self, y):
+        # save the start menu item that is currently hovered
         self.startMenuItemHovered = self.startMenuItemAtY(y)
 
     def startMenuItemAtY(self, y):
+        # calculate the index of the item that is at the y coordinate
         startMenuOriginY = self.windowSystem.height - self.taskBarHeight - self.startMenuHeight
         relativeY = y - startMenuOriginY
 
         return int(relativeY / self.startMenuItemHeight)
 
     def handleTitleBarDragged(self, window, x, y, offsetX, offsetY):
-        """
-        :param window: low-level window which is dragged
-        :param x:
-        :param y:
-        """
         # find top level window this window belongs to
         if window.getTopLevelWindow() is None:
             return
@@ -489,7 +504,9 @@ class WindowManager:
             topLevelWindow.y = y - offsetY
 
     def handleResizeDragged(self, window, width, height):
+        # get the top level window
         topLevelWindow = window.getTopLevelWindow()
+        # resize the window with the new width and height
         topLevelWindow.resize(topLevelWindow.x, topLevelWindow.y, width, height)
         self.windowSystem.requestRepaint()
 
@@ -508,6 +525,7 @@ class WindowManager:
             self.minimizeWindow(topLevelWindow)
 
     def closeWindow(self, window):
+        # remove the window from the window tree
         window.removeFromParentWindow()
         self.windowSystem.requestRepaint()
         # remove app from the open apps list
@@ -516,7 +534,9 @@ class WindowManager:
                 self.windowSystem.apps.remove(app)
 
     def minimizeWindow(self, window):
+        # set isHidden so the window isn't drawn anymore
         window.isHidden = True
+        # bring the window to the back of the z-index, this makes sure the next window in the z-order is focused
         window.parentWindow.childWindows.remove(window)
         window.parentWindow.childWindows.insert(0, window)
         self.windowSystem.requestRepaint()
