@@ -161,7 +161,11 @@ class WindowSystem(GraphicsEventSystem):
                 # start menu was clicked
                 self.windowManager.handleStartMenuClicked(y)
             else:
+                # hide start menu again if it is open
+                if self.windowManager.startMenuVisible:
+                    self.windowManager.startMenuVisible = False
                 clickedWindow = self.screen.childWindowAtLocation(x, y)
+                # handle clicking of a window's title bar or click inside window
                 if clickedWindow:
                     if "- Title Bar" in clickedWindow.identifier:
                         # title bar was clicked

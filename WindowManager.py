@@ -200,7 +200,6 @@ class WindowManager:
         ctx.fillRect(0, 0, self.windowSystem.width, self.taskBarHeight)
         ctx.strokeRect(0, 0, self.windowSystem.width, self.taskBarHeight)
 
-        # TODO: Felix: Close start window when screen is clicked (not only start menu icon)
         # draw start menu button
         if self.startMenuVisible:
             ctx.setFillColor("#DDDDDD")
