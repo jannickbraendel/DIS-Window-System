@@ -408,7 +408,6 @@ class WindowManager:
             ctx.drawLine(x + 5, y + 5, x + 30, y + 30)
             ctx.drawLine(x+ 30, y + 5, x + 5, y + 30)
 
-    # todo: offset new window position if there already is a window at that position
     def handleStartMenuClicked(self, y):
         item = self.startMenuItemAtY(y)
         if item == 0:

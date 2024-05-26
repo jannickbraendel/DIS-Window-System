@@ -115,6 +115,11 @@ class WindowSystem(GraphicsEventSystem):
             # start menu was pressed
             return
 
+        # check if the taskbar was clicked
+        if y >= self.height - self.windowManager.taskBarHeight:
+            # task bar was clicked, do nothing
+            return
+
         child = self.screen.childWindowAtLocation(x, y)
         if child:
             if child.identifier == "SCREEN":
