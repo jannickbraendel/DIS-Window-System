@@ -469,11 +469,8 @@ class WindowManager:
 
         return int(relativeY / self.startMenuItemHeight)
 
-
-
     def handleTitleBarDragged(self, window, x, y, offsetX, offsetY):
         """
-
         :param window: low-level window which is dragged
         :param x:
         :param y:

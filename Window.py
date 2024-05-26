@@ -217,7 +217,6 @@ class Window:
             # only anchored to right: keep exact distance to the right
             elif rightAnchor:
                 x = parentWidth - width - self.marginRight
-                # x += deltaWidth
 
             # VERTICAL ANCHORING:
             # not anchored to either top or bottom: keep relative distance to top and bottom
