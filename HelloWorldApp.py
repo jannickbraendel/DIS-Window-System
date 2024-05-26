@@ -46,7 +46,7 @@ class HelloWorldApp:
         quitButton = Button(self.appWindow.width - 80, self.appWindow.height - 80, 60, 40, "QuitButton",
                             layoutAnchors=LayoutAnchor.right | LayoutAnchor.bottom, text="Quit",
                             hoverBackgroundColor=COLOR_RED, pressedBackgroundColor="#8B0000", borderColor=COLOR_BLACK,
-                            action=self.appWindow.removeFromParentWindow)
+                            action=partial(self.windowSystem.windowManager.closeWindow, self.appWindow))
         self.appWindow.addChildWindow(quitButton)
         """
         # VERTICAL CONTAINER
