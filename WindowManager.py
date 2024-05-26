@@ -260,10 +260,14 @@ class WindowManager:
         # sort windows alphabetically to have fixed order of icons
         # topLevelWindowsSorted = sorted(topLevelWindows, key=lambda x: x.identifier)
         # add icon for each top level window
+        if len(topLevelWindows) <= 0:
+            # no windows are opened -> don't draw anything
+            return
+
         for app in self.windowSystem.apps:
             topLevelWindow = app.appWindow
             ctx.setOrigin(curX, curY)
-            windowIsSelected = topLevelWindows[len(topLevelWindows) - 1].identifier == topLevelWindow.identifier
+            windowIsSelected = topLevelWindows[-1].identifier == topLevelWindow.identifier
             if windowIsSelected:
                 # window is selected
                 ctx.setFillColor("#DDDDDD")
@@ -302,8 +306,8 @@ class WindowManager:
 
     def handleTaskBarClicked(self, x):
         topLevelWindows = self.windowSystem.screen.childWindows
-        # topLevelWindowsSorted = sorted(topLevelWindows, key=lambda win: win.identifier)
-        # counter goes through taskbar icons and stops when it reaches the x parameter, so we know which icon was clicked
+        # counter goes through taskbar icons and stops when it reaches the x parameter,
+        # so we know which icon was clicked
         xCounter = self.taskBarHeight + 1
         iconIndex = 0
         for i in range(len(topLevelWindows) + 1):
