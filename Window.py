@@ -188,7 +188,6 @@ class Window:
 
     # resizes itself and all its child windows
     def resize(self, x, y, width, height):
-        print("resizing:", self.identifier)
         titleBarHeight = self.getTopLevelWindow().parentWindow.windowSystem.windowManager.titleBarHeight
         parentWidth = self.parentWindow.width
         parentHeight = self.parentWindow.height
