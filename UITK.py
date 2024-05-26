@@ -65,8 +65,7 @@ class Container(Widget):
                 currentX += window.width + self.spacing
                 # as window's width changed, check if it reaches out of parent window
                 window.isHidden = window.x + window.width > window.parentWindow.width or window.y + window.height > window.parentWindow.height
-            # container height is the same as the maximum container window height
-            # self.height = max(window.height for window in self.containerWindows)
+
         else:
             # DISTRIBUTE VERTICALLY
             # calculate width for each window inside container
