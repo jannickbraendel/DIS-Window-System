@@ -3,10 +3,10 @@ from Window import Window, LayoutAnchor
 from GraphicsEventSystem import *
 
 class ResizingApp:
-    def __init__(self, windowSystem):
+    def __init__(self, windowSystem, x, y):
         self.windowSystem = windowSystem
         identifier = "Resizing"
-        self.appWindow = Window(400, 120, 300, 300, self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
+        self.appWindow = Window(x, y, 300, 300, self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
         self.appWindow.setBackgroundColor(COLOR_WHITE)
         self.windowSystem.screen.addChildWindow(self.appWindow)
         self.drawWindows()

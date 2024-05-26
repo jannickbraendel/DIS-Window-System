@@ -167,7 +167,7 @@ class WindowManager:
             ctx.drawString(window.identifier.split(" ", 1)[1], 3, 1)
         else:
             # draw first letters of identifier
-            ctx.drawString(window.identifier[:3], 3, 1)
+            ctx.drawString(window.identifier.split(" ", 1)[1][:3], 3, 1)
 
         buttonWidth = self.titleBarButtonWidth
         buttonHeight = self.titleBarHeight - 8
@@ -412,19 +412,56 @@ class WindowManager:
     def handleStartMenuClicked(self, y):
         item = self.startMenuItemAtY(y)
         if item == 0:
-            app = HelloWorldApp(self.windowSystem)
+            x = 200
+            y = 200
+            # check if there already is a window at the coordinates
+            x, y = self.findPossibleWindowPosition(x, y)
+            app = HelloWorldApp(self.windowSystem, x, y)
             self.windowSystem.apps.append(app)
         elif item == 1:
-            app = ColorsApp(self.windowSystem)
+            x = 700
+            y = 100
+            # check if there already is a window at the coordinates
+            x, y = self.findPossibleWindowPosition(x, y)
+            app = ColorsApp(self.windowSystem, x, y)
             self.windowSystem.apps.append(app)
         elif item == 2:
-            app = CalculatorApp(self.windowSystem)
+            x = 1200
+            y = 200
+            # check if there already is a window at the coordinates
+            x, y = self.findPossibleWindowPosition(x, y)
+            app = CalculatorApp(self.windowSystem, x, y)
             self.windowSystem.apps.append(app)
         elif item == 3:
-            app = ResizingApp(self.windowSystem)
+            x = 400
+            y = 120
+            # check if there already is a window at the coordinates
+            x, y = self.findPossibleWindowPosition(x, y)
+            app = ResizingApp(self.windowSystem, x, y)
             self.windowSystem.apps.append(app)
         elif item == 4:
             quit()
+
+    def findPossibleWindowPosition(self, x, y):
+        offset = 10
+        while True:
+            # Check if any window already exists at the current position
+            position_occupied = False
+            for window in self.windowSystem.screen.childWindows:
+                if window.x == x and window.y == y:
+                    position_occupied = True
+                    break
+
+            # If no window is found at the current position, return the position
+            if not position_occupied:
+                # clamp x and y positions to make sure window isn't drawn outside of windowsystem
+                x = min(x, self.windowSystem.width)
+                y = min(y, self.windowSystem.height)
+                return x, y
+
+            # Increment the position by the offset
+            x += offset
+            y += offset
 
     def handleStartMenuHovered(self, y):
         self.startMenuItemHovered = self.startMenuItemAtY(y)

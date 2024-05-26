@@ -20,10 +20,10 @@ def rgb_to_hex(red, green, blue):
 
 
 class ColorsApp:
-    def __init__(self, windowSystem):
+    def __init__(self, windowSystem, x, y):
         self.windowSystem = windowSystem
         identifier = "Colors"
-        self.appWindow = Window(700,100, 300, 500, self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
+        self.appWindow = Window(x,y, 300, 500, self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
         self.appWindow.setBackgroundColor(COLOR_WHITE)
         self.windowSystem.screen.addChildWindow(self.appWindow)
         self.hexLabel = None

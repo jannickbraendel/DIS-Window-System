@@ -6,11 +6,11 @@ from GraphicsEventSystem import *
 
 
 class HelloWorldApp:
-    def __init__(self, windowSystem):
+    def __init__(self, windowSystem, x, y):
         self.windowSystem = windowSystem
         # add app as top-level window to window system
         identifier = "HelloWorld"
-        self.appWindow = Window(200, 200, self.windowSystem.width/2.5, self.windowSystem.height/2.5,
+        self.appWindow = Window(x, y, self.windowSystem.width/2.5, self.windowSystem.height/2.5,
                                 self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
         self.appWindow.setBackgroundColor(COLOR_LIGHT_GRAY)
         self.windowSystem.screen.addChildWindow(self.appWindow)
