@@ -3,7 +3,7 @@ from Window import Window, LayoutAnchor
 from GraphicsEventSystem import *
 
 
-def rgb_to_hex(red, green, blue):
+def rgbToHex(red, green, blue):
     # Ensure the values are within the valid range
     if not (0 <= red <= 1 and 0 <= green <= 1 and 0 <= blue <= 1):
         raise ValueError("RGB values must be in the range [0, 1]")
@@ -23,17 +23,20 @@ class ColorsApp:
     def __init__(self, windowSystem, x, y):
         self.windowSystem = windowSystem
         identifier = "Colors"
+        # create app window
         self.appWindow = Window(x,y, 300, 500, self.windowSystem.getInstanceNumber(identifier) + " " + identifier,
                                 backgroundColor=COLOR_WHITE)
+        # append window as top level window
         self.windowSystem.screen.addChildWindow(self.appWindow)
+        # the label that shows the color
         self.hexLabel = None
-
+        # array for the three sliders
         self.sliders = []
         self.drawWidgets()
 
 
     def drawWidgets(self):
-        # Sliders
+        # create the three sliders
         for i in range(3):
             slider = Slider(0, 0, self.appWindow.width*0.8, 20, "Slider" + str(i+1),
                             0, self.updateColors,
@@ -43,6 +46,7 @@ class ColorsApp:
 
         slidersAndLabels = []
 
+        # create the three labels and add them to the slidersAndLabels array
         for i in range(3):
             text = ""
             if i == 0:
@@ -63,21 +67,23 @@ class ColorsApp:
         self.appWindow.addChildWindow(self.hexLabel)
         self.updateColors()
 
-        # Container
+        # Container for the sliders and Labels
         sliderContainer = Container(50, 50, self.appWindow.width * 0.8, 0, "sliderContainer",
                                     layoutAnchors=LayoutAnchor.top, horizontalDist=False, containerWindows=slidersAndLabels,
                                     spacing=10)
         self.appWindow.addChildWindow(sliderContainer)
 
-        # Container Wrapper for Sliders and label
+        # Container Wrapper for sliderContainer and the hexLabel
         elements = [sliderContainer, self.hexLabel]
         wrapperContainer = Container(50, 50, self.appWindow.width * 0.8, self.appWindow.height*0.8, "wrapperContainer",
                                      layoutAnchors=LayoutAnchor.top, horizontalDist=False, containerWindows=elements, spacing=30)
         self.appWindow.addChildWindow(wrapperContainer)
 
-        # TODO: Jannick: first resizing on colors window makes items jump around, find a way to prevent this
 
     def updateColors(self):
-        color = rgb_to_hex(self.sliders[0].sliderValue, self.sliders[1].sliderValue, self.sliders[2].sliderValue)
+        # get the current slider values and convert them to a hexadecimal string
+        color = rgbToHex(self.sliders[0].sliderValue, self.sliders[1].sliderValue, self.sliders[2].sliderValue)
+        # set the text of the label to that string
         self.hexLabel.text = color
+        # set the background color of the label accordingly
         self.hexLabel.setBackgroundColor(color)
