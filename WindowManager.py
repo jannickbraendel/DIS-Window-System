@@ -116,13 +116,10 @@ class WindowManager:
         buttonWidth = self.titleBarButtonWidth
         buttonHeight = self.titleBarHeight - 8
         distanceBetweenButtons = 5
-        # todo: remove maximize button because we dont need it (and it doesn't do anything)
         closeButton = Window(titleBar.width - buttonWidth - distanceBetweenButtons, 4, buttonWidth, buttonHeight, titleBar.identifier + " - Close Button")
-        maximizeButton = Window(titleBar.width - (2 * buttonWidth + 2 * distanceBetweenButtons), 4, buttonWidth, buttonHeight, titleBar.identifier + " - Maximize Button")
-        minimizeButton = Window(titleBar.width - (3 * buttonWidth + 3 * distanceBetweenButtons), 4, buttonWidth, buttonHeight, titleBar.identifier + " - Minimize Button")
+        minimizeButton = Window(titleBar.width - (2 * buttonWidth + 2 * distanceBetweenButtons), 4, buttonWidth, buttonHeight, titleBar.identifier + " - Minimize Button")
         # append buttons to title bar
         titleBar.addChildWindow(closeButton)
-        titleBar.addChildWindow(maximizeButton)
         titleBar.addChildWindow(minimizeButton)
 
     # Does the drawing part of window decoration (title string, button icons)
@@ -137,19 +134,16 @@ class WindowManager:
         titleBar = window.childWindows[len(window.childWindows) - 1]
         titleWindow = None
         minimizeButton = None
-        maximizeButton = None
         closeButton = None
         for child in titleBar.childWindows:
             if "- Minimize Button" in child.identifier:
                 minimizeButton = child
-            elif "- Maximize Button" in child.identifier:
-                maximizeButton = child
             elif "- Close Button" in child.identifier:
                 closeButton = child
             elif "- Title" in child.identifier:
                 titleWindow = child
         # draw title string
-        if None in (titleWindow, minimizeButton, maximizeButton, closeButton):
+        if None in (titleWindow, minimizeButton, closeButton):
             return
 
         titleWindowX, titleWindowY = titleWindow.convertPositionToScreen(0, 0)
@@ -169,10 +163,6 @@ class WindowManager:
         minButtonX, minButtonY = minimizeButton.convertPositionToScreen(0, 0)
         ctx.setOrigin(minButtonX, minButtonY)
         ctx.drawLine(0, minimizeButton.height / 2, buttonWidth, minimizeButton.height / 2)
-        # draw maximize button
-        maxButtonX, maxButtonY = maximizeButton.convertPositionToScreen(0, 0)
-        ctx.setOrigin(maxButtonX, maxButtonY)
-        ctx.strokeRect(0, 0, buttonWidth, buttonHeight)
         # draw close button
         closeButtonX, closeButtonY = closeButton.convertPositionToScreen(0, 0)
         ctx.setOrigin(closeButtonX, closeButtonY)
