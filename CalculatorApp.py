@@ -203,6 +203,9 @@ class CalculatorApp:
         # reset background colors for all op buttons:
         for button in operationButtons:
             button.setBackgroundColor("#FFC100")
+            # temp color has to be updated as well, since it still holds the previous bg color which would override the
+            # new one, when the button is not hovered anymore (s. below as well)
+            button.tempBackgroundColor = "#FFC100"
 
         # all buttons reset to old bg color
         if opNum is None:
@@ -210,3 +213,5 @@ class CalculatorApp:
 
         # mark selected operation
         operationButtons[opNum-1].setBackgroundColor(COLOR_ORANGE)
+        operationButtons[opNum-1].tempBackgroundColor = COLOR_ORANGE
+
