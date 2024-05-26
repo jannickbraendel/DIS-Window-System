@@ -22,6 +22,7 @@ def drawTaskbarIcon(identifier, ctx):
     if "HelloWorld" in identifier:
         # Hello World App
         # Draw "H"
+        # todo: draw the H manually instead of using font
         ctx.setFont(Font(family="Helvetica", size=25, weight="bold"))
         ctx.setStrokeColor(COLOR_BLACK)
         ctx.drawString("H", 7, 5)
@@ -334,10 +335,12 @@ class WindowManager:
                 ctx.setStrokeColor(COLOR_WHITE)
             else:
                 ctx.setStrokeColor(COLOR_BLACK)
+            # todo: make font sizes smaller because they are drawn larger on windows
             ctx.setFont(Font(family="Helvetica", size=20, weight="bold"))
             ctx.drawString(self.apps[i], itemSpacing * 2 + iconSize, i * self.startMenuItemHeight + self.startMenuItemHeight / 4)
 
     def drawStartMenuIcon(self, i, ctx):
+        # todo: maybe refactor to unify this method and drawTaskbarIcon
         startMenuOriginY = self.windowSystem.height - self.taskBarHeight - self.startMenuHeight
         iconSize = 35
         itemSpacing = 10
@@ -348,6 +351,7 @@ class WindowManager:
             # Hello World App
             ctx.setFillColor("#E0E081")
             ctx.fillRect(x, y, x + iconSize, y + iconSize)
+            # todo: draw the H manually instead of using font
             ctx.setFont(Font(family="Helvetica", size=25, weight="bold"))
             ctx.drawString("H",x + 7, y + 5)
         elif i == 1:
