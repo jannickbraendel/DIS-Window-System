@@ -11,8 +11,8 @@ class HelloWorldApp:
         # add app as top-level window to window system
         identifier = "HelloWorld"
         self.appWindow = Window(x, y, self.windowSystem.width/2.5, self.windowSystem.height/2.5,
-                                self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
-        self.appWindow.setBackgroundColor(COLOR_LIGHT_GRAY)
+                                self.windowSystem.getInstanceNumber(identifier) + " " + identifier,
+                                backgroundColor=COLOR_LIGHT_GRAY)
         self.windowSystem.screen.addChildWindow(self.appWindow)
         self.greetLabel = None
         self.languages = ["German", "English", "French"]
@@ -34,7 +34,6 @@ class HelloWorldApp:
                             pressedBackgroundColor=COLOR_ORANGE, action=partial(self.changeLanguage, self.languages[i]),
                             borderColor=COLOR_BLACK)
             buttons.append(button)
-            button.setBackgroundColor(COLOR_CLEAR)
             self.appWindow.addChildWindow(button)
 
         # language buttons are put into horizontal container
@@ -48,7 +47,6 @@ class HelloWorldApp:
                             layoutAnchors=LayoutAnchor.right | LayoutAnchor.bottom, text="Quit",
                             hoverBackgroundColor=COLOR_RED, pressedBackgroundColor="#8B0000", borderColor=COLOR_BLACK,
                             action=self.appWindow.removeFromParentWindow)
-        quitButton.setBackgroundColor(COLOR_CLEAR)
         self.appWindow.addChildWindow(quitButton)
         """
         # VERTICAL CONTAINER

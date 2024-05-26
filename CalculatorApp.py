@@ -24,8 +24,8 @@ class CalculatorApp:
     def __init__(self, windowSystem, x, y):
         self.windowSystem = windowSystem
         identifier = "Calculator"
-        self.appWindow = Window(x, y, 220, 350, self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
-        self.appWindow.setBackgroundColor("#3b3b3b")
+        self.appWindow = Window(x, y, 220, 350, self.windowSystem.getInstanceNumber(identifier) + " " + identifier,
+                                backgroundColor="#3b3b3b")
         self.windowSystem.screen.addChildWindow(self.appWindow)
 
         self.buttons = []

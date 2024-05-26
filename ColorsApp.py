@@ -23,8 +23,8 @@ class ColorsApp:
     def __init__(self, windowSystem, x, y):
         self.windowSystem = windowSystem
         identifier = "Colors"
-        self.appWindow = Window(x,y, 300, 500, self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
-        self.appWindow.setBackgroundColor(COLOR_WHITE)
+        self.appWindow = Window(x,y, 300, 500, self.windowSystem.getInstanceNumber(identifier) + " " + identifier,
+                                backgroundColor=COLOR_WHITE)
         self.windowSystem.screen.addChildWindow(self.appWindow)
         self.hexLabel = None
 
