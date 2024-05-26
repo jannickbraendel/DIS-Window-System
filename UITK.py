@@ -31,18 +31,24 @@ class Container(Widget):
         # spacing between items
         self.spacing = spacing
 
+    # new window is added to container windows array. No window object should be in a container twice
+    # (not used right now but maybe useful for future apps?)
     def addWindowToContainer(self, window):
         if window not in self.containerWindows:
             self.containerWindows.append(window)
             # adapt container to added window
             self.resize(self.x, self.y, self.width, self.height)
-    
+
+    # window is removed from container windows array
+    # (not used right now but maybe useful for future apps?)
     def removeWindowFromContainer(self, window):
         if window in self.containerWindows:
             self.containerWindows.remove(window)
             # adapt container to removed window
             self.resize(self.x, self.y, self.width, self.height)
 
+    # override resize function of window: container distributes its space between the container windows and resizes
+    # them to have the same width/height and position them while leaving space in between if spacing is defined.
     def resize(self, x, y, width, height):
         super().resize(x, y, width, height)
         if len(self.containerWindows) == 0:
@@ -101,10 +107,14 @@ class Label(Widget):
     def __init__(self, originX, originY, width, height, identifier, text, centered=True,
                  font=None, fontColor=None, layoutAnchors=LayoutAnchor.top | LayoutAnchor.left,
                  backgroundColor=COLOR_CLEAR):
+        # text displayed in label
         self.text = text
+        # boolean that is true, if text should be centered inside label
         self.centered = centered
+        # font as optional parameter, will be set to default if none
         if font is None:
             font = Font(family="Helvetica", size=12)
+        # font color as opt. parameter
         if fontColor is None:
             fontColor = COLOR_BLACK
         self.font = font
@@ -123,6 +133,7 @@ class Label(Widget):
             ctx.setOrigin(x, y)
             ctx.setStrokeColor(self.fontColor)
             ctx.setFont(self.font)
+            # check if text should be centered and set coordinates and centered attribute accordingly
             if self.centered:
                 ctx.drawString(self.text, tempWidth/2, tempHeight/2, centered=True)
             else:
@@ -137,19 +148,24 @@ class Button(Label):
         self.action = action
         # state can either be "NORMAL", "HOVERED", or "PRESSED"
         self.state = "NORMAL"
+        # font and font color same as in label class
         if font is None:
             font = Font(family="Helvetica", size=12)
         if fontColor is None:
             fontColor = COLOR_BLACK
         self.hoverBackgroundColor = hoverBackgroundColor
         self.pressedBackgroundColor = pressedBackgroundColor
+        # temp variable to store original background color -> used while changing button state from Hovered to Normal
+        # again
         self.tempBackgroundColor = None
+        # color used for left and top line of the border as the other lines are drawn in black to get depth effect
         self.borderColor = borderColor
         super().__init__(originX, originY, width, height, identifier, text, centered, font, fontColor, layoutAnchors,
                          backgroundColor)
 
     def draw(self, ctx):
         super().draw(ctx)
+        # set background color according to current state
         if self.state == "HOVERED":
             self.setBackgroundColor(self.hoverBackgroundColor)
         elif self.state == "PRESSED":
@@ -176,8 +192,10 @@ class Button(Label):
     def handleMouseClicked(self, x, y):
         if self.action is not None:
             self.action()
+        # after mouse click mouse is still on button so state changes to HOVERED
         self.changeState("HOVERED")
 
+    # update button state with state parameter
     def changeState(self, state):
         if self.state == "NORMAL" and state == "HOVERED":
             # store background color while changing state from NORMAL to HOVERED

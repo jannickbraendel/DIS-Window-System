@@ -1,3 +1,9 @@
+"""
+Window System - Submission
+by Felix Umland (#406886)
+and Jannick Brändel (#405391)
+"""
+
 from UITK import Label, Slider, Container
 from Window import Window, LayoutAnchor
 from GraphicsEventSystem import *
@@ -74,8 +80,6 @@ class ColorsApp:
         wrapperContainer = Container(50, 50, self.appWindow.width * 0.8, self.appWindow.height*0.8, "wrapperContainer",
                                      layoutAnchors=LayoutAnchor.top, horizontalDist=False, containerWindows=elements, spacing=30)
         self.appWindow.addChildWindow(wrapperContainer)
-
-        # TODO: Jannick: first resizing on colors window makes items jump around, find a way to prevent this
 
     def updateColors(self):
         color = rgb_to_hex(self.sliders[0].sliderValue, self.sliders[1].sliderValue, self.sliders[2].sliderValue)
