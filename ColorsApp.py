@@ -36,7 +36,8 @@ class ColorsApp:
         # Sliders
         for i in range(3):
             slider = Slider(0, 0, self.appWindow.width*0.8, 20, "Slider" + str(i+1),
-                        LayoutAnchor.top | LayoutAnchor.left | LayoutAnchor.right, 0, self.updateColors)
+                            0, self.updateColors,
+                            layoutAnchors=LayoutAnchor.top | LayoutAnchor.left | LayoutAnchor.right)
             self.sliders.append(slider)
             self.appWindow.addChildWindow(slider)
 
@@ -50,7 +51,8 @@ class ColorsApp:
                 text = "GREEN"
             elif i == 2:
                 text = "BLUE"
-            label = Label(0, 0, self.appWindow.width * 0.8, 20, "Label" + str(i + 1), LayoutAnchor.top, text)
+            label = Label(0, 0, self.appWindow.width * 0.8, 20, "Label" + str(i + 1), text=text,
+                          layoutAnchors=LayoutAnchor.top)
             slidersAndLabels.append(label)
             slidersAndLabels.append(self.sliders[i])
             self.appWindow.addChildWindow(label)
@@ -70,7 +72,7 @@ class ColorsApp:
         # Container Wrapper for Sliders and label
         elements = [sliderContainer, self.hexLabel]
         wrapperContainer = Container(50, 50, self.appWindow.width * 0.8, self.appWindow.height*0.8, "wrapperContainer",
-                                     layoutAnchors=LayoutAnchor.top, horizontalDist=False,containerWindows=elements, spacing=30)
+                                     layoutAnchors=LayoutAnchor.top, horizontalDist=False, containerWindows=elements, spacing=30)
         self.appWindow.addChildWindow(wrapperContainer)
 
         # TODO: first resizing on colors window makes items jump around, find a way to prevent this
