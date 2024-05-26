@@ -242,8 +242,18 @@ class WindowSystem(GraphicsEventSystem):
         if len(self.screen.childWindows) == 0:
             return
         focusedWindow = self.screen.childWindows[-1]
-        if focusedWindow.identifier == "Calculator":
-            self.calculatorApp.handleInput(char)
+        for app in self.apps:
+            if "Calculator" in app.appWindow.identifier and focusedWindow.identifier == app.appWindow.identifier:
+                # focused app is Calculator -> pass key input to that app window
+                if char == "A":
+                    # pressing A should result in AllClear
+                    char = "AC"
+                if char == "n":
+                    # pressing n should result in +/- (negate)
+                    char = "+/-"
+                # pass key input
+                app.handleInput(char)
+
 
     # When opening a new instance of an app, this function will be called
     # it returns a unique instance number that is then used for the identifier
