@@ -22,10 +22,13 @@ def drawTaskbarIcon(identifier, ctx):
     if "HelloWorld" in identifier:
         # Hello World App
         # Draw "H"
-        # todo: draw the H manually instead of using font
-        ctx.setFont(Font(family="Helvetica", size=25, weight="bold"))
-        ctx.setStrokeColor(COLOR_BLACK)
-        ctx.drawString("H", 7, 5)
+        ctx.setFillColor(COLOR_BLACK)
+        # left line of H
+        ctx.fillRect(5, 5, 10, 30)
+        # right line of H
+        ctx.fillRect(25, 5, 30, 30)
+        # middle line of H
+        ctx.fillRect(5, 15, 30, 20)
     elif "Colors" in identifier:
         # Colors App
         ctx.setFillColor(COLOR_BLACK)
@@ -340,20 +343,23 @@ class WindowManager:
             ctx.drawString(self.apps[i], itemSpacing * 2 + iconSize, i * self.startMenuItemHeight + self.startMenuItemHeight / 4)
 
     def drawStartMenuIcon(self, i, ctx):
-        # todo: maybe refactor to unify this method and drawTaskbarIcon
-        startMenuOriginY = self.windowSystem.height - self.taskBarHeight - self.startMenuHeight
         iconSize = 35
         itemSpacing = 10
         x = itemSpacing
+        # calculate where the position of the icon starts
         y = i * self.startMenuItemHeight + (self.startMenuItemHeight - iconSize) / 2
         ctx.setStrokeColor(COLOR_WHITE)
         if i == 0:
             # Hello World App
             ctx.setFillColor("#E0E081")
             ctx.fillRect(x, y, x + iconSize, y + iconSize)
-            # todo: draw the H manually instead of using font
-            ctx.setFont(Font(family="Helvetica", size=25, weight="bold"))
-            ctx.drawString("H",x + 7, y + 5)
+            ctx.setFillColor(COLOR_WHITE)
+            # left line of H
+            ctx.fillRect(x + 5, y + 5, x + 10, y + 30)
+            # right line of H
+            ctx.fillRect(x + 25, y + 5, x + 30, y + 30)
+            # middle line of H
+            ctx.fillRect(x + 5, y + 15, x + 30, y + 20)
         elif i == 1:
             # Colors APP
             ctx.setFillColor("#404040")
