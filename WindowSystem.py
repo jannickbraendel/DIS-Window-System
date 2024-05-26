@@ -195,7 +195,7 @@ class WindowSystem(GraphicsEventSystem):
         elif isinstance(self.tempHoveredWindow, Button):
             # mouse moved away from button -> change its state to NORMAL
             self.tempHoveredWindow.changeState("NORMAL")
-
+        # TODO: When moving from button to outside of the window, state does not change to normal..
         if self.tempHoveredWindow != hoveredWindow:
             if isinstance(self.tempHoveredWindow, Button):
                 # make sure that the last hovered window is set to normal again

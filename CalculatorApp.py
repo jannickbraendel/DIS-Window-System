@@ -68,12 +68,15 @@ class CalculatorApp:
                 if i == 0 and j != 3:
                     # First row, first three buttons
                     button.setBackgroundColor("#B4B4B8")
+                    button.hoverBackgroundColor = "#A4A1AA"
                 elif j == 3:
-                    # operation buttons
+                    # operation buttons and = button
                     button.setBackgroundColor("#FFC100")
+                    button.hoverBackgroundColor = "#005249"
                 else:
-                    # First three buttons in rows 2 to
+                    # First three buttons in rows 2 to 5
                     button.setBackgroundColor("#C07F00")
+                    button.hoverBackgroundColor = "#2F4858"
                 self.buttons.append(button)
                 self.appWindow.addChildWindow(button)
                 buttonRow.append(button)
