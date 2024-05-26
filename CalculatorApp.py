@@ -7,7 +7,7 @@ from UITK import *
 
 
 def floatToString(num):
-    num = round(num, 4)
+    num = round(num, 6)
     return f'{num:g}'
 
 
