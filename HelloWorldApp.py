@@ -48,13 +48,6 @@ class HelloWorldApp:
                             hoverBackgroundColor=COLOR_RED, pressedBackgroundColor="#8B0000", borderColor=COLOR_BLACK,
                             action=partial(self.windowSystem.windowManager.closeWindow, self.appWindow))
         self.appWindow.addChildWindow(quitButton)
-        """
-        # VERTICAL CONTAINER
-        contWindows = [self.greetLabel, buttonContainer]
-        verticalContainer = Container(20, 40, self.appWindow.width, 190, "VerticalContainer",
-                                      layoutAnchors=0, horizontalDist=False, containerWindows=contWindows, spacing=100)
-        self.appWindow.addChildWindow(verticalContainer)
-        """
 
     def changeLanguage(self, language):
         assert language in self.languages
