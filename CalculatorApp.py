@@ -52,7 +52,6 @@ class CalculatorApp:
         # array of arrays storing button labels in order of button grid layout
         buttonLabels = [["AC", "C", "%", "/"], ["7", "8", "9", "x"], ["4", "5", "6", "-"], ["1", "2", "3", "+"],
                         ["+/-", "0", ".", "="]]
-        buttonRowContainers = []
 
         # Create Button rows
         for i in range(5):
@@ -81,18 +80,10 @@ class CalculatorApp:
                 self.appWindow.addChildWindow(button)
                 buttonRow.append(button)
 
-            buttonRowContainer = Container(10, 100 + i * 50, self.appWindow.width - 20, 40, "horContainer" + str(i),
-                                           layoutAnchors=LayoutAnchor.top | LayoutAnchor.left, horizontalDist=True,
-                                           containerWindows=buttonRow, spacing=10)
+            buttonRowContainer = Container(10, 100 + i * 50, self.appWindow.width-20, 40, "horContainer" + str(i),
+                                           layoutAnchors=LayoutAnchor.left | LayoutAnchor.right | LayoutAnchor.bottom,
+                                           horizontalDist=True, containerWindows=buttonRow, spacing=10)
             self.appWindow.addChildWindow(buttonRowContainer)
-            buttonRowContainers.append(buttonRowContainer)
-
-        # Add vertical container for rowContainers
-        # todo: Jannick fix resizing
-        buttonContainer = Container(10, 100, self.appWindow.width - 20, self.appWindow.height - 110, "vertContainer",
-                                    layoutAnchors=LayoutAnchor.bottom, horizontalDist=False,
-                                    containerWindows=buttonRowContainers, spacing=10)
-        self.appWindow.addChildWindow(buttonContainer)
 
     def handleInput(self, char):
         numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]
