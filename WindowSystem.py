@@ -153,11 +153,9 @@ class WindowSystem(GraphicsEventSystem):
         deltaX, deltaY = abs(self.tempMouseDown[0] - x), abs(self.tempMouseDown[1] - y)
         # if distance is less than mouseClickTolerance send mouse-click event to child where click occurred.
         if deltaX <= self.mouseClickTolerance and deltaY <= self.mouseClickTolerance:
+            # check if taskbar is clicked (without checking the start menu)
             if y >= self.height - self.windowManager.taskBarHeight:
                 # task bar was clicked
-                # hide start menu again if it is open
-                if self.windowManager.startMenuVisible:
-                    self.windowManager.startMenuVisible = False
                 self.windowManager.handleTaskBarClicked(x)
             elif (self.windowManager.startMenuVisible and x <= self.windowManager.startMenuWidth
                   and self.height - self.windowManager.startMenuHeight - self.windowManager.taskBarHeight <= y <= self.height - self.windowManager.taskBarHeight):
@@ -192,17 +190,12 @@ class WindowSystem(GraphicsEventSystem):
                 and self.height - self.windowManager.startMenuHeight - self.windowManager.taskBarHeight <= y <= self.height - self.windowManager.taskBarHeight):
             # start menu was hovered, now highlight the element at that location
             self.windowManager.handleStartMenuHovered(y)
-            self.requestRepaint()
-        elif hoveredWindow.identifier == "SCREEN":
-            # screen window is hovered, do nothing
-            return
         if isinstance(hoveredWindow, Button):
             # mouse is moved over a button -> change its state to HOVERED
             hoveredWindow.changeState("HOVERED")
         elif isinstance(self.tempHoveredWindow, Button):
             # mouse moved away from button -> change its state to NORMAL
             self.tempHoveredWindow.changeState("NORMAL")
-        # TODO: Felix: When moving from button to outside of the window, state does not change to normal..
         if self.tempHoveredWindow != hoveredWindow:
             if isinstance(self.tempHoveredWindow, Button):
                 # make sure that the last hovered window is set to normal again

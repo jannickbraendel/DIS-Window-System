@@ -303,9 +303,15 @@ class WindowManager:
             # start menu button was clicked
             self.startMenuVisible = not self.startMenuVisible
         elif iconIndex > len(topLevelWindows):
-            # clicked outside of app icons in the task bar, do nothing
+            # clicked outside of app icons in the task bar
+            # close start menu again
+            if self.startMenuVisible:
+                self.startMenuVisible = False
             pass
         else:
+            # close start menu again
+            if self.startMenuVisible:
+                self.startMenuVisible = False
             # selected window is brought to front or reopened if minimized before
             window = self.windowSystem.apps[iconIndex-1].appWindow
             window.isHidden = False
