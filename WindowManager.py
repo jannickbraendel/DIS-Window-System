@@ -74,7 +74,6 @@ class WindowManager:
         self.startMenuWidth = 200
         self.startMenuHeight = len(self.apps * self.startMenuItemHeight)
 
-
     def checkWindowPosition(self, window, x, y):
         # check if window is top-level window and return otherwise
         if window.parentWindow.identifier != "SCREEN":
@@ -111,7 +110,6 @@ class WindowManager:
 
         # add title window to title Bar
         titleWindow = Window(0, 0, titleBar.width/2, titleBar.height, titleBar.identifier + " - Title")
-        titleWindow.setBackgroundColor(titleBar.backgroundColor)
         titleBar.addChildWindow(titleWindow)
 
         # add buttons windows
@@ -122,10 +120,6 @@ class WindowManager:
         closeButton = Window(titleBar.width - buttonWidth - distanceBetweenButtons, 4, buttonWidth, buttonHeight, titleBar.identifier + " - Close Button")
         maximizeButton = Window(titleBar.width - (2 * buttonWidth + 2 * distanceBetweenButtons), 4, buttonWidth, buttonHeight, titleBar.identifier + " - Maximize Button")
         minimizeButton = Window(titleBar.width - (3 * buttonWidth + 3 * distanceBetweenButtons), 4, buttonWidth, buttonHeight, titleBar.identifier + " - Minimize Button")
-        # buttons have same background color as titlebar
-        closeButton.setBackgroundColor(titleBar.backgroundColor)
-        maximizeButton.setBackgroundColor(titleBar.backgroundColor)
-        minimizeButton.setBackgroundColor(titleBar.backgroundColor)
         # append buttons to title bar
         titleBar.addChildWindow(closeButton)
         titleBar.addChildWindow(maximizeButton)
@@ -213,6 +207,7 @@ class WindowManager:
         ctx.fillRect(0, 0, self.windowSystem.width, self.taskBarHeight)
         ctx.strokeRect(0, 0, self.windowSystem.width, self.taskBarHeight)
 
+        # TODO: Close start window when screen is clicked (not only start menu icon)
         # draw start menu button
         if self.startMenuVisible:
             ctx.setFillColor("#DDDDDD")
@@ -234,7 +229,6 @@ class WindowManager:
             ctx.setStrokeColor(COLOR_BLACK)
             ctx.drawLine(0, self.taskBarHeight, self.taskBarHeight, self.taskBarHeight)
             ctx.drawLine(self.taskBarHeight, 0, self.taskBarHeight, self.taskBarHeight)
-
 
         # Add start menu icon
         ctx.setFillColor(COLOR_RED)

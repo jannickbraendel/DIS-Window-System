@@ -24,8 +24,8 @@ class CalculatorApp:
     def __init__(self, windowSystem, x, y):
         self.windowSystem = windowSystem
         identifier = "Calculator"
-        self.appWindow = Window(x, y, 220, 350, self.windowSystem.getInstanceNumber(identifier) + " " + identifier)
-        self.appWindow.setBackgroundColor("#3b3b3b")
+        self.appWindow = Window(x, y, 220, 350, self.windowSystem.getInstanceNumber(identifier) + " " + identifier,
+                                backgroundColor="#3b3b3b")
         self.windowSystem.screen.addChildWindow(self.appWindow)
 
         self.buttons = []
@@ -59,9 +59,9 @@ class CalculatorApp:
             buttonRow = []
             # create 4 buttons for each row
             for j in range(4):
-                button = Button(0, 0, 40, 40, "button" + str(i) + str(j), LayoutAnchor.top | LayoutAnchor.left,
+                button = Button(0, 0, 40, 40, "button" + str(i) + str(j),
                                 text=buttonLabels[i][j], hoverBackgroundColor=COLOR_BLACK,
-                                pressedBackgroundColor=COLOR_ORANGE,
+                                pressedBackgroundColor=COLOR_ORANGE, layoutAnchors=LayoutAnchor.top | LayoutAnchor.left,
                                 fontColor=COLOR_WHITE, font=Font(family="Helvetica", size=14, weight=BOLD),
                                 borderColor=COLOR_BLACK)
                 button.action = partial(self.handleInput, button.text)
@@ -195,18 +195,15 @@ class CalculatorApp:
         return floatToString(res)
 
     def changeOperationColor(self, opNum=None):
-        # TODO: Not handled correctly for keyboard input (tempBackgroundColor not the correct way to handle this)
         # operation numbers: 1 - Add, 2 - Subtract, 3 - Multiply, 4 - Divide, None - No operation
         operationButtons = [self.buttons[15], self.buttons[11], self.buttons[7], self.buttons[3]]
         # reset background colors for all op buttons:
         for button in operationButtons:
-            # button.setBackgroundColor("#FFC100")
-            button.tempBackgroundColor = "#FFC100"
+            button.setBackgroundColor("#FFC100")
 
         # all buttons reset to old bg color
         if opNum is None:
             return
 
         # mark selected operation
-        # operationButtons[opNum].setBackgroundColor(COLOR_ORANGE)
-        operationButtons[opNum - 1].tempBackgroundColor = COLOR_ORANGE
+        operationButtons[opNum-1].setBackgroundColor(COLOR_ORANGE)

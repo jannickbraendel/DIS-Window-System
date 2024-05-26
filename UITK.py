@@ -12,18 +12,19 @@ from Window import *
 
 
 class Widget(Window):
-    def __init__(self, originX, originY, width, height, identifier, layoutAnchors):
-        super().__init__(originX, originY, width, height, identifier, layoutAnchors)
-        # self.backgroundColor = COLOR_CLEAR
+    def __init__(self, originX, originY, width, height, identifier, layoutAnchors=LayoutAnchor.top | LayoutAnchor.left,
+                 backgroundColor=COLOR_CLEAR):
+        super().__init__(originX, originY, width, height, identifier, layoutAnchors, backgroundColor)
 
     def draw(self, ctx):
         super().draw(ctx)
 
 
 class Container(Widget):
-    def __init__(self, originX, originY, width, height, identifier, layoutAnchors, containerWindows: [Window],
-                 horizontalDist=True, spacing=0):
-        super().__init__(originX, originY, width, height, identifier, layoutAnchors)
+    def __init__(self, originX, originY, width, height, identifier, containerWindows: [Window],
+                 horizontalDist=True, spacing=0, layoutAnchors=LayoutAnchor.top | LayoutAnchor.left,
+                 backgroundColor=COLOR_CLEAR):
+        super().__init__(originX, originY, width, height, identifier, layoutAnchors, backgroundColor)
         self.containerWindows = containerWindows
         # boolean that is true when items should be horizontally distributed, otherwise they are vertically distributed
         self.horizontalDist = horizontalDist
@@ -82,18 +83,9 @@ class Container(Widget):
                 currentY += window.height + self.spacing
                 # as window's height changed, check if it reaches out of parent window
                 window.isHidden = window.x + window.width > window.parentWindow.width or window.y + window.height > window.parentWindow.height
-            # container width is the same as the maximum container window height
 
     def draw(self, ctx):
         super().draw(ctx)
-        """
-        if not self.isHidden:
-            # draw border to test container resizing
-            x, y = self.convertPositionToScreen(0, 0)
-            ctx.setOrigin(x, y)
-            ctx.setStrokeColor(COLOR_BLACK)
-            ctx.strokeRect(0, 0, self.width, self.height)
-        """
 
     # override hitTest function and always return false since were are not interested in if the container was hit
     def hitTest(self, x, y):
@@ -101,8 +93,9 @@ class Container(Widget):
 
 
 class Label(Widget):
-    def __init__(self, originX, originY, width, height, identifier, layoutAnchors, text, centered=True,
-                 font=None, fontColor=None):
+    def __init__(self, originX, originY, width, height, identifier, text, centered=True,
+                 font=None, fontColor=None, layoutAnchors=LayoutAnchor.top | LayoutAnchor.left,
+                 backgroundColor=COLOR_CLEAR):
         self.text = text
         self.centered = centered
         if font is None:
@@ -111,7 +104,7 @@ class Label(Widget):
             fontColor = COLOR_BLACK
         self.font = font
         self.fontColor = fontColor
-        super().__init__(originX, originY, width, height, identifier, layoutAnchors)
+        super().__init__(originX, originY, width, height, identifier, layoutAnchors, backgroundColor)
 
     def draw(self, ctx):
         # draw background with superclass function
@@ -132,8 +125,9 @@ class Label(Widget):
 
 
 class Button(Label):
-    def __init__(self, originX, originY, width, height, identifier, layoutAnchors, text, hoverBackgroundColor,
-                 pressedBackgroundColor, centered=True, font=None, fontColor=None, action=None, borderColor=COLOR_WHITE):
+    def __init__(self, originX, originY, width, height, identifier, text, hoverBackgroundColor,
+                 pressedBackgroundColor, centered=True, font=None, fontColor=None, action=None, borderColor=COLOR_WHITE,
+                 layoutAnchors=LayoutAnchor.top | LayoutAnchor.left, backgroundColor=COLOR_CLEAR):
         # lambda function that is executed when button is clicked
         self.action = action
         # state can either be "NORMAL", "HOVERED", or "PRESSED"
@@ -146,7 +140,8 @@ class Button(Label):
         self.pressedBackgroundColor = pressedBackgroundColor
         self.tempBackgroundColor = None
         self.borderColor = borderColor
-        super().__init__(originX, originY, width, height, identifier, layoutAnchors, text, centered, font, fontColor)
+        super().__init__(originX, originY, width, height, identifier, text, centered, font, fontColor, layoutAnchors,
+                         backgroundColor)
 
     def draw(self, ctx):
         super().draw(ctx)
@@ -189,7 +184,8 @@ class Button(Label):
 
 
 class Slider(Widget):
-    def __init__(self, originX, originY, width, height, identifier, layoutAnchors, defaultSliderValue=0.5, action=None):
+    def __init__(self, originX, originY, width, height, identifier, defaultSliderValue=0.5, action=None,
+                 layoutAnchors=LayoutAnchor.top | LayoutAnchor.left, backgroundColor=COLOR_CLEAR):
         # Value is in range [0,1]
         self.sliderValue = defaultSliderValue
         # Size of the element that can be moved around
@@ -199,7 +195,7 @@ class Slider(Widget):
         self.sliderPosition = self.sliderValue * width
         self.state = "NORMAL"
         self.action = action
-        super().__init__(originX, originY, width, height, identifier, layoutAnchors)
+        super().__init__(originX, originY, width, height, identifier, layoutAnchors, backgroundColor)
         self.changeSlider(self.sliderValue * width)
 
     def changeState(self, state):

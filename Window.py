@@ -16,7 +16,8 @@ LayoutAnchor = AllAnchors(1 << 0, 1 << 1, 1 << 2, 1 << 3)
 
 
 class Window:
-    def __init__(self, originX, originY, width, height, identifier, layoutAnchors=LayoutAnchor.top | LayoutAnchor.left):
+    def __init__(self, originX, originY, width, height, identifier, layoutAnchors=LayoutAnchor.top | LayoutAnchor.left,
+                 backgroundColor=COLOR_CLEAR):
         """
         Constructor for a new window setting the relevant attributes and the default background color
         :param originX: X coordinate of the top left corner of the window (coordinate system of parent window)
@@ -25,13 +26,14 @@ class Window:
         :param height: Height of the window
         :param identifier: window ID
         :param layoutAnchors: anchors to parent window in all directions (default: top-left)
+        :param backgroundColor: background color of window
         """
         self.x = originX
         self.y = originY
         self.width = width
         self.height = height
         self.identifier = identifier
-        self.backgroundColor = None
+        self.backgroundColor = backgroundColor
 
         self.childWindows = []
         self.parentWindow = None
@@ -152,10 +154,7 @@ class Window:
         position = self.convertPositionToScreen(0, 0)
         ctx.setOrigin(position[0], position[1])
         # ctx should draw with bg color
-        if self.backgroundColor is not None:
-            ctx.setFillColor(self.backgroundColor)
-        else:
-            ctx.setFillColor(COLOR_CLEAR)
+        ctx.setFillColor(self.backgroundColor)
         # fill the complete window
         ctx.fillRect(0, 0, tempWidth, tempHeight)
 
