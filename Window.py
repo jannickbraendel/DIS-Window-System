@@ -37,12 +37,12 @@ class Window:
 
         self.childWindows = []
         self.parentWindow = None
-        # used to minimize top-level windows
+        # used to minimize top-level windows and block drawing of clipped lower level windows
         self.isHidden = False
         # window is anchored to top-left by default
         self.layoutAnchors = layoutAnchors
 
-        # non-top level windows: save margins to bottom and right
+        # non-top level windows: save margins to bottom and right for resizing purposes
         self.marginRight = 0
         self.marginBottom = 0
 
@@ -57,9 +57,10 @@ class Window:
         # save margins to bottom and right: they might be broken while resizing and have to be re-established
         window.marginRight = self.width - (window.x + window.width)
         window.marginBottom = self.height - (window.y + window.height)
+
         # trigger resize to ensure window is correctly positioned according to anchors
         if not self.identifier == "SCREEN" and "- Title Bar" not in window.identifier:
-            self.resize(self.x, self.y, self.width, self.height)
+            window.resize(window.x, window.y, window.width, window.height)
 
     def removeFromParentWindow(self):
         """
@@ -140,7 +141,7 @@ class Window:
 
     def draw(self, ctx):
         """
-        Draw current window and all child windows on screen and filling them with the specified background color.
+        Draw current window and all child windows on screen and fill them with the specified background color.
         :param ctx: Current graphics context
         """
         # temporary width and height values are based on if the window is clipped by its parent
@@ -173,6 +174,7 @@ class Window:
     def setBackgroundColor(self, color):
         self.backgroundColor = color
 
+    # returns top level window the current window belongs to
     def getTopLevelWindow(self):
 
         if self.identifier == "SCREEN":
@@ -194,7 +196,7 @@ class Window:
             # resize window with updated values
             self.x = x
             self.y = y
-            # new width/height should not be lower than min width/height
+            # new width/height should not be lower than minimum width/height
             self.width = max(self.parentWindow.windowSystem.windowManager.tlwMinWidth, width)
             self.height = max(self.parentWindow.windowSystem.windowManager.tlwMinHeight, height)
         else:
@@ -242,10 +244,6 @@ class Window:
             if height < 20:
                 height = 20
 
-            """
-            # if window reaches out of parent on any side, clip it (set hidden)
-            self.isHidden = x + width > self.parentWindow.width or y + height > self.parentWindow.height
-            """
             # resize window with updated values
             self.x = x
             self.y = y
@@ -258,19 +256,20 @@ class Window:
 
     # returns temporary width and height values of a window to clip it to the bounds of its parent window (if exceeding)
     def getDrawingSize(self):
-        # TODO: Jannick: Check edge case where grandchild window exceeds tl window but is not clipped
         tempWidth = self.width
         tempHeight = self.height
         # TL windows keep their size
         if not self.parentWindow.identifier == "SCREEN":
             # HORIZONTALLY
-            if self.x + self.width > self.parentWindow.width:
-                # width set to distance between parent's right border and x origin (has to be <=0)
-                tempWidth = max(0, self.parentWindow.width - self.x)
+            # looks at parents temp width/height, as parent might be clipped as well
+            parentTempWidth, parentTempHeight = self.parentWindow.getDrawingSize()
+            if self.x + self.width > parentTempWidth:
+                # width set to distance between parent's right border and x origin (has to be >=0)
+                tempWidth = max(0, parentTempWidth - self.x)
             # VERTICALLY
-            if self.y + self.height > self.parentWindow.height:
-                # height set to distance between parent's lower border and y origin (has to be <=0)
-                tempHeight = max(0, self.parentWindow.height - self.y)
+            if self.y + self.height > parentTempHeight:
+                # height set to distance between parent's lower border and y origin (has to be >=0)
+                tempHeight = max(0, parentTempHeight - self.y)
 
             # window should disappear in the case of temp width or height being 0
             self.isHidden = tempWidth == 0 or tempHeight == 0

@@ -1,7 +1,14 @@
+"""
+Window System - Submission
+by Felix Umland (#406886)
+and Jannick Brändel (#405391)
+"""
+
 from Window import Window, LayoutAnchor
 from GraphicsEventSystem import *
 
 
+# displays a few examples of how resizing works in our window system
 class ResizingApp:
     def __init__(self, windowSystem, x, y):
         self.windowSystem = windowSystem
@@ -12,6 +19,7 @@ class ResizingApp:
         self.drawWindows()
 
     def drawWindows(self):
+        # draws windows for several different anchor configurations
         top_left = Window(15, 25, 70, 40, "top-left", backgroundColor=COLOR_GREEN)
         top = Window(115, 25, 70, 40, "top", LayoutAnchor.top, backgroundColor=COLOR_ORANGE)
         top_right = Window(215, 25, 70, 40, "top-right", LayoutAnchor.top | LayoutAnchor.right,

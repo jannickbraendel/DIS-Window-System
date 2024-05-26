@@ -1,3 +1,9 @@
+"""
+Window System - Submission
+by Felix Umland (#406886)
+and Jannick Brändel (#405391)
+"""
+
 import decimal
 from enum import Enum
 from functools import partial
@@ -6,13 +12,14 @@ from Window import *
 from UITK import *
 
 
+# converts float to string while rounding the value to 6 decimal places and using python's string formatting to
+# remove unnecessary zeros e.g.
 def floatToString(num):
     num = round(num, 6)
     return f'{num:g}'
 
 
 # enum for arithmetic operations
-# Operation = Enum('Operation', ['ADD', 'SUBTRACT', 'MULTIPLY', 'DIVIDE'])
 class Operation(Enum):
     ADD = 1
     SUBTRACT = 2
@@ -24,12 +31,13 @@ class CalculatorApp:
     def __init__(self, windowSystem, x, y):
         self.windowSystem = windowSystem
         identifier = "Calculator"
+        # top level window of the app
         self.appWindow = Window(x, y, 220, 350, self.windowSystem.getInstanceNumber(identifier) + " " + identifier,
                                 backgroundColor="#3b3b3b")
         self.windowSystem.screen.addChildWindow(self.appWindow)
-
+        # calculator buttons
         self.buttons = []
-
+        # label of the calculator screen displaying the current number
         self.inputLabel = None
         # temporarily stores the current result of the calculation
         self.currentResult = 0
@@ -39,8 +47,10 @@ class CalculatorApp:
         self.prevOperation = None
         # store previous input to check edge cases
         self.prevInput = None
+
         self.drawWidgets()
 
+    # draws the calculator app (label, buttons) and creates containers
     def drawWidgets(self):
         # INPUT LABEL
         self.inputLabel = Label(0, 20, self.appWindow.width, 80,
@@ -79,69 +89,75 @@ class CalculatorApp:
                 self.buttons.append(button)
                 self.appWindow.addChildWindow(button)
                 buttonRow.append(button)
-
+            # create horizontal container for each button row
             buttonRowContainer = Container(10, 100 + i * 50, self.appWindow.width-20, 40, "horContainer" + str(i),
                                            layoutAnchors=LayoutAnchor.left | LayoutAnchor.right | LayoutAnchor.bottom,
                                            horizontalDist=True, containerWindows=buttonRow, spacing=10)
             self.appWindow.addChildWindow(buttonRowContainer)
 
-    def handleInput(self, char):
+    # gets string value from button press or keyboard input (same as label of respective button)
+    # and updates the calculator accordingly
+    def handleInput(self, userInput):
         numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]
         operations = ["+", "-", "x", "/"]
         # temporarily store string value which is displayed
         inputText = self.inputLabel.text
 
         # check if ERROR is displayed and don't do anything except if AC is pressed
-        if inputText == "ERROR" and char != "AC":
+        if inputText == "ERROR" and userInput != "AC":
             return
 
-        if char in numbers:
-            if (inputText == "0" and char != ".") or self.overrideInput:
+        if userInput in numbers:
+            if (inputText == "0" and userInput != ".") or self.overrideInput:
                 # override input text after operation button or reset
-                inputText = char
+                inputText = userInput
                 self.overrideInput = False
             else:
-                inputText += char
+                # append input to label text
+                inputText += userInput
 
-        elif char in operations:
+        elif userInput in operations:
             if self.prevInput not in ["+", "-", "x", "/"]:
                 # perform previous Operation, BUT if the user clicked on another operation button before,
                 # only update but not perform operation
                 inputText = self.performPreviousOperation()
-            # store current operation to last operation variable and color it
-            if char == "+":
+            # store current operation to last operation variable and mark it with a color
+            if userInput == "+":
                 self.prevOperation = Operation.ADD
                 self.changeOperationColor(Operation.ADD.value)
-            elif char == "-":
+            elif userInput == "-":
                 self.prevOperation = Operation.SUBTRACT
                 self.changeOperationColor(Operation.SUBTRACT.value)
-            elif char == "x":
+            elif userInput == "x":
                 self.prevOperation = Operation.MULTIPLY
                 self.changeOperationColor(Operation.MULTIPLY.value)
-            elif char == "/":
+            elif userInput == "/":
                 self.prevOperation = Operation.DIVIDE
                 self.changeOperationColor(Operation.DIVIDE.value)
 
             # lets user override label with next input
             self.overrideInput = True
-        elif char == "%":
+        elif userInput == "%":
             inputText = self.percent()
-        elif char == "+/-":
+        elif userInput == "+/-":
             inputText = self.negate()
-        elif char == "=":
+        elif userInput == "=":
             # remove marking of operation buttons
             self.changeOperationColor()
             # display result
             inputText = self.performPreviousOperation()
             # reset prevOperation
             self.prevOperation = None
-        elif char == "C":
+        elif userInput == "C":
+            # delete the last number of the calculator label if it does not currently display 0
             if not inputText == "0":
                 if len(inputText) == 1:
+                    # one number left -> reset label to 0
                     inputText = "0"
                 else:
+                    # delete last number
                     inputText = inputText[:-1]
-        elif char == "AC":
+        elif userInput == "AC":
             # remove marking of operation buttons
             self.changeOperationColor()
             # reset calculator
@@ -153,10 +169,10 @@ class CalculatorApp:
         # set label text to updated inputText
         self.inputLabel.text = inputText
         # update previous input
-        self.prevInput = char
+        self.prevInput = userInput
 
+    # perform last operation on current result or set current result (if last operation is None)
     def performPreviousOperation(self):
-        # perform last operation on current result or set current result (if last operation is None)
         fInputText = float(self.inputLabel.text)
         if self.prevOperation is None:
             self.currentResult = fInputText
@@ -174,13 +190,13 @@ class CalculatorApp:
         # set input label to temporary result
         return floatToString(self.currentResult)
 
+    # divides current number by 100
     def percent(self):
-        # divides current number by 100
         res = float(self.inputLabel.text) / 100
         return floatToString(res)
 
+    # switch positive number to negative number and vice versa
     def negate(self):
-        # switch positive number to negative number and vice versa
         fInputText = float(self.inputLabel.text)
         if fInputText == 0:
             res = 0
@@ -188,6 +204,8 @@ class CalculatorApp:
             res = -fInputText
         return floatToString(res)
 
+    # colors operation buttons depending on which operation is received as parameter. This should help the user to know
+    # which operation is currently going on.
     def changeOperationColor(self, opNum=None):
         # operation numbers: 1 - Add, 2 - Subtract, 3 - Multiply, 4 - Divide, None - No operation
         operationButtons = [self.buttons[15], self.buttons[11], self.buttons[7], self.buttons[3]]

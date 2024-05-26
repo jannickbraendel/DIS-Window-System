@@ -1,3 +1,9 @@
+"""
+Window System - Submission
+by Felix Umland (#406886)
+and Jannick Brändel (#405391)
+"""
+
 from UITK import Label, Slider, Container
 from Window import Window, LayoutAnchor
 from GraphicsEventSystem import *

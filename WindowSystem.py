@@ -26,7 +26,7 @@ class WindowSystem(GraphicsEventSystem):
         # temporarily save the window that the mouse down event happened on, used for dragging
         self.tempMouseDownWindow = None
         # temporarily save the TOP-LEVEL window that the mouse down event happened on, used for dragging (especially
-        # getting new title bar)
+        # getting updated child windows e.g. title bar)
         self.tempMouseDownTLWindow = None
         # temporarily save the offset with which a window's title bar was clicked, used for dragging
         self.tempMouseDragOffset = (0, 0)
@@ -84,7 +84,7 @@ class WindowSystem(GraphicsEventSystem):
 
     def handlePaint(self):
         """
-        Repaint the screen by calling the draw function.
+        Repaint the screen, taskbar and start menu by calling the draw function.
         """
         self.screen.draw(self.graphicsContext)
         self.windowManager.drawTaskbar(self.graphicsContext)
@@ -97,7 +97,8 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleMousePressed(self, x, y):
         """
-        When the left mouse button is pressed, bring selected window to front and repaint the screen.
+        When the left mouse button is pressed, bring selected window to front, update buttons and sliders,
+        update temp variables for dragging and repaint the screen.
         :param x: x value of mouse position when pressed
         :param y: y value of mouse position when pressed
         """
@@ -114,7 +115,7 @@ class WindowSystem(GraphicsEventSystem):
         if y >= self.height - self.windowManager.taskBarHeight:
             # task bar was clicked, do nothing
             return
-
+        # check which window was pressed
         child = self.screen.childWindowAtLocation(x, y)
         if child:
             if child.identifier == "SCREEN":
@@ -124,11 +125,14 @@ class WindowSystem(GraphicsEventSystem):
             if isinstance(child,Button):
                 child.changeState("PRESSED")
                 self.requestRepaint()
+            # check if slider was pressed and change its state accordingly
             elif isinstance(child, Slider):
                 child.changeState("PRESSED")
                 localX, _ = child.convertPositionFromScreen(x, y)
                 child.changeSlider(localX)
                 self.requestRepaint()
+
+            # DRAGGING TEMP VARIABLES
             # save which window was pressed for dragging
             self.tempMouseDownWindow = child
             # get the top level window and calculate the offset between the window origin and
@@ -139,6 +143,7 @@ class WindowSystem(GraphicsEventSystem):
             self.tempMouseDragOffset = x - topLevelWindow.x, y - topLevelWindow.y
             self.tempMouseDownDimensions = topLevelWindow.width, topLevelWindow.height
 
+            # check if resizing icon in bottom left of window was pressed
             if x > topLevelWindow.x + topLevelWindow.width - self.windowManager.resizeCornerTolerance and y > topLevelWindow.y + topLevelWindow.height - self.windowManager.resizeCornerTolerance:
                 self.tempMouseDownResizing = True
 
@@ -175,6 +180,7 @@ class WindowSystem(GraphicsEventSystem):
                         clickedWindow.handleMouseClicked(x, y)
                         self.requestRepaint()
 
+        # Slider update
         if isinstance(self.tempMouseDownWindow, Slider):
             self.tempMouseDownWindow.changeState("NORMAL")
 
@@ -206,19 +212,23 @@ class WindowSystem(GraphicsEventSystem):
         self.requestRepaint()
 
     def handleMouseDragged(self, x, y):
+        # position of last MousePressed event
         clickedX, clickedY = self.tempMouseDown
         if self.tempMouseDownWindow is None:
             return
+        # window where last MousePressed event occurred on
         window = self.tempMouseDownWindow
         # calculate the delta between the originally clicked position and the current drag position
         deltaX, deltaY = x - clickedX, y - clickedY
 
+        # update slider while it is dragged (if current window is a slider)
         if isinstance(window, Slider):
             window.changeState("PRESSED")
             localX, _ = window.convertPositionFromScreen(x, y)
             window.changeSlider(localX)
             self.requestRepaint()
 
+        # if window is resized, send resized event to WM and let it resize the window
         if self.tempMouseDownResizing:
             self.windowManager.handleResizeDragged(
                 window,
@@ -239,8 +249,11 @@ class WindowSystem(GraphicsEventSystem):
 
     def handleKeyPressed(self, char):
         if len(self.screen.childWindows) == 0:
+            # no app is opened, key presses should not do anything here
             return
+        # focused window is last element of child window array (at z-level in front)
         focusedWindow = self.screen.childWindows[-1]
+        # search apps that are currently opened for calculator
         for app in self.apps:
             if "Calculator" in app.appWindow.identifier and focusedWindow.identifier == app.appWindow.identifier:
                 # focused app is Calculator -> pass key input to that app window
@@ -253,7 +266,6 @@ class WindowSystem(GraphicsEventSystem):
                 # pass key input
                 app.handleInput(char)
 
-
     # When opening a new instance of an app, this function will be called
     # it returns a unique instance number that is then used for the identifier
     def getInstanceNumber(self, appName):
@@ -265,7 +277,6 @@ class WindowSystem(GraphicsEventSystem):
                 openInstances = int(re.findall("[0-9]+", app.appWindow.identifier)[0])
                 break
         return str(openInstances + 1)
-
 
 
 # Let's start your window system!

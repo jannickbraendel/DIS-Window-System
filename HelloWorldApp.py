@@ -1,5 +1,10 @@
-from functools import partial
+"""
+Window System - Submission
+by Felix Umland (#406886)
+and Jannick Brändel (#405391)
+"""
 
+from functools import partial
 from UITK import Label, Button, Container
 from Window import Window, LayoutAnchor
 from GraphicsEventSystem import *
@@ -14,7 +19,9 @@ class HelloWorldApp:
                                 self.windowSystem.getInstanceNumber(identifier) + " " + identifier,
                                 backgroundColor=COLOR_LIGHT_GRAY)
         self.windowSystem.screen.addChildWindow(self.appWindow)
+        # label displaying the greeting at the top
         self.greetLabel = None
+        # languages which can be selected
         self.languages = ["German", "English", "French"]
         self.drawWidgets()
 
@@ -28,6 +35,7 @@ class HelloWorldApp:
         # LANGUAGE BUTTONS
         buttons = []
         for i in range(3):
+            # each button has the action changeLanguage with the specified language as parameter using partial
             button = Button(0, 0, 60, 40, "LanguageButton" + str(i), text=self.languages[i],
                             fontColor=COLOR_BLACK, font=Font(family="Helvetica", size=14),
                             layoutAnchors=LayoutAnchor.top | LayoutAnchor.left, hoverBackgroundColor=COLOR_LIGHT_BLUE,
@@ -48,14 +56,8 @@ class HelloWorldApp:
                             hoverBackgroundColor=COLOR_RED, pressedBackgroundColor="#8B0000", borderColor=COLOR_BLACK,
                             action=partial(self.windowSystem.windowManager.closeWindow, self.appWindow))
         self.appWindow.addChildWindow(quitButton)
-        """
-        # VERTICAL CONTAINER
-        contWindows = [self.greetLabel, buttonContainer]
-        verticalContainer = Container(20, 40, self.appWindow.width, 190, "VerticalContainer",
-                                      layoutAnchors=0, horizontalDist=False, containerWindows=contWindows, spacing=100)
-        self.appWindow.addChildWindow(verticalContainer)
-        """
 
+    # update greeting label based on the language parameter. German - Guten Tag, English - Hello, French - Bonjour
     def changeLanguage(self, language):
         assert language in self.languages
         if language == "German":
