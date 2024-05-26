@@ -258,19 +258,20 @@ class Window:
 
     # returns temporary width and height values of a window to clip it to the bounds of its parent window (if exceeding)
     def getDrawingSize(self):
-        # TODO: Jannick: Check edge case where grandchild window exceeds tl window but is not clipped
         tempWidth = self.width
         tempHeight = self.height
         # TL windows keep their size
         if not self.parentWindow.identifier == "SCREEN":
             # HORIZONTALLY
-            if self.x + self.width > self.parentWindow.width:
-                # width set to distance between parent's right border and x origin (has to be <=0)
-                tempWidth = max(0, self.parentWindow.width - self.x)
+            # looks at parents temp width/height, as parent might be clipped as well
+            parentTempWidth, parentTempHeight = self.parentWindow.getDrawingSize()
+            if self.x + self.width > parentTempWidth:
+                # width set to distance between parent's right border and x origin (has to be >=0)
+                tempWidth = max(0, parentTempWidth - self.x)
             # VERTICALLY
-            if self.y + self.height > self.parentWindow.height:
-                # height set to distance between parent's lower border and y origin (has to be <=0)
-                tempHeight = max(0, self.parentWindow.height - self.y)
+            if self.y + self.height > parentTempHeight:
+                # height set to distance between parent's lower border and y origin (has to be >=0)
+                tempHeight = max(0, parentTempHeight - self.y)
 
             # window should disappear in the case of temp width or height being 0
             self.isHidden = tempWidth == 0 or tempHeight == 0
