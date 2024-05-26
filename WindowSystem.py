@@ -155,6 +155,9 @@ class WindowSystem(GraphicsEventSystem):
         if deltaX <= self.mouseClickTolerance and deltaY <= self.mouseClickTolerance:
             if y >= self.height - self.windowManager.taskBarHeight:
                 # task bar was clicked
+                # hide start menu again if it is open
+                if self.windowManager.startMenuVisible:
+                    self.windowManager.startMenuVisible = False
                 self.windowManager.handleTaskBarClicked(x)
             elif (self.windowManager.startMenuVisible and x <= self.windowManager.startMenuWidth
                   and self.height - self.windowManager.startMenuHeight - self.windowManager.taskBarHeight <= y <= self.height - self.windowManager.taskBarHeight):
